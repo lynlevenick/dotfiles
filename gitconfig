@@ -1,0 +1,5 @@
+[core]
+	excludesfile = ~/.gitignore
+[user]
+	name = Lyn Levenick
+	email = lyn.levenick@gmail.com

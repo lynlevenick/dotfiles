@@ -1,0 +1,10 @@
+brew 'python'
+brew 'ripgrep'
+brew 'ruby'
+brew 'terminal-notifier'
+
+cask 'firefox'
+cask 'iterm2'
+cask 'mpv'
+cask 'slack'
+cask 'visual-studio-code'
