@@ -29,6 +29,12 @@ main() {
             brew tap homebrew/bundle
             brew bundle install --global
 
+            echo -n 'Set iterm2 configuration directory (Y/n) => '; read answer
+            if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
+                defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "${script_dir}/iterm2"
+                defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
+            fi
+
             echo -n 'Switch user shell to fish (Y/n) => '; read answer
             if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
                 echo '/usr/local/bin/fish' | sudo tee -a /etc/shells >/dev/null
