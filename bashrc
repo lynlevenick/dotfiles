@@ -1,4 +1,4 @@
-EDITOR=code --wait
+EDITOR='code --wait'
 
 term_default_bg__() {
     echo -en "\033]6;1;bg;red;brightness;40\a"

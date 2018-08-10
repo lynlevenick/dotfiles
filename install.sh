@@ -4,62 +4,63 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+backup_link() {
+    if [ -e "$2" ] ; then
+        echo "Backing up '$2'"
+        mkdir -p "${script_dir}/backup/"
+
+        local target_basename=$(basename "$2")
+        local target="${script_dir}/backup/${target_basename}"
+
+        if [ -e "${target}" ] ; then
+            echo "Backup of '$2' already exists! Exiting"
+            exit 1
+        fi
+        mv "$2" "${target}"
+    fi
+
+    echo "Linking '$2' to '$1'"
+    ln -s "$1" "$2"
+}
+
 main() {
     local answer
     local script_dir=$(pwd)/$(dirname "$0")
 
-    echo -n 'Link dotfiles (Y/n) => '; read answer
-    if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-        mkdir -p "${HOME}/.config"
+    backup_link "${script_dir}/bash_profile" "${HOME}/.bash_profile"
+    backup_link "${script_dir}/bashrc" "${HOME}/.bashrc"
+    backup_link "${script_dir}/Brewfile" "${HOME}/.Brewfile"
+    backup_link "${script_dir}/gitconfig" "${HOME}/.gitconfig"
+    backup_link "${script_dir}/gitignore" "${HOME}/.gitignore"
 
-        ln -si "${script_dir}/bash_profile" "${HOME}/.bash_profile" || true
-        ln -si "${script_dir}/bashrc" "${HOME}/.bashrc" || true
-        ln -si "${script_dir}/Brewfile" "${HOME}/.Brewfile" || true
-        ln -si "${script_dir}/gitconfig" "${HOME}/.gitconfig" || true
-        ln -si "${script_dir}/gitignore" "${HOME}/.gitignore" || true
+    echo 'Installing homebrew'
+    sudo chown -R "${USER}:admin" /usr/local
+    /usr/bin/env ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" <&-
 
-        echo -n 'Install packages (Y/n) => '; read answer
-        if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-            sudo chown -R "${USER}:admin" /usr/local
-            /usr/bin/env ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    brew doctor
+    brew update
 
-            brew doctor
-            brew update
+    echo 'Installing packages'
+    brew tap homebrew/bundle
+    brew bundle install --global
 
-            brew tap homebrew/bundle
-            brew bundle install --global
+    echo 'Setting iterm2 configuration directory'
+    defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "${script_dir}/iterm2"
+    defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
 
-            echo -n 'Set iterm2 configuration directory (Y/n) => '; read answer
-            if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-                defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "${script_dir}/iterm2"
-                defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
-            fi
+    echo 'Installing vscode settings'
+    mkdir -p "${HOME}/Library/Application Support/Code/User"
+    backup_link "${script_dir}/vscode/settings.json" "${HOME}/Library/Application Support/Code/User/settings.json"
 
-            echo -n 'Switch user shell to fish (Y/n) => '; read answer
-            if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-                echo '/usr/local/bin/fish' | sudo tee -a /etc/shells >/dev/null
-                sudo chsh -u "$USER" -s '/usr/local/bin/fish'
-            fi
+    echo 'Installing vscode general extensions'
+    code --install-extension 'editorconfig.editorconfig'
+    code --install-extension 'eamodio.gitlens'
+    code --install-extension 'zhuangtongfa.material-theme'
+    code --install-extension 'robertohuertasm.vscode-icons'
 
-            echo -n 'Install vscode settings (Y/n) => '; read answer
-            if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-                mkdir -p "${HOME}/Library/Application Support/Code/User"
-                ln -si "${script_dir}/vscode/settings.json" "${HOME}/Library/Application Support/Code/User/settings.json"
-
-                echo -n 'Install vscode extensions (Y/n) => '; read answer
-                if [ "$answer" != 'n' ] && [ "$answer" != 'N' ] ; then
-                    code --install-extension 'editorconfig.editorconfig'
-                    code --install-extension 'eamodio.gitlens'
-                    code --install-extension 'zhuangtongfa.material-theme'
-                    code --install-extension 'robertohuertasm.vscode-icons'
-
-                    # Ruby
-                    code --install-extension 'rebornix.ruby'
-                    code --install-extension 'karunamurti.haml'
-                fi
-            fi
-        fi
-    fi
+    echo 'Installing vscode ruby extensions'
+    code --install-extension 'rebornix.ruby'
+    code --install-extension 'karunamurti.haml'
 }
 
-main $@
+main "$@"
