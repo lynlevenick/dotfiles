@@ -32,6 +32,8 @@ main() {
     backup_link "${script_dir}/Brewfile" "${HOME}/.Brewfile"
     backup_link "${script_dir}/gitconfig" "${HOME}/.gitconfig"
     backup_link "${script_dir}/gitignore" "${HOME}/.gitignore"
+    mkdir -p "${HOME}/.config"
+    backup_link "${script_dir}/fish" "${HOME}/.config/fish"
 
     echo 'Installing homebrew'
     sudo chown -R "${USER}:admin" /usr/local
@@ -43,6 +45,10 @@ main() {
     echo 'Installing packages'
     brew tap homebrew/bundle
     brew bundle install --global
+
+    echo 'Setting fish as default shell'
+    echo "$(which fish)" | sudo tee -a /etc/shells >/dev/null
+    sudo chsh -u "${USER}" -s "$(which fish)"
 
     echo 'Setting iterm2 configuration directory'
     defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "${script_dir}/iterm2"
@@ -57,6 +63,9 @@ main() {
     code --install-extension 'eamodio.gitlens'
     code --install-extension 'zhuangtongfa.material-theme'
     code --install-extension 'robertohuertasm.vscode-icons'
+
+    echo 'Installing vscode fish extensions'
+    code --install-extension 'skyapps.fish-vscode'
 
     echo 'Installing vscode ruby extensions'
     code --install-extension 'rebornix.ruby'

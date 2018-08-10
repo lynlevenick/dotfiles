@@ -1,0 +1,18 @@
+set fish_greeting ''
+
+set __fish_git_prompt_char_stateseparator ' '
+set __fish_git_prompt_color_branch brblack
+set __fish_git_prompt_color_branch_detached yellow
+set __fish_git_prompt_color_cleanstate green
+set __fish_git_prompt_color_dirtystate red
+set __fish_git_prompt_color_flags blue
+set __fish_git_prompt_color_invalidstate brred --bold
+set __fish_git_prompt_color_merging magenta
+set __fish_git_prompt_color_prefix brblack
+set __fish_git_prompt_color_stagedstate yellow
+set __fish_git_prompt_color_suffix brblack
+set __fish_git_prompt_color_untrackedfiles red
+set __fish_git_prompt_color_upstream bryellow
+set __fish_git_prompt_show_informative_status
+set __fish_git_prompt_showcolorhints
+set __fish_git_prompt_showupstream informative
