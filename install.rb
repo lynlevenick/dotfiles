@@ -1,6 +1,5 @@
-#! /usr/bin/env ruby
+#! /usr/bin/ruby
 abort 'Don\'t run this as root!' if Process.uid.zero?
-
 STDIN.reopen('/dev/null')
 
 class Dir
@@ -18,10 +17,7 @@ Dir.mkdirp($BACKUP_DIR)
 def backup_and_symlink(old_name, new_name)
   if File.exist?(new_name)
     backup_name = File.expand_path(File.basename(new_name), $BACKUP_DIR)
-
-    if File.exist?(backup_name)
-      raise BackupExists
-    end
+    raise BackupExists if File.exist?(backup_name)
 
     File.rename(new_name, backup_name)
   end
@@ -31,44 +27,40 @@ end
 
 $SECTION = []
 def section(section)
-  begin
-    $SECTION.push(section)
-    puts($SECTION.join('::'))
+  $SECTION.push(section)
+  puts($SECTION.join(' '))
 
-    yield
-  ensure
-    $SECTION.pop
-  end
+  yield
+ensure
+  $SECTION.pop
 end
 
 $OUTPUT_DIRECTORY = ''
 $OUTPUT_PREFIX = ''
 def with_directory(directory, prefix: '')
-  begin
-    old_directory = $OUTPUT_DIRECTORY
-    old_prefix = $OUTPUT_PREFIX
+  old_directory = $OUTPUT_DIRECTORY
+  old_prefix = $OUTPUT_PREFIX
 
-    if !$OUTPUT_DIRECTORY.empty?
-      $OUTPUT_DIRECTORY += '/' unless $OUTPUT_DIRECTORY[-1] == '/'
-    end
-
-    $OUTPUT_DIRECTORY += directory
-    $OUTPUT_PREFIX = prefix
-
-    Dir.mkdirp($OUTPUT_DIRECTORY)
-
-    yield
-  ensure
-    $OUTPUT_PREFIX = old_prefix
-    $OUTPUT_DIRECTORY = old_directory
+  if !$OUTPUT_DIRECTORY.empty?
+    $OUTPUT_DIRECTORY += '/' unless $OUTPUT_DIRECTORY[-1] == '/'
   end
+
+  $OUTPUT_DIRECTORY += directory
+  $OUTPUT_PREFIX = prefix
+
+  Dir.mkdirp($OUTPUT_DIRECTORY)
+
+  yield
+ensure
+  $OUTPUT_PREFIX = old_prefix
+  $OUTPUT_DIRECTORY = old_directory
 end
 
 def dotfile(name)
   name_base = File.basename(name)
   backup_and_symlink(
-    "#{$SCRIPT_DIR}/#{name}",
-    "#{$OUTPUT_DIRECTORY}/#{$OUTPUT_PREFIX}#{name_base}"
+   "#{$SCRIPT_DIR}/#{name}",
+   "#{$OUTPUT_DIRECTORY}/#{$OUTPUT_PREFIX}#{name_base}"
   )
 end
 
@@ -94,9 +86,11 @@ if __FILE__ == $0
     end
 
     section :fish do
-      section :as_default_shell do
+      section :default_shell do
+        require 'shellwords'
+
         fish_path = `which fish`
-        system("echo '#{fish_path}' | sudo tee -a /etc/shells >/dev/null") || raise
+        system("echo #{fish_path.shellescape} | sudo tee -a /etc/shells >/dev/null") || raise
         system('sudo', 'chsh', '-u', ENV['USER'], '-s', fish_path) || raise
       end
 
@@ -117,11 +111,11 @@ if __FILE__ == $0
     section :iterm2 do
       section :configuration do
         def configure(key, type, value)
-          system('defaults', 'write', 'com.googlecode.iterm2.plist', key, "-#{type}", value) || raise
+          system('defaults', 'write', 'com.googlecode.iterm2.plist', key, "-#{type}", value.to_s) || raise
         end
 
         configure 'PrefsCustomFolder', 'string', "#{$SCRIPT_DIR}/iterm2"
-        configure 'LoadPrefsFromCustomFolder', 'bool', 'true'
+        configure 'LoadPrefsFromCustomFolder', 'bool', true
       end
     end
 
