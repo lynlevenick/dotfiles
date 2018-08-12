@@ -29,7 +29,6 @@ end
 task :configuration => [:vscode_config]
 task :dotfiles => [
   :bash_dotfiles,
-  :fish_dotfiles,
   :git_dotfiles,
   :homebrew_dotfiles,
   :hyper_dotfiles,
@@ -42,13 +41,11 @@ task :vscode_config => [:apps] do
   sh 'code', '--install-extension', 'eamodio.gitlens'
   sh 'code', '--install-extension', 'zhuangtongfa.material-theme'
   sh 'code', '--install-extension', 'robertohuertasm.vscode-icons'
-  sh 'code', '--install-extension', 'skyapps.fish-vscode'
   sh 'code', '--install-extension', 'rebornix.ruby'
   sh 'code', '--install-extension', 'karunamurti.haml'
 end
 
 task :bash_dotfiles => ["#{$home}/.bash_profile", "#{$home}/.bashrc"]
-task :fish_dotfiles => ["#{$home}/.config/fish"]
 task :git_dotfiles => ["#{$home}/.gitconfig", "#{$home}/.gitignore"]
 task :ssh_dotfiles => ["#{$home}/.ssh"]
 task :homebrew_dotfiles => ["#{$home}/.Brewfile"]
