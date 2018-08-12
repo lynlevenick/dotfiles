@@ -31,7 +31,6 @@ task :dotfiles => [
   :bash_dotfiles,
   :git_dotfiles,
   :homebrew_dotfiles,
-  :hyper_dotfiles,
   :ssh_dotfiles,
   :vscode_dotfiles,
 ]
@@ -49,7 +48,6 @@ task :bash_dotfiles => ["#{$home}/.bash_profile", "#{$home}/.bashrc"]
 task :git_dotfiles => ["#{$home}/.gitconfig", "#{$home}/.gitignore"]
 task :ssh_dotfiles => ["#{$home}/.ssh"]
 task :homebrew_dotfiles => ["#{$home}/.Brewfile"]
-task :hyper_dotfiles => ["#{$home}/.hyper.js"]
 
 vscode_settings = File.expand_path('Library/Application Support/Code/User/settings.json', $home)
 task :vscode_dotfiles => [vscode_settings]
