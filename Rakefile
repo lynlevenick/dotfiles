@@ -26,20 +26,16 @@ task :apps => [:homebrew, :dotfiles] do
   sh 'brew', 'tap', 'homebrew/bundle'
   sh 'brew', 'bundle', 'install', '--global'
 end
-task :configuration => [:iterm2_config, :vscode_config]
+task :configuration => [:vscode_config]
 task :dotfiles => [
   :bash_dotfiles,
   :fish_dotfiles,
   :git_dotfiles,
   :homebrew_dotfiles,
+  :hyper_dotfiles,
   :ssh_dotfiles,
   :vscode_dotfiles,
 ]
-
-task :iterm2_config do
-  sh 'defaults', 'write', 'com.googlecode.iterm2.plist', 'LoadPrefsFromCustomFolder', '-bool', 'true'
-  sh 'defaults', 'write', 'com.googlecode.iterm2.plist', 'PrefsCustomFolder', '-string', File.expand_path('iterm2', $pwd)
-end
 
 task :vscode_config => [:apps] do
   sh 'code', '--install-extension', 'editorconfig.editorconfig'
@@ -56,6 +52,7 @@ task :fish_dotfiles => ["#{$home}/.config/fish"]
 task :git_dotfiles => ["#{$home}/.gitconfig", "#{$home}/.gitignore"]
 task :ssh_dotfiles => ["#{$home}/.ssh"]
 task :homebrew_dotfiles => ["#{$home}/.Brewfile"]
+task :hyper_dotfiles => ["#{$home}/.hyper.js"]
 
 vscode_settings = File.expand_path('Library/Application Support/Code/User/settings.json', $home)
 task :vscode_dotfiles => [vscode_settings]
