@@ -66,7 +66,7 @@ module.exports = {
     // for advanced config flags please refer to https://hyper.is/#cfg
   },
 
-  plugins: ["hyper-one-dark-vivid"],
+  plugins: ["hyper-one-dark-vivid", "hyper-statusline"],
   localPlugins: [],
 
   keymaps: {
