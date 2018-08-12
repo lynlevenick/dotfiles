@@ -1,3 +1,4 @@
+brew 'fish'
 brew 'python'
 brew 'ripgrep'
 brew 'ruby'

@@ -32,6 +32,7 @@ task :dotfiles => [
   :fish_dotfiles,
   :git_dotfiles,
   :homebrew_dotfiles,
+  :ssh_dotfiles,
   :vscode_dotfiles,
 ]
 
@@ -53,6 +54,7 @@ end
 task :bash_dotfiles => ["#{$home}/.bash_profile", "#{$home}/.bashrc"]
 task :fish_dotfiles => ["#{$home}/.config/fish"]
 task :git_dotfiles => ["#{$home}/.gitconfig", "#{$home}/.gitignore"]
+task :ssh_dotfiles => ["#{$home}/.ssh"]
 task :homebrew_dotfiles => ["#{$home}/.Brewfile"]
 
 vscode_settings = File.expand_path('Library/Application Support/Code/User/settings.json', $home)
@@ -74,7 +76,7 @@ end
 
 rule %r{\A#{Regexp.escape($home)}\/\..+\z} => proc { |task_name|
   dotfile_name = task_name[($home.size + 1)..-1]
-  File.expand_path(File.basename(dotfile_name), $pwd)
+  File.expand_path(File.basename(dotfile_name[1..-1]), $pwd)
 } do |t|
   target = File.expand_path(t.name, $home)
   link_and_backup(t.source, target)
