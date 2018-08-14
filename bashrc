@@ -8,7 +8,7 @@ bind 'set mark-symlinked-directories on'
 shopt -s histappend
 
 edit() {
-    if [ -z "$@" ]; then
+    if [ "$#" -lt 1 ]; then
         echo 'Must provide a search'
         return 1
     fi
