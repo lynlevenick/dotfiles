@@ -1,6 +1,6 @@
 [alias]
 	gocheckout = "!git status >/dev/null && git branch -vv | fzf -1 | cut -d' ' -f2 | xargs git checkout;"
-	gorebase = "!git status >/dev/null && git rebase -i $(git log --oneline | fzf -1 --preview 'git show {+1}' | cut -d' ' -f1)^"
+	gorebase = "!git status >/dev/null && git rebase -i $(git log --oneline | fzf -1 --preview 'git show {+1}' | cut -d' ' -f1)^;"
 	goshow = "!git status >/dev/null && git log --oneline | fzf -1 --preview 'git show {+1}' | cut -d' ' -f1 | xargs git show;"
 [core]
 	excludesfile = ~/.gitignore
