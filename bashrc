@@ -8,12 +8,14 @@ bind 'set mark-symlinked-directories on'
 shopt -s histappend
 
 search() {
+    local params
     if [ "$#" -lt 1 ]; then
-        echo 'Must provide a search'
-        return 1
+        params='\A'
+    else
+        params="$@"
     fi
 
-    rg --vimgrep "$@" | fzf -d: -m --preview 'tail -n"+"{2} {1} | head -n${LINES}' --preview-window=up | cut -d: -f1-3 | xargs -I% -R1 code -g %
+    rg --vimgrep ${params} | fzf -d: -m --preview 'tail -n"+"{2} {1} | head -n${LINES}' --preview-window=up | cut -d: -f1-3 | xargs -I% -R1 code -g %
 }
 edit() {
     local dir
