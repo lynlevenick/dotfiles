@@ -1,1 +1,1 @@
-[[ -s "$HOME/.bashrc" ]] && source "$HOME/.bashrc"
+[ -r "${HOME}/.bashrc" ] && source "${HOME}/.bashrc"
