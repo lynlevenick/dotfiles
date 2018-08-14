@@ -12,6 +12,7 @@ search() {
         echo 'Must provide a search'
         return 1
     fi
+
     rg --vimgrep "$@" | fzf -d: -m --preview 'tail -n"+"{2} {1} | head -n${LINES}' --preview-window=up | cut -d: -f1-3 | xargs -I% -R1 code -g %
 }
 edit() {
@@ -24,5 +25,11 @@ edit() {
     else
         dir="."
     fi
+
+    if [ ! -d "${dir}" ]; then
+        echo 'Must provide a directory'
+        return 1
+    fi
+
     rg --files "${dir}" | fzf -m --preview 'head -n${LINES} {}' --preview-window=up | xargs -I% -R1 code -g %
 }
