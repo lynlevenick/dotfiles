@@ -21,5 +21,5 @@ fedit() {
     rg -0 --files -- "${dir}" | fzf --read0 --print0 -m --preview 'head -n${LINES} {}' | xargs -0 -I% -R1 code -g %
 }
 fkill() {
-    ps -Arc -opid=,command= | awk '{ print $1, $2 }' | fzf -m --tiebreak=index | cut -d' ' -f1 | xargs kill "$@" --
+    ps -Arc -opid=,command= | awk '{for(i=1;i<=NF;++i)printf"%s ",$i;print""}' | fzf -m --tiebreak=index | cut -d' ' -f1 | xargs kill "$@" --
 }
