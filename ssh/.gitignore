@@ -1,0 +1,5 @@
+*
+!.gitignore
+!config
+!generate_key.rb
+!*.pub
