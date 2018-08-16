@@ -1,8 +1,6 @@
 {
     "files.associations": {
         "*.Makefile": "makefile",
-        "bash_profile": "shellscript",
-        "bashrc": "shellscript",
     },
     "workbench.colorTheme": "One Dark Pro Vivid",
     "workbench.iconTheme": "vscode-icons",
