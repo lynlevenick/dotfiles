@@ -27,5 +27,5 @@ fedit() {
     rg -0 --files -- "${dir}" | fzf --read0 --print0 -m --preview 'head -n${LINES} {}' | xargs -0 -n1 -- code -g
 }
 fkill() {
-    ps -Arc -opid=,command= | awk '{for(i=1;i<=NF;++i)printf"%s ",$i;print""}' | fzf -m --tiebreak=index --preview 'ps -c -o%cpu,%mem -p {1}' --preview-window up:2 | cut -d' ' -f1 | xargs kill "$@" --
+    ps -Arc -opid=,command= | awk '{for(i=1;i<=NF;++i)printf"%s ",$i;print""}' | fzf -m --tiebreak=index --preview 'ps -c -o%cpu,%mem -p {1..}' --preview-window up:2 | cut -d' ' -f1- | xargs kill "$@" --
 }
