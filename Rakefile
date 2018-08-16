@@ -57,6 +57,4 @@ multitask :vscode => [:homebrew, *stow($pwd.join('vscode'))] do
   sh 'code', '--install-extension', 'eamodio.gitlens'
   sh 'code', '--install-extension', 'zhuangtongfa.material-theme'
   sh 'code', '--install-extension', 'robertohuertasm.vscode-icons'
-  sh 'code', '--install-extension', 'rebornix.ruby'
-  sh 'code', '--install-extension', 'karunamurti.haml'
 end
