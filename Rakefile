@@ -9,36 +9,39 @@ def stow(dir)
   dir = Pathname.new(dir) unless dir.is_a?(Pathname)
 
   targets = []
-  Dir.glob(dir.join('**/*'), File::FNM_DOTMATCH) do |path|
-    path = Pathname.new(path)
-    next unless path.file?
+  Dir.glob(dir.join('**/*'), File::FNM_DOTMATCH) do |source_path|
+    source_path = Pathname.new(source_path)
+    next unless source_path.file?
 
-    relative_dirname = path.dirname.relative_path_from(dir)
-    target = $home.join(relative_dirname).join(path.basename)
+    relative_dirname = source_path.dirname.relative_path_from(dir)
+    target_path = $home.join(relative_dirname).join(source_path.basename)
 
-    file target => path do
+    file target_path => source_path do |task|
+      target = Pathname.new(task.name)
+      source = Pathname.new(task.source)
+
       if target.exist?
-        next if target.symlink? && target.realpath.cleanpath == path.cleanpath
+        next if target.symlink? && target.realpath.cleanpath == source.cleanpath
         raise "fatal: File exists: #{target}"
       end
 
       target.dirname.mkpath
-      target.make_symlink(path)
+      target.make_symlink(source)
     end
 
-    targets << target
+    targets << target_path.to_s
   end
 
   targets
 end
 
-multitask :default => [:bash, :git, :homebrew, :readline, :ssh, :vscode]
+task default: [:bash, :git, :homebrew, :readline, :ssh, :vscode]
 
-multitask :bash => [*stow($pwd.join('bash'))]
+task bash: [*stow($pwd.join('bash'))]
 
-multitask :git => [*stow($pwd.join('git'))]
+task git: [*stow($pwd.join('git'))]
 
-multitask :homebrew => ['/usr/local/bin/brew', *stow($pwd.join('homebrew'))] do
+task homebrew: ['/usr/local/bin/brew', *stow($pwd.join('homebrew'))] do
   sh 'brew', 'doctor'
   sh 'brew', 'update'
   sh 'brew', 'tap', 'homebrew/bundle'
@@ -48,11 +51,11 @@ file '/usr/local/bin/brew' do
   eval(%x{curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install})
 end
 
-multitask :readline => [*stow($pwd.join('readline'))]
+task readline: [*stow($pwd.join('readline'))]
 
-multitask :ssh => [*stow($pwd.join('ssh'))]
+task ssh: [*stow($pwd.join('ssh'))]
 
-multitask :vscode => [:homebrew, *stow($pwd.join('vscode'))] do
+task vscode: [:homebrew, *stow($pwd.join('vscode'))] do
   sh 'code', '--install-extension', 'editorconfig.editorconfig'
   sh 'code', '--install-extension', 'eamodio.gitlens'
   sh 'code', '--install-extension', 'zhuangtongfa.material-theme'
