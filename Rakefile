@@ -37,11 +37,17 @@ end
 
 task default: [:bash, :git, :homebrew, :readline, :ssh, :vscode]
 
-task bash: [*stow($pwd.join('bash'))]
+bash_files = stow($pwd.join('bash'))
+desc 'Configure bash'
+task bash: [*bash_files]
 
-task git: [*stow($pwd.join('git'))]
+git_files = stow($pwd.join('git'))
+desc 'Configure git'
+task git: [*git_files]
 
-task homebrew: ['/usr/local/bin/brew', *stow($pwd.join('homebrew'))] do
+homebrew_files = stow($pwd.join('homebrew'))
+desc 'Configure homebrew'
+task homebrew: ['/usr/local/bin/brew', *homebrew_files] do
   sh 'brew', 'doctor'
   sh 'brew', 'update'
   sh 'brew', 'tap', 'homebrew/bundle'
@@ -51,11 +57,17 @@ file '/usr/local/bin/brew' do
   eval(%x{curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install})
 end
 
-task readline: [*stow($pwd.join('readline'))]
+readline_files = stow($pwd.join('readline'))
+desc 'Configure readline'
+task readline: [*readline_files]
 
-task ssh: [*stow($pwd.join('ssh'))]
+ssh_files = stow($pwd.join('ssh'))
+desc 'Configure ssh'
+task ssh: [*ssh_files]
 
-task vscode: [:homebrew, *stow($pwd.join('vscode'))] do
+vscode_files = stow($pwd.join('vscode'))
+desc 'Configure vscode'
+task vscode: [:homebrew, *vscode_files] do
   sh 'code', '--install-extension', 'editorconfig.editorconfig'
   sh 'code', '--install-extension', 'eamodio.gitlens'
   sh 'code', '--install-extension', 'zhuangtongfa.material-theme'
