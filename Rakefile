@@ -3,8 +3,8 @@ abort 'Don\'t run this as root!' if Process.uid.zero?
 require 'pathname'
 require 'rake/clean'
 
-$home = Pathname.new(ENV['HOME'])
-$pwd = Pathname.new(__FILE__).dirname
+$home = Pathname.new(ENV['HOME']).expand_path
+$pwd = Pathname.new(__FILE__).dirname.expand_path
 
 def stow(dir)
   dir = Pathname.new(dir) unless dir.is_a?(Pathname)
