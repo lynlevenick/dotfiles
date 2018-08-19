@@ -37,19 +37,14 @@ def stow(dir)
   targets
 end
 
+desc 'Install dotfiles'
 task default: [:bash, :git, :homebrew, :readline, :ssh, :vscode]
 
-bash_files = stow($pwd.join('bash'))
-desc 'Configure bash'
-task bash: [*bash_files]
+task bash: [*stow($pwd.join('bash'))]
 
-git_files = stow($pwd.join('git'))
-desc 'Configure git'
-task git: [*git_files]
+task git: [*stow($pwd.join('git'))]
 
-homebrew_files = stow($pwd.join('homebrew'))
-desc 'Configure homebrew'
-task homebrew: ['/usr/local/bin/brew', *homebrew_files] do
+task homebrew: ['/usr/local/bin/brew', *stow($pwd.join('homebrew'))] do
   sh 'brew', 'doctor'
   sh 'brew', 'update'
   sh 'brew', 'tap', 'homebrew/bundle'
@@ -59,17 +54,11 @@ file '/usr/local/bin/brew' do
   eval(%x{curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install})
 end
 
-readline_files = stow($pwd.join('readline'))
-desc 'Configure readline'
-task readline: [*readline_files]
+task readline: [*stow($pwd.join('readline'))]
 
-ssh_files = stow($pwd.join('ssh'))
-desc 'Configure ssh'
-task ssh: [*ssh_files]
+task ssh: [*stow($pwd.join('ssh'))]
 
-vscode_files = stow($pwd.join('vscode'))
-desc 'Configure vscode'
-task vscode: [:homebrew, *vscode_files] do
+task vscode: [:homebrew, *stow($pwd.join('vscode'))] do
   sh 'code', '--install-extension', 'editorconfig.editorconfig'
   sh 'code', '--install-extension', 'eamodio.gitlens'
   sh 'code', '--install-extension', 'zhuangtongfa.material-theme'
