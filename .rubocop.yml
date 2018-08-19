@@ -2,7 +2,7 @@ Metrics/LineLength:
   Max: 132
 
 Style/StringLiterals:
-  EnforcedStyle: single_quotes
+  EnforcedStyle: double_quotes
 
 Style/HashSyntax:
   EnforcedStyle: ruby19_no_mixed_keys
