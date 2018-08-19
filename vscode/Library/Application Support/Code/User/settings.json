@@ -1,4 +1,5 @@
 {
+    "editor.renderIndentGuides": false,
     "files.associations": {
         "*.Makefile": "makefile",
     },
