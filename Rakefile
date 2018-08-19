@@ -1,5 +1,6 @@
 abort "Don't run this as root!" if Process.uid.zero?
 
+require "open3"
 require "pathname"
 require "rake/clean"
 
@@ -75,7 +76,6 @@ namespace :install do
   end
 
   file "/usr/local/bin/brew" do
-    require "open3"
     installed = Open3.pipeline(
       ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
       "ruby"
