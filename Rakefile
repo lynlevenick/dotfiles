@@ -1,6 +1,7 @@
 abort 'Don\'t run this as root!' if Process.uid.zero?
 
 require 'pathname'
+require 'rake/clean'
 
 $home = Pathname.new(ENV['HOME'])
 $pwd = Pathname.new(__FILE__).dirname
@@ -30,6 +31,7 @@ def stow(dir)
     end
 
     targets << target_path.to_s
+    CLOBBER << target_path.to_s
   end
 
   targets
