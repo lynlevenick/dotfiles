@@ -1,0 +1,23 @@
+Metrics/LineLength:
+  Max: 132
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+
+Style/PreferredHashMethods:
+  Enabled: false
+
+Style/CollectionMethods:
+  Enabled: true
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Style/SignalException:
+  EnforcedStyle: only_raise
+
+Style/MethodCalledOnDoEndBlock:
+  Enabled: true
