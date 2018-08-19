@@ -15,7 +15,7 @@ module Stow
       .map(&Pathname.method(:new))
       .select(&:file?)
       .map { |source| [Stow.target(into, source, from: dir), source] }
-      .each { |target, source| Stow.symlink(target, source) }
+      .each do |target, source| Stow.symlink(target, source) end
       .map(&:first)
 
     CLOBBER.concat(targets)

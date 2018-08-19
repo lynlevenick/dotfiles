@@ -1,23 +1,5 @@
-Metrics/LineLength:
-  Max: 132
-
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
-Style/HashSyntax:
-  EnforcedStyle: ruby19_no_mixed_keys
-
-Style/PreferredHashMethods:
-  Enabled: false
-
-Style/CollectionMethods:
-  Enabled: true
+inherit_from:
+- https://relaxed.ruby.style/rubocop.yml
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
-
-Style/SignalException:
-  EnforcedStyle: only_raise
-
-Style/MethodCalledOnDoEndBlock:
-  Enabled: true
