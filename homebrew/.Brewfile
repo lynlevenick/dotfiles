@@ -1,4 +1,3 @@
-brew 'fzf'
 brew 'python'
 brew 'ripgrep'
 brew 'ruby'
