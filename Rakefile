@@ -88,7 +88,7 @@ namespace :install do
   file "/usr/local/bin/brew" do
     installed = Open3.pipeline(
       ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
-      "ruby"
+      "ruby",
     ).all(&:zero?)
 
     raise "fatal: Homebrew install failed" unless installed
