@@ -11,6 +11,9 @@ Style/AsciiComments:
 Style/AutoResourceCleanup:
   Enabled: true
 
+Style/BlockDelimiters:
+  EnforcedStyle: semantic
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 

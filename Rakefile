@@ -10,16 +10,16 @@ require "rake/clean"
 module Stow
   extend Rake::DSL
 
-  def self.stow(dir, into: ENV["HOME"])
-    dir = Pathname.new(dir).expand_path
+  def self.stow(from, into: ENV["HOME"])
+    from = Pathname.new(from).expand_path
     into = Pathname.new(into).expand_path
 
-    targets = dir.glob("**/*", File::FNM_DOTMATCH)
-                 .map(&Pathname.method(:new))
-                 .select(&:file?)
+    sources = from.glob("**/*", File::FNM_DOTMATCH)
+                  .map(&Pathname.method(:new)).select(&:file?)
 
-    targets.each do |source|
-      Stow.symlink(Stow.target(into, source, from: dir), source)
+    targets = sources.map { |source| Stow.target(into, source, from: from) }
+    sources.zip(targets).each do |source, target|
+      Stow.symlink(target, source)
     end
 
     CLOBBER.concat(targets)
