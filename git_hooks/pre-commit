@@ -1,7 +1,29 @@
-#! /usr/bin/env sh
+#! /usr/bin/env ruby
+# frozen-string-literal: true
 
-# git prepends its script directory to the path, which homebrew
-# really doesn't like
-PATH="$(echo "${PATH}" | cut -d: -f2-)"
+require "open3"
 
-rake run:rubocop
+# First, stash index and work dir, keeping only the
+# to-be-committed changes in the working directory.
+
+prev, _ = Open3.capture2("git", "rev-parse", "-q", "--verify", "refs/stash")
+success = system("git", "stash", "save", "-q", "--keep-index")
+raise "fatal: git stash" unless success
+curr, _ = Open3.capture2("git", "rev-parse", "-q", "--verify", "refs/stash")
+
+if prev == curr
+  puts "pre-commit: no changes in working directory"
+  exit 0
+end
+
+# git prepends its script directory to the path,
+# which homebrew really doesn't like
+PATH = ENV["PATH"].split(":").drop(1).join(":").freeze
+test_success = system({ "PATH" => PATH }, "rake", "run:rubocop")
+
+# Restore changes
+system("git", "reset", "--hard", "-q") &&
+  system("git", "stash", "apply", "--index", "-q") &&
+  system("git", "stash", "drop", "-q")
+
+exit 1 unless test_success
