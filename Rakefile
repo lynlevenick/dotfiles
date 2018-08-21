@@ -14,10 +14,9 @@ module Stow
     from = Pathname.new(from).expand_path
     into = Pathname.new(into).expand_path
 
-    sources = from.glob("**/*", File::FNM_DOTMATCH)
-                  .map(&Pathname.method(:new)).select(&:file?)
+    sources = Stow.sources(from)
+    targets = sources.map { |source| Stow.target(source, from, into) }
 
-    targets = sources.map { |source| Stow.target(into, source, from: from) }
     sources.zip(targets).each do |source, target|
       Stow.symlink(target, source)
     end
@@ -27,7 +26,13 @@ module Stow
   end
 
   class << self
-    def target(into, source, from: source.dirname)
+    def sources(from)
+      from.glob("**/*", File::FNM_DOTMATCH)
+          .map(&Pathname.method(:new))
+          .select(&:file?)
+    end
+
+    def target(source, from, into)
       dirname = source.dirname.relative_path_from(from)
       into.join(dirname).join(source.basename)
     end
