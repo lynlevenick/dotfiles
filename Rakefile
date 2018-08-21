@@ -76,7 +76,7 @@ namespace :install do
     end
   end
 
-  task homebrew: ["/usr/local/bin/brew"] do
+  task homebrew: [:'stow:homebrew', "/usr/local/bin/brew"] do
     sh "brew", "doctor"
     sh "brew", "update"
     sh "brew", "tap", "homebrew/bundle"
@@ -96,12 +96,22 @@ end
 desc "Link configuration files emulating GNU Stow"
 task stow: :'stow:default'
 namespace :stow do
-  task default: %i[bash git homebrew readline ssh vscode]
+  task default: %i[bash git git_hooks homebrew readline ssh vscode]
 
-  task bash:     [*Stow.stow(PWD.join("bash"))]
-  task git:      [*Stow.stow(PWD.join("git"))]
-  task homebrew: [*Stow.stow(PWD.join("homebrew"))]
-  task readline: [*Stow.stow(PWD.join("readline"))]
-  task ssh:      [*Stow.stow(PWD.join("ssh"))]
-  task vscode:   [*Stow.stow(PWD.join("vscode"))]
+  task bash:      [*Stow.stow(PWD.join("bash"))]
+  task git:       [*Stow.stow(PWD.join("git"))]
+  task git_hooks: [*Stow.stow(PWD.join("git_hooks"), into: PWD.join(".git/hooks"))]
+  task homebrew:  [*Stow.stow(PWD.join("homebrew"))]
+  task readline:  [*Stow.stow(PWD.join("readline"))]
+  task ssh:       [*Stow.stow(PWD.join("ssh"))]
+  task vscode:    [*Stow.stow(PWD.join("vscode"))]
+end
+
+namespace :run do
+  desc "Run rubocop"
+  task rubocop: %i[install:gems stow:git_hooks] do
+    Dir.chdir(PWD) do
+      sh "bundle", "exec", "rubocop"
+    end
+  end
 end

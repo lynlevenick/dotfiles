@@ -1,0 +1,7 @@
+#! /usr/bin/env sh
+
+# git prepends its script directory to the path, which homebrew
+# really doesn't like
+PATH="$(echo "${PATH}" | cut -d: -f2-)"
+
+rake run:rubocop
