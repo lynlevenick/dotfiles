@@ -15,11 +15,12 @@ module Stow
     into = Pathname.new(into).expand_path
 
     targets = dir.glob("**/*", File::FNM_DOTMATCH)
-      .map(&Pathname.method(:new))
-      .select(&:file?)
-      .map { |source| [Stow.target(into, source, from: dir), source] }
-      .each do |target, source| Stow.symlink(target, source) end
-      .map(&:first)
+                 .map(&Pathname.method(:new))
+                 .select(&:file?)
+
+    targets.each do |source|
+      Stow.symlink(Stow.target(into, source, from: dir), source)
+    end
 
     CLOBBER.concat(targets)
     targets
@@ -27,7 +28,8 @@ module Stow
 
   class << self
     def target(into, source, from: source.dirname)
-      into.join(source.dirname.relative_path_from(from)).join(source.basename)
+      dirname = source.dirname.relative_path_from(from)
+      into.join(dirname).join(source.basename)
     end
 
     def symlink(target, source)
@@ -100,7 +102,8 @@ namespace :stow do
 
   task bash:      [*Stow.stow(PWD.join("bash"))]
   task git:       [*Stow.stow(PWD.join("git"))]
-  task git_hooks: [*Stow.stow(PWD.join("git_hooks"), into: PWD.join(".git/hooks"))]
+  task git_hooks: [*Stow.stow(PWD.join("git_hooks"),
+                              into: PWD.join(".git/hooks"))]
   task homebrew:  [*Stow.stow(PWD.join("homebrew"))]
   task readline:  [*Stow.stow(PWD.join("readline"))]
   task ssh:       [*Stow.stow(PWD.join("ssh"))]

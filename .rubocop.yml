@@ -1,5 +1,15 @@
-inherit_gem:
-  relaxed-rubocop: .rubocop.yml
+Layout/EndOfLine:
+  EnforcedStyle: lf
 
-Layout/MultilineMethodCallIndentation:
-  EnforcedStyle: indented
+Metrics/LineLength:
+  IgnoredPatterns:
+    - 'http(?:s)?://'
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/AutoResourceCleanup:
+  Enabled: true
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
