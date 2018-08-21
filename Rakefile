@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 abort "Don't run this as root!" if Process.uid.zero?
 
 require "open3"
@@ -66,7 +68,13 @@ end
 desc "Install programs"
 task install: :'install:default'
 namespace :install do
-  task default: %i[homebrew]
+  task default: %i[gems homebrew]
+
+  task gems: %i[homebrew] do
+    Dir.chdir(PWD) do
+      sh "bundle", "install", "--path", ".bundle"
+    end
+  end
 
   task homebrew: ["/usr/local/bin/brew"] do
     sh "brew", "doctor"
