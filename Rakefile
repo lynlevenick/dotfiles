@@ -9,12 +9,8 @@ require "pathname"
 module Stow
   extend Rake::DSL
 
-  # Creates a set of rake tasks that will link files from the source to
-  # destination.
-  #
-  # @param [Pathname, String] from the directory files will be linked from
-  # @param [Pathname, String] into the directory files will be linked into
-  # @return [Array<String>] names of targets, usable by rake
+  # Create a set of rake tasks that will link all files from the source
+  # directory to the destination directory
   def self.stow(from, into: ENV["HOME"])
     from = Pathname.new(from).expand_path
     into = Pathname.new(into).expand_path
@@ -30,31 +26,20 @@ module Stow
   end
 
   class << self
-    # Retrieves a list of files in a directory.
-    #
-    # @param [Pathname] from directory to list
-    # @return [Array<Pathname>] files in directory
+    # Retrieve a list of files in a directory
     def sources(from)
       from.glob("**/*", File::FNM_DOTMATCH)
           .map(&Pathname.method(:new))
           .select(&:file?)
     end
 
-    # Transforms a source filename in from into a destination filename
-    # in into
-    #
-    # @param [Pathname] source the file to transform
-    # @param [Pathname] from the directory to transform from
-    # @param [Pathname] into the directory to transform into
+    # Transform a source filename into a destination filename
     def target(source, from, into)
       dirname = source.dirname.relative_path_from(from)
       into.join(dirname).join(source.basename)
     end
 
-    # Creates a rake task to symlink target to source
-    #
-    # @param [Pathname, String] target destination file location
-    # @param [Pathname, String] source source file location
+    # Create a rake task to symlink target to source
     def symlink(target, source)
       file target => source do |task|
         target = Pathname.new(task.name)
