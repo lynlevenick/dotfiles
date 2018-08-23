@@ -87,24 +87,13 @@ namespace :configure do
     sh "code", "--install-extension", "eamodio.gitlens"
     sh "code", "--install-extension", "zhuangtongfa.material-theme"
     sh "code", "--install-extension", "rebornix.ruby"
-    sh "code", "--install-extension", "castwide.solargraph"
     sh "code", "--install-extension", "robertohuertasm.vscode-icons"
   end
 end
 
 desc "Install programs"
-task install: %i[install:dev_gems install:gems install:homebrew]
+task install: %i[install:homebrew]
 namespace :install do
-  task :dev_gems => [:homebrew] do
-    Dir.chdir(PWD) do
-      sh "bundle", "install", "--path", ".bundle"
-    end
-  end
-
-  task :gems => [:homebrew] do
-    sh "gem", "install", "solargraph"
-  end
-
   task :homebrew => ["/usr/local/bin/brew"] do
     sh "brew", "doctor"
     sh "brew", "update"
