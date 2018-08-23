@@ -74,19 +74,22 @@ end
 
 PWD = Pathname.new(__FILE__).dirname.freeze
 
-desc "Perform all tasks"
 task :default => %i[install:all]
 
 namespace :install do
+  desc "Install and configure all programs"
   task :all => %i[bash git homebrew python readline
                   ripgrep ruby ssh visual-studio-code]
 
   bash_files = Stow.stow(PWD.join("bash"))
+  desc "Configure bash"
   task :bash => [*bash_files]
 
   git_files = Stow.stow(PWD.join("git"))
+  desc "Configure git"
   task :git => [*git_files]
 
+  desc "Install homebrew"
   task :homebrew => ["/usr/local/bin/brew"]
   file "/usr/local/bin/brew" do
     installed = Open3.pipeline(
@@ -100,6 +103,7 @@ namespace :install do
     sh "touch", "-c", "/usr/local/bin/brew"
   end
 
+  desc "Install python"
   task :python => ["/usr/local/bin/python3"]
   file "/usr/local/bin/python3" => "/usr/local/bin/brew" do
     sh "brew", "install", "python"
@@ -107,14 +111,17 @@ namespace :install do
   end
 
   readline_files = Stow.stow(PWD.join("readline"))
+  desc "Configure readline"
   task :readline => [*readline_files]
 
+  desc "Install ripgrep"
   task :ripgrep => ["/usr/local/bin/rg"]
   file "/usr/local/bin/rg" => "/usr/local/bin/brew" do
     sh "brew", "install", "ripgrep"
     sh "touch", "-c", "/usr/local/bin/rg"
   end
 
+  desc "Install ruby"
   task :ruby => ["/usr/local/bin/ruby"]
   file "/usr/local/bin/ruby" => "/usr/local/bin/brew" do
     sh "brew", "install", "ruby"
@@ -122,9 +129,11 @@ namespace :install do
   end
 
   ssh_files = Stow.stow(PWD.join("ssh"))
+  desc "Configure ssh"
   task :ssh => [*ssh_files]
 
   visual_studio_code_files = Stow.stow(PWD.join("visual-studio-code"))
+  desc "Install and configure Visual Studio Code"
   task :'visual-studio-code' => ["/Applications/Visual Studio Code.app",
                                  *visual_studio_code_files]
   file "/Applications/Visual Studio Code.app" => "/usr/local/bin/brew" do
