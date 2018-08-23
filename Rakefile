@@ -92,12 +92,11 @@ namespace :install do
   desc "Install homebrew"
   task :homebrew => ["/usr/local/bin/brew"]
   file "/usr/local/bin/brew" do
-    installed = Open3.pipeline(
+    Open3.pipeline(
       ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
       "ruby",
-    ).all(&:zero?)
+    ).all(&:zero?) or raise "fatal: Homebrew install failed"
 
-    raise "fatal: Homebrew install failed" unless installed
     sh "brew", "doctor"
     sh "brew", "update"
     sh "touch", "-c", "/usr/local/bin/brew"
