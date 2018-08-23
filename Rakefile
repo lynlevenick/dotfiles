@@ -97,13 +97,13 @@ namespace :install do
     raise "fatal: Homebrew install failed" unless installed
     sh "brew", "doctor"
     sh "brew", "update"
-    sh "touch", "/usr/local/bin/brew"
+    sh "touch", "-c", "/usr/local/bin/brew"
   end
 
   task :python => ["/usr/local/bin/python3"]
   file "/usr/local/bin/python3" => "/usr/local/bin/brew" do
     sh "brew", "install", "python"
-    sh "touch", "/usr/local/bin/python3"
+    sh "touch", "-c", "/usr/local/bin/python3"
   end
 
   readline_files = Stow.stow(PWD.join("readline"))
@@ -112,13 +112,13 @@ namespace :install do
   task :ripgrep => ["/usr/local/bin/rg"]
   file "/usr/local/bin/rg" => "/usr/local/bin/brew" do
     sh "brew", "install", "ripgrep"
-    sh "touch", "/usr/local/bin/rg"
+    sh "touch", "-c", "/usr/local/bin/rg"
   end
 
   task :ruby => ["/usr/local/bin/ruby"]
   file "/usr/local/bin/ruby" => "/usr/local/bin/brew" do
     sh "brew", "install", "ruby"
-    sh "touch", "/usr/local/bin/ruby"
+    sh "touch", "-c", "/usr/local/bin/ruby"
   end
 
   ssh_files = Stow.stow(PWD.join("ssh"))
@@ -129,6 +129,6 @@ namespace :install do
                                  *visual_studio_code_files]
   file "/Applications/Visual Studio Code.app" => "/usr/local/bin/brew" do
     sh "brew", "cask", "install", "visual-studio-code"
-    sh "touch", "/Applications/Visual Studio Code.app"
+    sh "touch", "-c", "/Applications/Visual Studio Code.app"
   end
 end
