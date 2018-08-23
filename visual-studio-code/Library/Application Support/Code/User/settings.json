@@ -8,7 +8,6 @@
     "ruby.codeCompletion": false,
     "ruby.intellisense": false,
     "ruby.useLanguageServer": false,
-    "solargraph.useBundler": true,
     "workbench.colorTheme": "One Dark Pro Vivid",
     "workbench.iconTheme": "vscode-icons",
 }

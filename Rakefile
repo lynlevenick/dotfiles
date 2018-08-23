@@ -93,12 +93,16 @@ namespace :configure do
 end
 
 desc "Install programs"
-task install: %i[install:gems install:homebrew]
+task install: %i[install:dev_gems install:gems install:homebrew]
 namespace :install do
-  task :gems => [:homebrew] do
+  task :dev_gems => [:homebrew] do
     Dir.chdir(PWD) do
       sh "bundle", "install", "--path", ".bundle"
     end
+  end
+
+  task :gems => [:homebrew] do
+    sh "gem", "install", "solargraph"
   end
 
   task :homebrew => ["/usr/local/bin/brew"] do
