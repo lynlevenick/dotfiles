@@ -4,7 +4,6 @@ abort "Don't run this as root!" if Process.uid.zero?
 
 require "open3"
 require "pathname"
-require "rake/clean"
 
 # Create rake tasks that emulate GNU Stow
 module Stow
@@ -27,7 +26,6 @@ module Stow
       Stow.symlink(target, source)
     end
 
-    CLOBBER.concat(targets)
     targets
   end
 
@@ -77,29 +75,19 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Perform all tasks"
-task :default => %i[configure install stow]
+task :default => %i[install:all]
 
-desc "Perform non-file configuration"
-task configure: %i[configure:visual-studio-code]
-namespace :configure do
-  task :'visual-studio-code' => %i[install:homebrew] do
-    sh "code", "--install-extension", "editorconfig.editorconfig"
-    sh "code", "--install-extension", "eamodio.gitlens"
-    sh "code", "--install-extension", "zhuangtongfa.material-theme"
-    sh "code", "--install-extension", "rebornix.ruby"
-    sh "code", "--install-extension", "robertohuertasm.vscode-icons"
-  end
-end
-
-desc "Install programs"
-task install: %i[install:homebrew]
 namespace :install do
-  task :homebrew => ["/usr/local/bin/brew"] do
-    sh "brew", "doctor"
-    sh "brew", "update"
-    sh "brew", "tap", "homebrew/bundle"
-    sh "brew", "bundle", "install", "--global"
-  end
+  task :all => %i[bash git homebrew python readline
+                  ripgrep ruby ssh visual-studio-code]
+
+  bash_files = Stow.stow(PWD.join("bash"))
+  task :bash => [*bash_files]
+
+  git_files = Stow.stow(PWD.join("git"))
+  task :git => [*git_files]
+
+  task :homebrew => ["/usr/local/bin/brew"]
   file "/usr/local/bin/brew" do
     installed = Open3.pipeline(
       ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
@@ -107,17 +95,40 @@ namespace :install do
     ).all(&:zero?)
 
     raise "fatal: Homebrew install failed" unless installed
+    sh "brew", "doctor"
+    sh "brew", "update"
+    sh "touch", "/usr/local/bin/brew"
   end
-end
 
-desc "Link configuration files"
-task stow: %i[stow:bash stow:git stow:homebrew stow:readline stow:ssh
-              stow:visual-studio-code]
-namespace :stow do
-  task :bash =>                 [*Stow.stow(PWD.join("bash"))]
-  task :git =>                  [*Stow.stow(PWD.join("git"))]
-  task :homebrew =>             [*Stow.stow(PWD.join("homebrew"))]
-  task :readline =>             [*Stow.stow(PWD.join("readline"))]
-  task :ssh =>                  [*Stow.stow(PWD.join("ssh"))]
-  task :'visual-studio-code' => [*Stow.stow(PWD.join("visual-studio-code"))]
+  task :python => ["/usr/local/bin/python3"]
+  file "/usr/local/bin/python3" => "/usr/local/bin/brew" do
+    sh "brew", "install", "python"
+    sh "touch", "/usr/local/bin/python3"
+  end
+
+  readline_files = Stow.stow(PWD.join("readline"))
+  task :readline => [*readline_files]
+
+  task :ripgrep => ["/usr/local/bin/rg"]
+  file "/usr/local/bin/rg" => "/usr/local/bin/brew" do
+    sh "brew", "install", "ripgrep"
+    sh "touch", "/usr/local/bin/rg"
+  end
+
+  task :ruby => ["/usr/local/bin/ruby"]
+  file "/usr/local/bin/ruby" => "/usr/local/bin/brew" do
+    sh "brew", "install", "ruby"
+    sh "touch", "/usr/local/bin/ruby"
+  end
+
+  ssh_files = Stow.stow(PWD.join("ssh"))
+  task :ssh => [*ssh_files]
+
+  visual_studio_code_files = Stow.stow(PWD.join("visual-studio-code"))
+  task :'visual-studio-code' => ["/Applications/Visual Studio Code.app",
+                                 *visual_studio_code_files]
+  file "/Applications/Visual Studio Code.app" => "/usr/local/bin/brew" do
+    sh "brew", "cask", "install", "visual-studio-code"
+    sh "touch", "/Applications/Visual Studio Code.app"
+  end
 end
