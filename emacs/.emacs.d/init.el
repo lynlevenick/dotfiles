@@ -47,7 +47,7 @@
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (use-package dired
-  :config (setf dired-use-ls-dired nil))
+  :init (setf dired-use-ls-dired nil))
 
 ;;;; Fix broken defaults
 (use-package exec-path-from-shell
@@ -168,18 +168,16 @@ If no previous match was done, just beeps."
 (use-package counsel
   :ensure t :delight counsel-mode
   :after (ivy)
-  :init
-  (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s")
-  (counsel-mode 1)
-  :bind (("C-c r" . counsel-rg)))
+  :init (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s")
+  :config (counsel-mode 1))
 (use-package counsel-projectile
   :ensure t
   :after (counsel projectile)
-  :init (counsel-projectile-mode 1)
   :bind (("s-d" . counsel-projectile-find-dir)
          ("s-f" . counsel-projectile-find-file)
          ("s-g" . counsel-projectile-rg)
-         ("s-p" . counsel-projectile-switch-project)))
+         ("s-p" . counsel-projectile-switch-project))
+  :config (counsel-projectile-mode 1))
 (use-package ivy
   :ensure t :delight ivy-mode
   :init
