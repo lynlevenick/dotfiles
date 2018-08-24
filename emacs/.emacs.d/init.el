@@ -67,13 +67,22 @@
 (push '(ns-transparent-titlebar . t) initial-frame-alist)
 (use-package smart-mode-line
   :ensure t
-  :after (spacemacs-common)
+  :after (doom-themes solaire-mode)
   :init (setf sml/replacer-regexp-list nil
               sml/theme nil)
   :config (sml/setup))
-(use-package spacemacs-common
-  :ensure spacemacs-theme
-  :init (load-theme 'spacemacs-dark t))
+(use-package solaire-mode
+  :ensure t
+  :after (doom-themes)
+  :hook ((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
+  :config
+  (solaire-mode-swap-bg)
+  (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
+(use-package doom-themes
+  :ensure t
+  :init
+  (load-theme 'doom-one t)
+  (doom-themes-visual-bell-config))
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
@@ -104,6 +113,9 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package flycheck
   :ensure t
   :init (add-hook 'after-init-hook #'global-flycheck-mode))
+(use-package paren
+  :hook (prog-mode . show-paren-mode)
+  :init (setf show-paren-delay 0))
 (use-package syntax-subword
   :ensure t
   :init
