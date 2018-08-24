@@ -40,7 +40,8 @@
       sentence-end-double-space nil
       user-full-name "Lyn Levenick"
       user-mail-address "lyn.levenick@gmail.com")
-(setq-default indent-tabs-mode nil
+(setq-default display-line-numbers-type 'relative
+              indent-tabs-mode nil
 	            tab-width 2
               truncate-lines t)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
