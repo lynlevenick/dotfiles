@@ -57,10 +57,10 @@
 (push '(font . "Menlo-12") default-frame-alist)
 (use-package smart-mode-line
   :ensure t
-  :config (progn
-            (setf sml/replacer-regexp-list nil
-                  sml/theme nil)
-            (sml/setup)))
+  :config
+  (setf sml/replacer-regexp-list nil
+        sml/theme nil)
+  (sml/setup))
 (use-package spacemacs-common
   :ensure spacemacs-theme
   :config (load-theme 'spacemacs-dark t))
@@ -93,9 +93,9 @@ point reaches the beginning of end of the buffer, stop there."
   :config (add-hook 'after-init-hook #'global-flycheck-mode))
 (use-package syntax-subword
   :ensure t
-  :config (progn
-            (setf syntax-subword-skip-spaces 'consistent)
-            (global-syntax-subword-mode 1)))
+  :config
+  (setf syntax-subword-skip-spaces 'consistent)
+  (global-syntax-subword-mode 1))
 (use-package ws-butler
   :ensure t
   :delight ws-butler-mode
@@ -113,6 +113,12 @@ point reaches the beginning of end of the buffer, stop there."
 	:ensure t
 	:bind ("C-c g" . magit-status)
 	:config (setf magit-completing-read-function 'magit-ido-completing-read))
+(use-package projectile
+  :ensure t
+  :init (projectile-mode 1)
+  :bind-keymap (("C-c p" . projectile-command-map))
+  :config
+  (setf projectile-project-search-path '("~/")))
 (use-package windsize
   :ensure t
   :bind (("C-s-<up>" . windsize-up)
@@ -123,11 +129,6 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-s" . windsize-down)
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
-
-;;;; Major Modes
-(use-package enh-ruby-mode
-  :ensure t
-  :mode "\\.rb\\'")
 
 ;;;; Searching
 (defun lyn-isearch-delete-something ()
@@ -152,36 +153,38 @@ If no previous match was done, just beeps."
 (bind-key "<backspace>" #'lyn-isearch-delete-something isearch-mode-map)
 (use-package anzu
   :ensure t
-  :demand
   :delight anzu-mode
+  :init (global-anzu-mode 1)
   :bind (("M-%" . anzu-query-replace)
-         ("C-M-%" . anzu-query-replace-regexp))
-  :config (global-anzu-mode 1))
-(use-package helm
+         ("C-M-%" . anzu-query-replace-regexp)))
+(use-package ivy
   :ensure t
-  :init (progn
-          (require 'helm-config)
-          (setf helm-buffers-fuzzy-matching t
-                helm-candidate-number-limit 100
-                helm-move-to-line-cycle-in-source t
-                helm-split-window-inside-p t)
-          (bind-key "C-c h" #'helm-command-prefix)
-          (unbind-key "C-x c")
-          (helm-mode 1))
-  :bind (("C-c h" . helm-mini)
-         ("C-h a" . helm-apropos)
-         ("C-x C-b" . helm-buffers-list)
-         ("C-x b" . helm-buffers-list)
-         ("C-x C-f" . helm-find-files)
-         ("M-y" . helm-show-kill-ring)
-         ("M-x" . helm-M-x)
-         (:map helm-map
-               ("<tab>" . helm-execute-persistent-action)
-               ("C-z" . helm-select-action)))
-  :config (progn
-            (use-package helm-descbinds
-              :ensure t
-              :init (helm-descbinds-mode 1))))
+  :delight ivy-mode
+  :init (ivy-mode 1)
+  :bind (("C-c C-r" . ivy-resume))
+  :config
+  (setf projectile-completion-system 'ivy)
+  (use-package counsel
+    :ensure t
+    :demand
+    :bind (("C-c r" . counsel-rg)
+           ("C-h a" . counsel-apropos)
+           ("C-h f" . counsel-describe-function)
+           ("C-h v" . counsel-describe-variable)
+           ("C-x C-f" . counsel-find-file)
+           ("M-x" . counsel-M-x))
+    :config
+    (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s")
+    (use-package counsel-projectile
+      :ensure t
+      :init (counsel-projectile-mode 1)
+      :bind (("s-d" . counsel-projectile-find-dir)
+             ("s-f" . counsel-projectile-find-file)
+             ("s-g" . counsel-projectile-rg)
+             ("s-p" . counsel-projectile-switch-project)))
+    (use-package swiper
+      :ensure t
+      :bind (("C-s" . counsel-grep-or-swiper)))))
 
 (provide 'init)
 ;;; init.el ends here
