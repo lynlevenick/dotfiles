@@ -60,12 +60,20 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash git homebrew python readline
-                    ripgrep ruby ssh visual-studio-code]
+task :default => %i[bash emacs git homebrew python readline ripgrep ruby ssh]
 
 bash_files = Stow.stow(PWD.join("bash"))
 desc "Configure bash"
 task :bash => [*bash_files]
+
+emacs_files = Stow.stow(PWD.join("emacs"))
+desc "Install and configure emacs"
+task :emacs => ["/Applications/Emacs.app",
+                *emacs_files]
+file "/Applications/Emacs.app" => ["/usr/local/bin/brew"] do
+  sh "brew", "cask", "install", "emacs"
+  sh "touch", "-c", "/Applications/Emacs.app"
+end
 
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
@@ -112,12 +120,3 @@ end
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
 task :ssh => [*ssh_files]
-
-visual_studio_code_files = Stow.stow(PWD.join("visual-studio-code"))
-desc "Install and configure Visual Studio Code"
-task :'visual-studio-code' => ["/Applications/Visual Studio Code.app",
-                              *visual_studio_code_files]
-file "/Applications/Visual Studio Code.app" => "/usr/local/bin/brew" do
-  sh "brew", "cask", "install", "visual-studio-code"
-  sh "touch", "-c", "/Applications/Visual Studio Code.app"
-end
