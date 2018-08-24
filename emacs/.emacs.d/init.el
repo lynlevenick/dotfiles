@@ -47,7 +47,7 @@
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (use-package dired
-  :init (setf dired-use-ls-dired nil))
+  :config (setf dired-use-ls-dired nil))
 
 ;;;; Fix broken defaults
 (use-package exec-path-from-shell
@@ -59,9 +59,10 @@
 (push '(font . "Menlo-12") default-frame-alist)
 (use-package smart-mode-line
   :ensure t
+  :after (spacemacs-common)
   :init (setf sml/replacer-regexp-list nil
               sml/theme nil)
-  (sml/setup))
+  :config (sml/setup))
 (use-package spacemacs-common
   :ensure spacemacs-theme
   :init (load-theme 'spacemacs-dark t))
@@ -91,7 +92,7 @@ point reaches the beginning of end of the buffer, stop there."
 (bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
-  :init (setq-default display-line-numbers-type 'relative))
+  :config (setq-default display-line-numbers-type 'relative))
 (use-package flycheck
   :ensure t
   :init (add-hook 'after-init-hook #'global-flycheck-mode))
@@ -101,26 +102,25 @@ point reaches the beginning of end of the buffer, stop there."
   (setf syntax-subword-skip-spaces 'consistent)
   (global-syntax-subword-mode 1))
 (use-package ws-butler
-  :ensure t
-  :delight ws-butler-mode
+  :ensure t :delight ws-butler-mode
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
 (use-package ace-window
   :ensure t
-  :bind (("C-x o" . ace-window))
   :init (setf aw-background nil
               aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-              aw-scope 'frame))
+              aw-scope 'frame)
+  :bind (("C-x o" . ace-window)))
 (use-package magit
 	:ensure t
 	:bind ("C-c g" . magit-status))
 (use-package projectile
-  :ensure t
-  :delight projectile-mode
-  :init (projectile-mode 1)
-  :bind-keymap (("C-c p" . projectile-command-map))
-  :config (setf projectile-project-search-path '("~/")))
+  :ensure t :delight projectile-mode
+  :init
+  (setf projectile-project-search-path '("~/"))
+  (projectile-mode 1)
+  :bind-keymap (("C-c p" . projectile-command-map)))
 (use-package windsize
   :ensure t
   :bind (("C-s-<up>" . windsize-up)
@@ -161,40 +161,36 @@ If no previous match was done, just beeps."
   (isearch-update))
 (bind-key "<backspace>" #'lyn-isearch-delete-something isearch-mode-map)
 (use-package anzu
-  :ensure t
-  :delight anzu-mode
+  :ensure t :delight anzu-mode
   :init (global-anzu-mode 1)
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp)))
-(use-package ivy
+(use-package counsel
+  :ensure t :delight counsel-mode
+  :after (ivy)
+  :init
+  (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s")
+  (counsel-mode 1)
+  :bind (("C-c r" . counsel-rg)))
+(use-package counsel-projectile
   :ensure t
-  :delight ivy-mode
-  :init (ivy-mode 1)
-  :bind (("C-c C-r" . ivy-resume))
-  :config
+  :after (counsel projectile)
+  :init (counsel-projectile-mode 1)
+  :bind (("s-d" . counsel-projectile-find-dir)
+         ("s-f" . counsel-projectile-find-file)
+         ("s-g" . counsel-projectile-rg)
+         ("s-p" . counsel-projectile-switch-project)))
+(use-package ivy
+  :ensure t :delight ivy-mode
+  :init
   (setf projectile-completion-system 'ivy)
-  (use-package counsel
-    :ensure t
-    :demand
-    :bind (("C-c r" . counsel-rg)
-           ("C-h a" . counsel-apropos)
-           ("C-h f" . counsel-describe-function)
-           ("C-h v" . counsel-describe-variable)
-           ("C-x C-f" . counsel-find-file)
-           ("M-x" . counsel-M-x))
-    :config
-    (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s")
-    (use-package counsel-projectile
-      :ensure t
-      :init (counsel-projectile-mode 1)
-      :bind (("s-d" . counsel-projectile-find-dir)
-             ("s-f" . counsel-projectile-find-file)
-             ("s-g" . counsel-projectile-rg)
-             ("s-p" . counsel-projectile-switch-project)))
-    (use-package swiper
-      :ensure t
-      :bind (("C-r" . counsel-grep-or-swiper)
-             ("C-s" . counsel-grep-or-swiper)))))
+  (ivy-mode 1)
+  :bind (("C-c C-r" . ivy-resume)))
+(use-package swiper
+  :ensure t
+  :after (ivy counsel)
+  :bind (("C-r" . counsel-grep-or-swiper)
+         ("C-s" . counsel-grep-or-swiper)))
 
 (provide 'init)
 ;;; init.el ends here
