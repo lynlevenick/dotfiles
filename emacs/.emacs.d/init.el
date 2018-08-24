@@ -92,7 +92,7 @@ point reaches the beginning of end of the buffer, stop there."
 (bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
-  :config (setq-default display-line-numbers-type 'relative))
+  :init (setq-default display-line-numbers-type 'relative))
 (use-package flycheck
   :ensure t
   :init (add-hook 'after-init-hook #'global-flycheck-mode))
