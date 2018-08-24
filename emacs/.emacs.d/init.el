@@ -134,6 +134,11 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
 
+;;;; Major Modes
+(use-package haml-mode
+  :ensure t
+  :mode "\\.haml\\'")
+
 ;;;; Searching
 (defun lyn-isearch-delete-something ()
   "Delete non-matching text or the last character.
