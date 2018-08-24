@@ -9,13 +9,13 @@
       file-name-handler-alist nil
       gc-cons-threshold-original gc-cons-threshold
       gc-cons-threshold (* 64 1024 1024))
-(run-with-idle-timer
- 5 nil
- (lambda ()
-   (setf file-name-handler-alist file-name-handler-alist-original
-	       gc-cons-threshold gc-cons-threshold-original)
-   (makunbound 'file-name-handler-alist-original)
-   (makunbound 'gc-cons-threshold-original)))
+(defun lyn-restore-original-vars ()
+  "Restore variables temporarily set during initialization."
+  (setf file-name-handler-alist file-name-handler-alist-original
+	      gc-cons-threshold gc-cons-threshold-original)
+  (makunbound 'file-name-handler-alist-original)
+  (makunbound 'gc-cons-threshold-original))
+(run-with-idle-timer 5 nil #'lyn-restore-original-vars)
 
 (require 'package)
 (setf package-enable-at-startup nil)
