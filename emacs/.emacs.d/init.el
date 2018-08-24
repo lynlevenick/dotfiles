@@ -40,34 +40,31 @@
       sentence-end-double-space nil
       user-full-name "Lyn Levenick"
       user-mail-address "lyn.levenick@gmail.com")
-(setq-default display-line-numbers-type 'relative
-              indent-tabs-mode nil
+(setq-default indent-tabs-mode nil
 	            tab-width 2
               truncate-lines t)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (column-number-mode 1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (use-package dired
-  :config (setf dired-use-ls-dired nil))
+  :init (setf dired-use-ls-dired nil))
 
 ;;;; Fix broken defaults
 (use-package exec-path-from-shell
   :ensure t
-  :config (exec-path-from-shell-initialize))
+  :init (exec-path-from-shell-initialize))
 
 ;;;; Theme
 (push '(font . "Menlo-12") initial-frame-alist)
 (push '(font . "Menlo-12") default-frame-alist)
 (use-package smart-mode-line
   :ensure t
-  :config
-  (setf sml/replacer-regexp-list nil
-        sml/theme nil)
+  :init (setf sml/replacer-regexp-list nil
+              sml/theme nil)
   (sml/setup))
 (use-package spacemacs-common
   :ensure spacemacs-theme
-  :config (load-theme 'spacemacs-dark t))
+  :init (load-theme 'spacemacs-dark t))
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
@@ -81,7 +78,7 @@ the beginning of the line.
 If ARG is not nil or 1, move forward ARG - 1 lines first. If
 point reaches the beginning of end of the buffer, stop there."
   (interactive "^p")
-  (setq arg (or arg 1))
+  (setf arg (or arg 1))
 
   (when (/= arg 1)
     (let ((line-move-visual nil))
@@ -92,37 +89,38 @@ point reaches the beginning of end of the buffer, stop there."
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
 (bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
+(use-package display-line-numbers
+  :hook (prog-mode . display-line-numbers-mode)
+  :init (setq-default display-line-numbers-type 'relative))
 (use-package flycheck
   :ensure t
-  :config (add-hook 'after-init-hook #'global-flycheck-mode))
+  :init (add-hook 'after-init-hook #'global-flycheck-mode))
 (use-package syntax-subword
   :ensure t
-  :config
+  :init
   (setf syntax-subword-skip-spaces 'consistent)
   (global-syntax-subword-mode 1))
 (use-package ws-butler
   :ensure t
   :delight ws-butler-mode
-  :commands (ws-butler-mode)
-  :init (add-hook 'prog-mode-hook #'ws-butler-mode))
+  :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
 (use-package ace-window
   :ensure t
   :bind (("C-x o" . ace-window))
-  :config (setf aw-background nil
-                aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-                aw-scope 'frame))
+  :init (setf aw-background nil
+              aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+              aw-scope 'frame))
 (use-package magit
 	:ensure t
-	:bind ("C-c g" . magit-status)
-	:config (setf magit-completing-read-function 'magit-ido-completing-read))
+	:bind ("C-c g" . magit-status))
 (use-package projectile
   :ensure t
+  :delight projectile-mode
   :init (projectile-mode 1)
   :bind-keymap (("C-c p" . projectile-command-map))
-  :config
-  (setf projectile-project-search-path '("~/")))
+  :config (setf projectile-project-search-path '("~/")))
 (use-package windsize
   :ensure t
   :bind (("C-s-<up>" . windsize-up)
@@ -138,6 +136,8 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package haml-mode
   :ensure t
   :mode "\\.haml\\'")
+(use-package ruby-mode
+  :init (setq-default ruby-align-chained-calls t))
 
 ;;;; Searching
 (defun lyn-isearch-delete-something ()
@@ -193,7 +193,8 @@ If no previous match was done, just beeps."
              ("s-p" . counsel-projectile-switch-project)))
     (use-package swiper
       :ensure t
-      :bind (("C-s" . counsel-grep-or-swiper)))))
+      :bind (("C-r" . counsel-grep-or-swiper)
+             ("C-s" . counsel-grep-or-swiper)))))
 
 (provide 'init)
 ;;; init.el ends here
