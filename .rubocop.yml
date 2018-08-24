@@ -1,0 +1,36 @@
+Layout/EndOfLine:
+  EnforcedStyle: lf
+
+Metrics/LineLength:
+  IgnoredPatterns:
+    - 'http(?:s)?://'
+
+Style/AndOr:
+  EnforcedStyle: conditionals
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/AutoResourceCleanup:
+  Enabled: true
+
+Style/BlockDelimiters:
+  EnforcedStyle: semantic
+
+Style/HashSyntax:
+  EnforcedStyle: no_mixed_keys
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingUnderscoreVariable:
+  Enabled: false
