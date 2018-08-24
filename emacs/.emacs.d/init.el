@@ -43,6 +43,8 @@
 (setq-default indent-tabs-mode nil
 	            tab-width 2
               truncate-lines t)
+(global-display-line-numbers-mode 1)
+(column-number-mode 1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (use-package dired

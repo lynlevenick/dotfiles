@@ -1,5 +1,6 @@
 #! /usr/bin/env ruby
 
+# Provide ActiveSupport-style Object#blank? and Object#present? methods
 class Object
   def blank?
     if respond_to?(:empty?)
@@ -20,22 +21,17 @@ def ask(question)
   $stdin.gets.chomp.strip
 end
 
-def keygen(output_name, comment: nil, type: 'ed25519')
-  args = ['ssh-keygen', '-f', output_name, '-t', type]
-  if comment.present?
-    args.concat(['-C', comment])
-  end
+def keygen(output_name, comment: nil, type: "ed25519")
+  args = ["ssh-keygen", "-f", output_name, "-t", type]
+  args.concat(["-C", comment]) if comment.present?
 
   system(*args)
 end
 
-identifier = ask('Identifier')
-comment = ask('Comment?')
+identifier = ask("Identifier")
+comment = ask("Comment?")
 
-output = File.expand_path(".ssh/id_ed25519_#{identifier}", ENV['HOME'])
+output = File.expand_path(".ssh/id_ed25519_#{identifier}", ENV["HOME"])
 keygen(output, comment: comment)
 
-should_add = ask('Add to agent? (Y/n)').casecmp('n') != 0
-if should_add
-  system('ssh-add', '-K', output)
-end
+ask("Add to agent? (Y/n)").casecmp("n") != 0 and system("ssh-add", "-K", output)
