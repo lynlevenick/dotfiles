@@ -1,18 +1,16 @@
-;;; init.el --- My Emacs initialization
-;;; Commentary:
-;; There are many Emacs configurations, but this one is mine.
-;;; Code:
+;; -*- lexical-binding: t -*-
 
-(defvar file-name-handler-alist-original)
-(defvar gc-cons-threshold-original)
 (setf file-name-handler-alist-original file-name-handler-alist
       file-name-handler-alist nil
       gc-cons-threshold-original gc-cons-threshold
-      gc-cons-threshold (* 64 1024 1024))
+      gc-cons-threshold (* 1024 1024 1024)
+      gc-cons-percentage-original gc-cons-percentage
+      gc-cons-percentage 1.0)
 (defun lyn-restore-original-vars ()
   "Restore variables temporarily set during initialization."
   (setf file-name-handler-alist file-name-handler-alist-original
-	      gc-cons-threshold gc-cons-threshold-original)
+	      gc-cons-threshold gc-cons-threshold-original
+        gc-cons-percentage gc-cons-percentage-original)
   (makunbound 'file-name-handler-alist-original)
   (makunbound 'gc-cons-threshold-original))
 (run-with-idle-timer 5 nil #'lyn-restore-original-vars)
@@ -113,15 +111,15 @@ point reaches the beginning of end of the buffer, stop there."
   :init (setq-default display-line-numbers-type 'relative))
 (use-package flycheck
   :ensure t
-  :init (add-hook 'after-init-hook #'global-flycheck-mode))
+  :hook (prog-mode . flycheck-mode)
+  :init (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 (use-package paren
   :hook (prog-mode . show-paren-mode)
   :init (setf show-paren-delay 0))
 (use-package syntax-subword
   :ensure t
-  :init
-  (setf syntax-subword-skip-spaces 'consistent)
-  (global-syntax-subword-mode 1))
+  :hook (prog-mode . syntax-subword-mode)
+  :init (setf syntax-subword-skip-spaces 'consistent))
 (use-package ws-butler
   :ensure t :delight ws-butler-mode
   :hook (prog-mode . ws-butler-mode))
@@ -212,4 +210,3 @@ If no previous match was done, just beeps."
          ("C-s" . counsel-grep-or-swiper)))
 
 (provide 'init)
-;;; init.el ends here
