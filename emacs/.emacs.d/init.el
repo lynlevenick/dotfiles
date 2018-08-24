@@ -55,8 +55,16 @@
   :init (exec-path-from-shell-initialize))
 
 ;;;; Theme
-(push '(font . "Menlo-12") initial-frame-alist)
+(setf frame-title-format nil
+      ns-use-proxy-icon nil)
 (push '(font . "Menlo-12") default-frame-alist)
+(push '(font . "Menlo-12") initial-frame-alist)
+(push '(height . 25) default-frame-alist)
+(push '(height . 25) initial-frame-alist)
+(push '(width . 80) default-frame-alist)
+(push '(width . 80) initial-frame-alist)
+(push '(ns-transparent-titlebar . t) default-frame-alist)
+(push '(ns-transparent-titlebar . t) initial-frame-alist)
 (use-package smart-mode-line
   :ensure t
   :after (spacemacs-common)
