@@ -41,7 +41,8 @@
       user-full-name "Lyn Levenick"
       user-mail-address "lyn.levenick@gmail.com")
 (setq-default indent-tabs-mode nil
-	            tab-width 2)
+	            tab-width 2
+              truncate-lines t)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (use-package dired
