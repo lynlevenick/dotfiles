@@ -100,7 +100,7 @@ through to `use-package'."
 
   (cond ((listp recipe-or-name)
 	 `(progn (straight-use-package ,recipe-or-name)
-		 (use-package ,(car recipe-or-name) . ,body)))
+		 (use-package . (,(car (nth 1 recipe-or-name)) . ,body))))
 	(`(progn (straight-use-package ',recipe-or-name)
 		 (use-package ,recipe-or-name . ,body)))))
 
