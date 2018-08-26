@@ -22,18 +22,19 @@
   :demand
   :config
   (load-theme 'doom-one t)
-  (doom-themes-visual-bell-config)
-  (use-package solaire-mode :ensure t
-    :demand
-    :hook ((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
-    :config
-    (solaire-mode-swap-bg)
-    (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
-  (use-package smart-mode-line :ensure t
-    :demand
-    :init (setf sml/replacer-regexp-list nil
-                sml/theme nil)
-    :config (sml/setup)))
+  (doom-themes-visual-bell-config))
+(use-package solaire-mode :ensure t
+  :demand
+  :hook ((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
+  :config
+  (solaire-mode-swap-bg)
+  (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
+(use-package smart-mode-line :ensure t
+  :demand
+  :config
+  (setf sml/replacer-regexp-list nil
+        sml/theme nil)
+  (sml/setup))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)

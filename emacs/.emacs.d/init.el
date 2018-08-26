@@ -48,8 +48,10 @@ point reaches the beginning of end of the buffer, stop there."
   :init (setf aw-background nil
               aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
               aw-scope 'frame))
+(use-package company :ensure t
+  :hook (prog-mode . company-mode))
 (use-package magit :ensure t
-	:bind ("C-c g" . magit-status))
+  :bind ("C-c g" . magit-status))
 (use-package projectile :ensure t
   :delight projectile-mode
   :hook (after-init . projectile-mode)
@@ -66,7 +68,7 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
 
-;;;; Major Modes
+;;;; Languages
 (use-package haml-mode :ensure t
   :mode "\\.haml\\'")
 (setq-default ruby-align-chained-calls t)
