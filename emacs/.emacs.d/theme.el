@@ -12,6 +12,7 @@
 (setq-default cursor-type 'bar
 	      display-line-numbers-grow-only t
               display-line-numbers-type 'relative
+	      echo-keystrokes 1e-10
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
 (push '(height . 25) default-frame-alist)
