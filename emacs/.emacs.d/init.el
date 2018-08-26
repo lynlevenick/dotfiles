@@ -79,9 +79,7 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Languages
 (use-package haml-mode :ensure t
   :mode "\\.haml\\'")
-(use-package ruby-mode
-  :defer
-  :custom (ruby-align-chained-calls t))
+(setf ruby-align-chained-calls t)
 
 ;;;; Searching
 (use-package counsel :ensure t

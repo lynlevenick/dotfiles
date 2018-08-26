@@ -21,7 +21,7 @@
 
     (setf gc-cons-percentage gc-cons-percentage-original
 	  gc-cons-threshold gc-cons-threshold-original))
-  (run-with-idle-timer 5 nil #'finalize-gc))
+  (run-with-idle-timer 3 nil #'finalize-gc))
 
 (defconst cache-directory (concat user-emacs-directory "cache/")
   "Volatile storage.")
