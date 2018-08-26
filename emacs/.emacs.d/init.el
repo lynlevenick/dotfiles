@@ -3,20 +3,12 @@
 ;; There are many configurations, but this one is mine.
 ;;; Code:
 
-(defun current-file ()
-  "Return currently executing file."
-
-  (cond ((stringp (car-safe current-load-list)) (car current-load-list))
-	(load-file-name)
-	((buffer-file-name))))
-(defun load-relative (name &rest arguments)
-  "Load NAME relative to the current file.
-
-ARGUMENTS are passed through to `load'."
-
-  (apply #'load (concat (file-name-directory (current-file)) name) arguments))
 (unless (bound-and-true-p early-init-file)
-  (load-relative "early-init" nil t))
+  (load (concat user-emacs-directory "early-init") nil t))
+
+;;;; Defaults
+(use-package exec-path-from-shell :ensure t
+  :init (exec-path-from-shell-initialize))
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)

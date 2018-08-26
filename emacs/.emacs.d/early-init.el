@@ -74,9 +74,6 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-(use-package delight :ensure t)
-
-(load-relative "theme" nil t)
 
 (defun ensure-directories ()
   "Ensure essential directories exist."
@@ -84,41 +81,9 @@
   (dolist (directory `(,cache-directory))
     (unless (file-directory-p directory)
       (make-directory directory))))
-
-(defun ensure-wrap (&optional unwrap)
-  "Wrap Emacs.app to have a proper PATH. With UNWRAP, unwrap it."
-
-  (let ((app-directory (cond ((file-exists-p "/Applications/Emacs.app")
-                              "/Applications/Emacs.app")
-                             ((file-exists-p "~/Applications/Emacs.app")
-                              "~/Applications/Emacs.app"))))
-    (unless app-directory
-      (user-error "Could not find Emacs.app"))
-    (let ((old-binary (expand-file-name "Contents/MacOS/Emacs" app-directory))
-          (new-binary (expand-file-name "Contents/MacOS/RunEmacs" app-directory)))
-      (cond (unwrap
-             (unless (file-exists-p new-binary)
-               (user-error "Emacs is not patched"))
-             (copy-file new-binary old-binary t nil t t)
-             (unless (file-exists-p old-binary)
-               (error "Copy failed"))
-             (delete-file new-binary))
-            ((and (not (file-exists-p new-binary))
-		  (y-or-n-p "Emacs needs to be patched. Patch? "))
-             (copy-file old-binary new-binary nil nil t t)
-             (unless (file-exists-p new-binary)
-               (error "Copy failed"))
-             (with-temp-buffer
-               (insert "#!/usr/bin/env sh\n"
-                       "args=\"$@\"\n"
-                       (concat "exec \"${SHELL}\" -c \"'"
-			       new-binary
-			       "' ${args}\""))
-               (write-file old-binary))
-             (chmod old-binary (file-modes new-binary)))))))
-
 (ensure-directories)
-(ensure-wrap)
+
+(load (concat user-emacs-directory "theme") nil t)
 
 (provide 'early-init)
 ;;; early-init.el ends here

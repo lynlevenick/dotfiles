@@ -9,6 +9,7 @@
       show-paren-delay 0
       ns-use-proxy-icon nil)
 (setq-default cursor-type 'bar
+	      display-line-numbers-grow-only t
               display-line-numbers-type 'relative
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
