@@ -19,8 +19,8 @@
   (defun finalize-gc ()
     "Restore default gc."
 
-    (setf gc-cons-percentage gc-cons-percentage-original))
-    (setf gc-cons-threshold gc-cons-threshold-original)
+    (setf gc-cons-percentage gc-cons-percentage-original
+	  gc-cons-threshold gc-cons-threshold-original))
   (run-with-idle-timer 5 nil #'finalize-gc))
 
 (defconst cache-directory (concat user-emacs-directory "cache/")
