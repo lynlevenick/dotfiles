@@ -62,7 +62,7 @@
  tramp-auto-save-directory (concat cache-directory "tramp-auto-save")
  tramp-backup-directory-alist backup-directory-alist
  tramp-persistency-file-name (concat cache-directory "tramp-persistency")
- ;; Customize is terrible
+ ;; Customize is terrible (we won't load the file)
  custom-file (concat cache-directory "custom.el")
  ;; Quiet byte compilation
  byte-compile-warnings '(not free-vars unresolved noruntime lexical)
@@ -73,8 +73,9 @@
                "openssl s_client -connect %h:%p -no_ssl2 -no_ssl2 -ign_eof")
  ;; Broken Emacs defaults
  sentence-end-double-space nil
- ;; Broken OS defaults
- dired-use-ls-dired nil)
+ ;; Broken OS behavior
+ dired-use-ls-dired nil
+ use-dialog-box nil)
 
 ;;;; package.el replacement
 (setf straight-check-for-modifications '(check-on-save find-when-checking))
