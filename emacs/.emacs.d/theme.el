@@ -12,7 +12,7 @@
 (setq-default cursor-type 'bar
 	      display-line-numbers-grow-only t
               display-line-numbers-type 'relative
-	      echo-keystrokes 1e-10
+	      echo-keystrokes 0.25
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
 (push '(height . 25) default-frame-alist)
@@ -31,10 +31,10 @@
   :config (solaire-mode-swap-bg))
 (use-package smart-mode-line :ensure t
   :demand
-  :config
-  (setf sml/replacer-regexp-list nil
-        sml/theme nil)
-  (sml/setup))
+  :custom
+  (sml/replacer-regexp-list nil)
+  (sml/theme nil)
+  :config (sml/setup))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)

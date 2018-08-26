@@ -33,16 +33,17 @@ point reaches the beginning of end of the buffer, stop there."
     (back-to-indentation)
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
-(bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
+(global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
 
 (use-package editorconfig :ensure t
   :delight
   :hook (prog-mode . editorconfig-mode))
 (use-package flycheck :ensure t
-  :hook (prog-mode . flycheck-mode))
+  :hook (prog-mode . flycheck-mode)
+  :custom (flycheck-errors-delay 0.25))
 (use-package syntax-subword :ensure t
   :hook (prog-mode . syntax-subword-mode)
-  :init (setf syntax-subword-skip-spaces 'consistent))
+  :custom (syntax-subword-skip-spaces 'consistent))
 (use-package ws-butler :ensure t
   :delight
   :hook (prog-mode . ws-butler-mode))
@@ -50,20 +51,21 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Interaction
 (use-package ace-window :ensure t
   :bind (("C-x o" . ace-window))
-  :init (setf aw-background nil
-              aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
-              aw-scope 'frame))
+  :custom
+  (aw-background nil)
+  (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (aw-scope 'frame))
 (use-package company :ensure t
   :delight
   :hook (prog-mode . company-mode))
 (use-package magit :ensure t
-  :bind ("C-c g" . magit-status))
+  :bind (("C-c g" . magit-status)))
 (use-package projectile :ensure t
   :delight
   :hook (after-init . projectile-mode)
   :bind-keymap (("C-c p" . projectile-command-map)))
 (use-package transpose-frame :ensure t
-  :bind (("C-c f" . transpose-frame)))
+  :bind (("C-c t" . transpose-frame)))
 (use-package windsize :ensure t
   :bind (("C-s-<up>" . windsize-up)
          ("C-s-<down>" . windsize-down)
@@ -77,13 +79,15 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Languages
 (use-package haml-mode :ensure t
   :mode "\\.haml\\'")
-(setf ruby-align-chained-calls t)
+(use-package ruby-mode
+  :defer
+  :custom (ruby-align-chained-calls t))
 
 ;;;; Searching
 (use-package counsel :ensure t
   :delight
   :hook (ivy-mode . counsel-mode)
-  :init (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
+  :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
 (use-package counsel-projectile :ensure t
   :hook (counsel-mode . counsel-projectile-mode)
   :bind (("s-d" . counsel-projectile-find-dir)
@@ -94,10 +98,9 @@ point reaches the beginning of end of the buffer, stop there."
   :delight
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
-  :init (setf projectile-completion-system 'ivy))
+  :custom (projectile-completion-system 'ivy))
 (use-package swiper :ensure t
-  :bind (("C-r" . counsel-grep-or-swiper)
-         ("C-s" . counsel-grep-or-swiper)))
+  :bind (("C-s" . counsel-grep-or-swiper)))
 
 (provide 'init)
 ;;; init.el ends here

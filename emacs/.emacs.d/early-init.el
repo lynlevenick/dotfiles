@@ -9,7 +9,7 @@
       (gc-cons-threshold-original gc-cons-threshold))
   (setf file-name-handler-alist nil
         gc-cons-percentage 1.0
-        gc-cons-threshold (* 1024 1024 1024))
+        gc-cons-threshold most-positive-fixnum)
   (defun finalize-file-name-handler ()
     "Restore default file name handler."
 
