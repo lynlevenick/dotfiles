@@ -1,4 +1,4 @@
-;;; init.el --- Package configuration -*- lexical-binding: t; -*-
+;;; init.el --- Package configuration -*- lexical-binding: t; no-byte-compile: t; -*-
 ;;; Commentary:
 ;; There are many configurations, but this one is mine.
 ;;; Code:
@@ -7,8 +7,8 @@
   (load (concat user-emacs-directory "early-init") nil t))
 
 ;;;; Defaults
-(use-package delight :ensure t)
-(use-package exec-path-from-shell :ensure t
+(def-package! delight)
+(def-package! exec-path-from-shell
   :init (exec-path-from-shell-initialize))
 
 ;;;; Editing
@@ -35,38 +35,40 @@ point reaches the beginning of end of the buffer, stop there."
       (move-beginning-of-line 1))))
 (global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
 
-(use-package editorconfig :ensure t
+(def-package! editorconfig
   :delight
   :hook (prog-mode . editorconfig-mode))
-(use-package flycheck :ensure t
+(def-package! flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
-(use-package syntax-subword :ensure t
+(straight-use-package 'syntax-subword)
+(def-package! syntax-subword
   :hook (prog-mode . syntax-subword-mode)
   :custom (syntax-subword-skip-spaces 'consistent))
-(use-package ws-butler :ensure t
+(straight-use-package 'ws-butler)
+(def-package! ws-butler
   :delight
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
-(use-package ace-window :ensure t
+(def-package! ace-window
   :bind (("C-x o" . ace-window))
   :custom
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
-(use-package company :ensure t
+(def-package! company
   :delight
   :hook (prog-mode . company-mode))
-(use-package magit :ensure t
+(def-package! magit
   :bind (("C-c g" . magit-status)))
-(use-package projectile :ensure t
+(def-package! projectile
   :delight
   :hook (after-init . projectile-mode)
   :bind-keymap (("C-c p" . projectile-command-map)))
-(use-package transpose-frame :ensure t
+(def-package! transpose-frame
   :bind (("C-c t" . transpose-frame)))
-(use-package windsize :ensure t
+(def-package! windsize
   :bind (("C-s-<up>" . windsize-up)
          ("C-s-<down>" . windsize-down)
          ("C-s-<left>" . windsize-left)
@@ -77,27 +79,28 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-d" . windsize-right)))
 
 ;;;; Languages
-(use-package haml-mode :ensure t
+(def-package! haml-mode
   :mode "\\.haml\\'")
 (setf ruby-align-chained-calls t)
 
 ;;;; Searching
-(use-package counsel :ensure t
+(def-package! counsel
   :delight
   :hook (ivy-mode . counsel-mode)
   :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
-(use-package counsel-projectile :ensure t
+(straight-use-package 'counsel-projectile)
+(use-package counsel-projectile
   :hook (counsel-mode . counsel-projectile-mode)
   :bind (("s-d" . counsel-projectile-find-dir)
          ("s-f" . counsel-projectile-find-file)
          ("s-g" . counsel-projectile-rg)
          ("s-p" . counsel-projectile-switch-project)))
-(use-package ivy :ensure t
+(def-package! ivy
   :delight
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
   :custom (projectile-completion-system 'ivy))
-(use-package swiper :ensure t
+(def-package! swiper
   :bind (("C-s" . counsel-grep-or-swiper)))
 
 (provide 'init)
