@@ -1,5 +1,6 @@
 export CLICOLOR="1"
-export EDITOR="code --wait"
+export EDITOR="emacs -nw"
+export VISUAL="emacs"
 
 __ps1_err_color="$(tput setaf 1)"
 __ps1_err() {
