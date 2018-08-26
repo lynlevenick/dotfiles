@@ -26,6 +26,14 @@
 (defconst cache-directory (concat user-emacs-directory "cache/")
   "Volatile storage.")
 
+(defun ensure-directories ()
+  "Ensure essential directories exist."
+
+  (dolist (directory `(,cache-directory))
+    (unless (file-directory-p directory)
+      (make-directory directory))))
+(ensure-directories)
+
 (set-charset-priority 'unicode)
 (prefer-coding-system 'utf-8-unix)
 
@@ -74,14 +82,6 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
-(defun ensure-directories ()
-  "Ensure essential directories exist."
-
-  (dolist (directory `(,cache-directory))
-    (unless (file-directory-p directory)
-      (make-directory directory))))
-(ensure-directories)
 
 (load (concat user-emacs-directory "theme") nil t)
 

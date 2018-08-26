@@ -54,6 +54,8 @@ point reaches the beginning of end of the buffer, stop there."
   :delight projectile-mode
   :hook (after-init . projectile-mode)
   :bind-keymap (("C-c p" . projectile-command-map)))
+(use-package transpose-frame :ensure t
+  :bind (("C-c f" . transpose-frame)))
 (use-package windsize :ensure t
   :bind (("C-s-<up>" . windsize-up)
          ("C-s-<down>" . windsize-down)
