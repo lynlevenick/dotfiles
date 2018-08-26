@@ -33,6 +33,9 @@ point reaches the beginning of end of the buffer, stop there."
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
 (bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
+
+(use-package editorconfig :ensure t
+  :hook (prog-mode . editorconfig-mode))
 (use-package flycheck :ensure t
   :hook (prog-mode . flycheck-mode))
 (use-package syntax-subword :ensure t
@@ -71,7 +74,7 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Languages
 (use-package haml-mode :ensure t
   :mode "\\.haml\\'")
-(setq-default ruby-align-chained-calls t)
+(setf ruby-align-chained-calls t)
 
 ;;;; Searching
 (use-package counsel :ensure t
