@@ -7,6 +7,7 @@
   (load (concat user-emacs-directory "early-init") nil t))
 
 ;;;; Defaults
+(use-package delight :ensure t)
 (use-package exec-path-from-shell :ensure t
   :init (exec-path-from-shell-initialize))
 
@@ -35,6 +36,7 @@ point reaches the beginning of end of the buffer, stop there."
 (bind-key "C-a" #'lyn-smarter-move-beginning-of-line)
 
 (use-package editorconfig :ensure t
+  :delight
   :hook (prog-mode . editorconfig-mode))
 (use-package flycheck :ensure t
   :hook (prog-mode . flycheck-mode))
@@ -42,7 +44,7 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . syntax-subword-mode)
   :init (setf syntax-subword-skip-spaces 'consistent))
 (use-package ws-butler :ensure t
-  :delight ws-butler-mode
+  :delight
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
@@ -52,11 +54,12 @@ point reaches the beginning of end of the buffer, stop there."
               aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
               aw-scope 'frame))
 (use-package company :ensure t
+  :delight
   :hook (prog-mode . company-mode))
 (use-package magit :ensure t
   :bind ("C-c g" . magit-status))
 (use-package projectile :ensure t
-  :delight projectile-mode
+  :delight
   :hook (after-init . projectile-mode)
   :bind-keymap (("C-c p" . projectile-command-map)))
 (use-package transpose-frame :ensure t
@@ -78,7 +81,7 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Searching
 (use-package counsel :ensure t
-  :delight counsel-mode
+  :delight
   :hook (ivy-mode . counsel-mode)
   :init (setf counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
 (use-package counsel-projectile :ensure t
@@ -88,7 +91,7 @@ point reaches the beginning of end of the buffer, stop there."
          ("s-g" . counsel-projectile-rg)
          ("s-p" . counsel-projectile-switch-project)))
 (use-package ivy :ensure t
-  :delight ivy-mode
+  :delight
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
   :init (setf projectile-completion-system 'ivy))

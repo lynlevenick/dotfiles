@@ -26,10 +26,9 @@
   (doom-themes-visual-bell-config))
 (use-package solaire-mode :ensure t
   :demand
-  :hook ((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
-  :config
-  (solaire-mode-swap-bg)
-  (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
+  :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
+	 (minibuffer-setup . solaire-mode-in-minibuffer))
+  :config (solaire-mode-swap-bg))
 (use-package smart-mode-line :ensure t
   :demand
   :config
