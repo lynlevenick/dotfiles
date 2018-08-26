@@ -132,7 +132,6 @@ through to `use-package'."
   :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
 	 (minibuffer-setup . solaire-mode-in-minibuffer))
   :config (solaire-mode-swap-bg))
-(straight-use-package 'smart-mode-line)
 (def-package! smart-mode-line
   :demand
   :custom

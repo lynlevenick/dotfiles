@@ -41,11 +41,9 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
-(straight-use-package 'syntax-subword)
 (def-package! syntax-subword
   :hook (prog-mode . syntax-subword-mode)
   :custom (syntax-subword-skip-spaces 'consistent))
-(straight-use-package 'ws-butler)
 (def-package! ws-butler
   :delight
   :hook (prog-mode . ws-butler-mode))
@@ -88,8 +86,7 @@ point reaches the beginning of end of the buffer, stop there."
   :delight
   :hook (ivy-mode . counsel-mode)
   :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
-(straight-use-package 'counsel-projectile)
-(use-package counsel-projectile
+(def-package! counsel-projectile
   :hook (counsel-mode . counsel-projectile-mode)
   :bind (("s-d" . counsel-projectile-find-dir)
          ("s-f" . counsel-projectile-find-file)
