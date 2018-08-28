@@ -114,7 +114,6 @@ through to `use-package'."
   :config
   (load-theme 'doom-one t)
   (doom-themes-visual-bell-config))
-(def-package! hide-mode-line)
 (def-package! minions
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))

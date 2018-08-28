@@ -54,9 +54,7 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-scope 'frame))
 (def-package! company
   :hook (prog-mode . company-mode))
-(def-package! magit
-  :demand
-  :hook ((magit-mode magit-popup-mode) . hide-mode-line-mode))
+(def-package! magit)
 (def-package! projectile
   :demand
   :bind-keymap (("C-c p" . projectile-command-map))
