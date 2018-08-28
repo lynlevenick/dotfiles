@@ -51,14 +51,13 @@ through to `use-package'."
 
   (cond ((listp recipe-or-name)
 	 `(progn (straight-use-package ,recipe-or-name)
-		 (use-package . (,(car (nth 1 recipe-or-name)) . ,body))))
+		 (use-package . (,(car (elt recipe-or-name 1)) . ,body))))
 	(`(progn (straight-use-package ',recipe-or-name)
 		 (use-package ,recipe-or-name . ,body)))))
 
 (def-package! no-littering)
 
 ;;;; General
-(fset #'display-startup-echo-area-message #'ignore)
 (setf
  ;; Decrease work to create autoloads
  autoload-compute-prefixes nil
@@ -71,6 +70,7 @@ through to `use-package'."
  inhibit-default-init t
  initial-major-mode #'fundamental-mode
  initial-scratch-message nil
+ (symbol-function 'display-startup-echo-area-message) #'ignore
  ;; Control file creation - use version control for version control
  auto-save-default nil
  create-lockfiles nil
@@ -95,6 +95,9 @@ through to `use-package'."
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+(let ((mode-line-format-stripped
+       (cl-set-difference mode-line-format '(mode-line-mule-info mode-line-client))))
+  (setq-default mode-line-format mode-line-format-stripped))
 (setf frame-title-format nil
       show-paren-delay 0
       ns-use-proxy-icon nil)
