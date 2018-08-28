@@ -58,8 +58,7 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! company
   :delight
   :hook (prog-mode . company-mode))
-(def-package! magit
-  :bind (("C-c g" . magit-status)))
+(def-package! magit)
 (def-package! projectile
   :delight
   :hook (after-init . projectile-mode)
