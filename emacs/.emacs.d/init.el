@@ -8,7 +8,7 @@
 
 ;;;; Defaults
 (def-package! exec-path-from-shell
-  :init (exec-path-from-shell-initialize))
+  :config (exec-path-from-shell-initialize))
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
