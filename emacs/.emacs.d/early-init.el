@@ -71,7 +71,7 @@ through to `use-package'."
  inhibit-default-init t
  initial-major-mode #'fundamental-mode
  initial-scratch-message nil
- ;; Control file creation
+ ;; Control file creation - use version control for version control
  auto-save-default nil
  create-lockfiles nil
  make-backup-files nil
