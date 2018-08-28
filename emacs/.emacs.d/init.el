@@ -96,6 +96,7 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
   :custom
+  (ivy-on-del-error-function nil)
   (magit-completing-read-function #'ivy-completing-read)
   (projectile-completion-system 'ivy))
 (def-package! swiper
