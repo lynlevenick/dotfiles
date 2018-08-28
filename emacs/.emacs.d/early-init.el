@@ -102,8 +102,6 @@ through to `use-package'."
       show-paren-delay 0
       ns-use-proxy-icon nil)
 (setq-default cursor-type 'bar
-	      display-line-numbers-grow-only t
-              display-line-numbers-type 'relative
 	      echo-keystrokes 0.25
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
@@ -123,7 +121,6 @@ through to `use-package'."
   :config (solaire-mode-swap-bg))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (add-hook 'prog-mode-hook #'show-paren-mode)
 
 (provide 'early-init)
