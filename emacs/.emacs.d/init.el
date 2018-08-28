@@ -95,7 +95,9 @@ point reaches the beginning of end of the buffer, stop there."
   :delight
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
-  :custom (projectile-completion-system 'ivy))
+  :custom
+  (magit-completing-read-function #'ivy-completing-read)
+  (projectile-completion-system 'ivy))
 (def-package! swiper
   :bind (("C-s" . counsel-grep-or-swiper)))
 
