@@ -7,7 +7,6 @@
   (load (concat user-emacs-directory "early-init") nil t))
 
 ;;;; Defaults
-(def-package! delight)
 (def-package! exec-path-from-shell
   :init (exec-path-from-shell-initialize))
 
@@ -36,8 +35,7 @@ point reaches the beginning of end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
 
 (def-package! editorconfig
-  :delight
-  :hook (prog-mode . editorconfig-mode))
+  :config (editorconfig-mode))
 (def-package! flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
@@ -45,7 +43,6 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . syntax-subword-mode)
   :custom (syntax-subword-skip-spaces 'consistent))
 (def-package! ws-butler
-  :delight
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
@@ -56,11 +53,9 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
 (def-package! company
-  :delight
   :hook (prog-mode . company-mode))
 (def-package! magit)
 (def-package! projectile
-  :delight
   :hook (after-init . projectile-mode)
   :bind-keymap (("C-c p" . projectile-command-map)))
 (def-package! transpose-frame
@@ -82,7 +77,6 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Searching
 (def-package! counsel
-  :delight
   :hook (ivy-mode . counsel-mode)
   :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
 (def-package! counsel-projectile
@@ -92,7 +86,6 @@ point reaches the beginning of end of the buffer, stop there."
          ("s-g" . counsel-projectile-rg)
          ("s-p" . counsel-projectile-switch-project)))
 (def-package! ivy
-  :delight
   :hook (after-init . ivy-mode)
   :bind (("C-c C-r" . ivy-resume))
   :custom
