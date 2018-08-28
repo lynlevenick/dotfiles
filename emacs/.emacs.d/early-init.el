@@ -114,7 +114,8 @@ through to `use-package'."
   (load-theme 'doom-one t)
   (doom-themes-visual-bell-config))
 (def-package! minions
-  :config (minions-mode 1))
+  :config (minions-mode 1)
+  :custom (minions-mode-line-lighter "…"))
 (def-package! solaire-mode
   :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
 	 (minibuffer-setup . solaire-mode-in-minibuffer))
