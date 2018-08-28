@@ -56,8 +56,9 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . company-mode))
 (def-package! magit)
 (def-package! projectile
-  :hook (after-init . projectile-mode)
-  :bind-keymap (("C-c p" . projectile-command-map)))
+  :demand
+  :bind-keymap (("C-c p" . projectile-command-map))
+  :config (projectile-mode 1))
 (def-package! transpose-frame
   :bind (("C-c t" . transpose-frame)))
 (def-package! windsize
@@ -77,17 +78,20 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Searching
 (def-package! counsel
-  :hook (ivy-mode . counsel-mode)
+  :after ivy
+  :config (counsel-mode 1)
   :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
 (def-package! counsel-projectile
-  :hook (counsel-mode . counsel-projectile-mode)
+  :after (counsel projectile)
   :bind (("s-d" . counsel-projectile-find-dir)
          ("s-f" . counsel-projectile-find-file)
          ("s-g" . counsel-projectile-rg)
-         ("s-p" . counsel-projectile-switch-project)))
+         ("s-p" . counsel-projectile-switch-project))
+  :config (counsel-projectile-mode 1))
 (def-package! ivy
-  :hook (after-init . ivy-mode)
+  :demand
   :bind (("C-c C-r" . ivy-resume))
+  :config (ivy-mode 1)
   :custom
   (ivy-on-del-error-function nil)
   (magit-completing-read-function #'ivy-completing-read)
