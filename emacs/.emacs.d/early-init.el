@@ -20,7 +20,7 @@
     "Restore default gc."
 
     (setf gc-cons-percentage gc-cons-percentage-original
-	  gc-cons-threshold gc-cons-threshold-original))
+          gc-cons-threshold gc-cons-threshold-original))
   (run-with-idle-timer 3 nil #'finalize-gc))
 
 ;;;; Unicode
@@ -50,10 +50,10 @@ through to `use-package'."
   (declare (indent defun))
 
   (cond ((listp recipe-or-name)
-	 `(progn (straight-use-package ,recipe-or-name)
+         `(progn (straight-use-package ,recipe-or-name)
 		 (use-package . (,(car (elt recipe-or-name 1)) . ,body))))
-	(`(progn (straight-use-package ',recipe-or-name)
-		 (use-package ,recipe-or-name . ,body)))))
+        (`(progn (straight-use-package ',recipe-or-name)
+                 (use-package ,recipe-or-name . ,body)))))
 
 (def-package! no-littering)
 
@@ -89,20 +89,21 @@ through to `use-package'."
  ;; Broken OS behavior
  dired-use-ls-dired nil
  use-dialog-box nil)
+(setq-default indent-tabs-mode nil)
 
 ;;;; Theme
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
-(let ((mode-line-format-stripped
-       (cl-set-difference mode-line-format '(mode-line-mule-info mode-line-client))))
-  (setq-default mode-line-format mode-line-format-stripped))
 (setf frame-title-format nil
       show-paren-delay 0
       ns-use-proxy-icon nil)
+(setq-default mode-line-format
+              (cl-set-difference mode-line-format
+                                 '(mode-line-front-space mode-line-mule-info mode-line-client)))
 (setq-default cursor-type 'bar
-	      echo-keystrokes 0.25
+              echo-keystrokes 0.25
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
 (push '(height . 25) default-frame-alist)
@@ -119,7 +120,7 @@ through to `use-package'."
   :custom (minions-mode-line-lighter "\u2026"))
 (def-package! solaire-mode
   :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
-	 (minibuffer-setup . solaire-mode-in-minibuffer))
+         (minibuffer-setup . solaire-mode-in-minibuffer))
   :config (solaire-mode-swap-bg))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
