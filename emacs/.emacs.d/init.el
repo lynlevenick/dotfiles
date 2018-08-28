@@ -52,6 +52,9 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
+(def-package! avy
+  :bind (("C-c l" . avy-goto-line)
+         ("C-c s" . avy-goto-char-timer)))
 (def-package! company
   :hook (prog-mode . company-mode))
 (def-package! magit)
