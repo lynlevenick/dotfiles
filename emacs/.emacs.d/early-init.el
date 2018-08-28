@@ -30,7 +30,7 @@
 (defun ensure-directories ()
   "Ensure essential directories exist."
 
-  (dolist (directory `(,cache-directory))
+  (dolist (directory (list cache-directory))
     (unless (file-directory-p directory)
       (make-directory directory))))
 (ensure-directories)
@@ -123,22 +123,19 @@ through to `use-package'."
 (push '(width . 80) default-frame-alist)
 (push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
 
+(def-package! all-the-icons)
 (def-package! doom-themes
   :demand
   :config
   (load-theme 'doom-one t)
   (doom-themes-visual-bell-config))
+(def-package! doom-modeline
+  :hook (after-init . doom-modeline-init))
 (def-package! solaire-mode
   :demand
   :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
 	 (minibuffer-setup . solaire-mode-in-minibuffer))
   :config (solaire-mode-swap-bg))
-(def-package! smart-mode-line
-  :demand
-  :custom
-  (sml/replacer-regexp-list nil)
-  (sml/theme nil)
-  :config (sml/setup))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
