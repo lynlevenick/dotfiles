@@ -12,7 +12,7 @@
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
-  "Move point between beginning of indentation and beginning of line.
+  "Move point between beginning of indentation or beginning of line.
 
 Move point to the first non-whitespace character on this line.
 If point is already there, move to the beginning of the line.
