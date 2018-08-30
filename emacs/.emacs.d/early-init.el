@@ -11,13 +11,13 @@
         gc-cons-percentage 1.0
         gc-cons-threshold most-positive-fixnum)
   (defun finalize-file-name-handler ()
-    "Restore default file name handler."
+    "Restore default file name handler after emacs has finished starting up."
 
     (setf file-name-handler-alist file-name-handler-alist-original))
   (add-hook 'emacs-startup-hook #'finalize-file-name-handler)
 
   (defun finalize-gc ()
-    "Restore default gc."
+    "Restore default gc after some idle when emacs has finished starting up."
 
     (setf gc-cons-percentage gc-cons-percentage-original
           gc-cons-threshold gc-cons-threshold-original))
