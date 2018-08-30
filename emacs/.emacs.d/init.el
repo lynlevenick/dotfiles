@@ -39,9 +39,6 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
-(def-package! syntax-subword
-  :hook (prog-mode . syntax-subword-mode)
-  :custom (syntax-subword-skip-spaces 'consistent))
 (def-package! ws-butler
   :hook (prog-mode . ws-butler-mode))
 
