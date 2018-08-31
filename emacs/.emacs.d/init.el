@@ -77,27 +77,32 @@ point reaches the beginning of end of the buffer, stop there."
 (setf ruby-align-chained-calls t)
 
 ;;;; Searching
-(def-package! counsel
-  :after ivy
-  :config (counsel-mode 1)
-  :custom (counsel-grep-base-command "rg -i -M 120 --no-heading --line-number --color-never '%s' %s"))
-(def-package! counsel-projectile
-  :after (counsel projectile)
-  :bind (("s-d" . counsel-projectile-find-dir)
-         ("s-f" . counsel-projectile-find-file)
-         ("s-g" . counsel-projectile-rg)
-         ("s-p" . counsel-projectile-switch-project))
-  :config (counsel-projectile-mode 1))
-(def-package! ivy
+(def-package! anzu
   :demand
-  :bind (("C-c C-r" . ivy-resume))
-  :config (ivy-mode 1)
+  :bind (("M-%" . anzu-query-replace)
+         ("C-M-%" . anzu-query-replace-regexp))
+  :config (global-anzu-mode))
+(def-package! flx-ido
+  :after ido
+  :config (flx-ido-mode 1)
   :custom
-  (ivy-on-del-error-function nil)
-  (magit-completing-read-function #'ivy-completing-read)
-  (projectile-completion-system 'ivy))
-(def-package! swiper
-  :bind (("C-s" . counsel-grep-or-swiper)))
+  (ido-enable-flex-matching t)
+  (ido-use-faces nil))
+(def-package! ido-completing-read+
+  :after ido
+  :config (ido-ubiquitous-mode 1))
+(def-package! ido-vertical-mode
+  :after ido
+  :config (ido-vertical-mode 1))
+(def-package! smex
+  :after ido
+  :bind (("M-x" . smex)
+         ("M-X" . smex-major-mode-commands))
+  :config (smex-initialize))
+;; Turn on ido-mode
+(ido-mode 1)
+(ido-everywhere 1)
+(setf magit-completing-read-function #'magit-ido-completion-read)
 
 (provide 'init)
 ;;; init.el ends here
