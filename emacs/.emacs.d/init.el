@@ -80,10 +80,12 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Major Modes
 (def-package! haml-mode
   :mode "\\.haml\\'")
-(def-package! htmlize)
+(def-package! htmlize
+  :after org)
 (def-package! org
   :mode ("\\.org\\'" . org-mode))
-(def-package! ox-reveal)
+(def-package! ox-reveal
+  :after org)
 (setf ruby-align-chained-calls t)
 (def-package! rust-mode
   :mode "\\.rs\\'")
