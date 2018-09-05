@@ -52,10 +52,10 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
 (def-package! avy
-  :bind (("C-c g n" . avy-goto-line-below)
-         ("C-c g p" . avy-goto-line-above)
-         ("C-c g r" . avy-goto-char-2-above)
-         ("C-c g s" . avy-goto-char-2-below))
+  :bind (("C-c n" . avy-goto-line-below)
+         ("C-c p" . avy-goto-line-above)
+         ("C-c r" . avy-goto-char-2-above)
+         ("C-c s" . avy-goto-char-2-below))
   :config (advice-add 'avy-action-goto :after #'pulse-momentary-highlight-one-line)
   :custom (avy-all-windows nil))
 (def-package! company
@@ -63,7 +63,7 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! magit)
 (def-package! projectile
   :demand
-  :bind-keymap (("C-c p" . projectile-command-map))
+  :bind-keymap (("s-p" . projectile-command-map))
   :config (projectile-mode 1))
 (def-package! transpose-frame
   :bind (("C-c t" . transpose-frame)))
