@@ -9,6 +9,7 @@
 ;;;; Defaults
 (def-package! exec-path-from-shell
   :config (exec-path-from-shell-initialize))
+(bind-key "s-`" #'ns-next-frame)
 
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
