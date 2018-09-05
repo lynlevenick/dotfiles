@@ -86,7 +86,8 @@ point reaches the beginning of end of the buffer, stop there."
   :mode ("\\.org\\'" . org-mode))
 (def-package! ox-reveal
   :after org)
-(setf ruby-align-chained-calls t)
+(setf ruby-align-chained-calls t
+      ruby-insert-encoding-magic-comment nil)
 (def-package! rust-mode
   :mode "\\.rs\\'")
 
