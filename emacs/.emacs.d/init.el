@@ -52,13 +52,6 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
-(def-package! avy
-  :bind (("C-c n" . avy-goto-line-below)
-         ("C-c p" . avy-goto-line-above)
-         ("C-c r" . avy-goto-char-2-above)
-         ("C-c s" . avy-goto-char-2-below))
-  :config (advice-add 'avy-action-goto :after #'pulse-momentary-highlight-one-line)
-  :custom (avy-all-windows nil))
 (def-package! company
   :hook (prog-mode . company-mode))
 (def-package! magit)
@@ -103,6 +96,15 @@ point reaches the beginning of end of the buffer, stop there."
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp))
   :config (global-anzu-mode))
+(def-package! avy
+  :bind (("C-c n" . avy-goto-line-below)
+         ("C-c p" . avy-goto-line-above)
+         ("C-c r" . avy-goto-char-2-above)
+         ("C-c s" . avy-goto-char-2-below))
+  :config (advice-add 'avy-action-goto :after #'pulse-momentary-highlight-one-line)
+  :custom (avy-all-windows nil))
+(def-package! deadgrep
+  :bind (("C-c g" . deadgrep)))
 (def-package! flx-ido
   :after ido
   :config (flx-ido-mode 1)
@@ -123,7 +125,7 @@ point reaches the beginning of end of the buffer, stop there."
 ;; Turn on ido-mode
 (ido-mode 1)
 (ido-everywhere 1)
-(setf magit-completing-read-function #'magit-ido-completion-read)
+(setf magit-completing-read-function #'magit-ido-completing-read)
 
 (provide 'init)
 ;;; init.el ends here
