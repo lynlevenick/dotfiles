@@ -22,6 +22,7 @@ the beginning of the line.
 If ARG is not nil or 1, move forward ARG - 1 lines first. If
 point reaches the beginning of end of the buffer, stop there."
   (interactive "^p")
+
   (setf arg (or arg 1))
 
   (when (/= arg 1)
@@ -44,14 +45,19 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Interaction
 (def-package! ace-window
+  :after avy
   :bind (("C-x o" . ace-window))
   :custom
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
 (def-package! avy
-  :bind (("C-c l" . avy-goto-line)
-         ("C-c s" . avy-goto-char-timer)))
+  :bind (("C-c g n" . avy-goto-line-below)
+         ("C-c g p" . avy-goto-line-above)
+         ("C-c g r" . avy-goto-char-2-above)
+         ("C-c g s" . avy-goto-char-2-below))
+  :config (advice-add 'avy-action-goto :after #'pulse-momentary-highlight-one-line)
+  :custom (avy-all-windows nil))
 (def-package! company
   :hook (prog-mode . company-mode))
 (def-package! magit)
