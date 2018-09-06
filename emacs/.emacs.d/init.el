@@ -46,7 +46,6 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Interaction
 (def-package! ace-window
-  :after avy
   :bind (("C-x o" . ace-window))
   :custom
   (aw-background nil)
@@ -70,6 +69,8 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-s" . windsize-down)
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
+(def-package! zygospore
+  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 
 ;;;; Major Modes
 (def-package! haml-mode
