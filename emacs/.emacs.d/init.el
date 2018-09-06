@@ -97,12 +97,14 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-M-%" . anzu-query-replace-regexp))
   :config (global-anzu-mode))
 (def-package! avy
-  :bind (("C-c n" . avy-goto-line-below)
+  :bind (("C-c c" . avy-goto-char-2)
+         ("C-c l" . avy-goto-line)
+         ("C-c n" . avy-goto-line-below)
          ("C-c p" . avy-goto-line-above)
          ("C-c r" . avy-goto-char-2-above)
          ("C-c s" . avy-goto-char-2-below))
-  :config (advice-add 'avy-action-goto :after #'pulse-momentary-highlight-one-line)
-  :custom (avy-all-windows nil))
+  :config (advice-add 'avy-action-goto
+                      :after #'pulse-momentary-highlight-one-line))
 (def-package! deadgrep
   :bind (("C-c g" . deadgrep)))
 (def-package! flx-ido
