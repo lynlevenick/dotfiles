@@ -106,8 +106,8 @@ through to `use-package'."
               echo-keystrokes 0.25
               truncate-lines t)
 (push '(font . "Menlo-12") default-frame-alist)
-(push '(height . 25) default-frame-alist)
-(push '(width . 80) default-frame-alist)
+(push '(height . 50) default-frame-alist)
+(push '(width . 100) default-frame-alist)
 (push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
 
 (def-package! doom-themes
