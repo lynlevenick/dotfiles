@@ -9,6 +9,7 @@
 ;;;; Defaults
 (def-package! exec-path-from-shell
   :config (exec-path-from-shell-initialize))
+(bind-key "C-c i" #'imenu)
 (bind-key "s-`" #'ns-next-frame)
 
 ;;;; Editing
