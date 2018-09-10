@@ -12,19 +12,6 @@
 (bind-key "C-c i" #'imenu)
 (bind-key "s-`" #'ns-next-frame)
 
-;;;; Convenient Functions
-(defun lyn-advice-no-gc (orig &rest args)
-  "Call ORIG with ARGS, first setting higher garbage collection bounds.
-
-Use this to advice functions which cause lots of gc thrashing, anticipating
-a longer pause after calling in exchange for fewer pauses during the call."
-
-  (let ((gc-cons-percentage-original gc-cons-percentage)
-        (gc-cons-threshold-original gc-cons-threshold))
-    (setf gc-cons-percentage 1.0
-          gc-cons-threshold most-positive-fixnum)
-    (apply orig args)))
-
 ;;;; Editing
 (defun lyn-smarter-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
@@ -127,9 +114,7 @@ point reaches the beginning of end of the buffer, stop there."
   :config (flx-ido-mode 1)
   :custom
   (ido-enable-flex-matching t)
-  (ido-use-faces nil)
-  (advice-add 'flx-score
-              :around #'lyn-advice-no-gc))
+  (ido-use-faces nil))
 (def-package! ido-completing-read+
   :after ido
   :config (ido-ubiquitous-mode 1))

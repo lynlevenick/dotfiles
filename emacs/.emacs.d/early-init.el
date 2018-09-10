@@ -7,20 +7,37 @@
 (let ((file-name-handler-alist-original file-name-handler-alist)
       (gc-cons-percentage-original gc-cons-percentage)
       (gc-cons-threshold-original gc-cons-threshold))
-  (setf file-name-handler-alist nil
-        gc-cons-percentage 1.0
-        gc-cons-threshold most-positive-fixnum)
-  (defun finalize-file-name-handler ()
+
+  (defun disable-file-name-handler ()
+    "Disable file name handling."
+
+    (setf file-name-handler-alist nil))
+  (defun disable-gc ()
+    "Disable garbage collection."
+
+    (setf gc-cons-percentage 1.0
+          gc-cons-threshold most-positive-fixnum))
+  (defun restore-file-name-handler ()
     "Restore default file name handler after emacs has finished starting up."
 
     (setf file-name-handler-alist file-name-handler-alist-original))
-  (add-hook 'emacs-startup-hook #'finalize-file-name-handler)
-
-  (defun finalize-gc ()
-    "Restore default gc after some idle when emacs has finished starting up."
+  (defun restore-gc ()
+    "Enable garbage collection."
 
     (setf gc-cons-percentage gc-cons-percentage-original
           gc-cons-threshold gc-cons-threshold-original))
+
+  (disable-file-name-handler)
+  (add-hook 'emacs-startup-hook #'restore-file-name-handler)
+
+  (defun finalize-gc ()
+    "Finalize garbage collection reset and add minibuffer hooks."
+
+    (restore-gc)
+    (add-hook 'minibuffer-setup-hook #'disable-gc)
+    (add-hook 'minibuffer-exit-hook #'restore-gc))
+
+  (disable-gc)
   (run-with-idle-timer 3 nil #'finalize-gc))
 
 ;;;; Unicode
