@@ -120,7 +120,8 @@ point reaches the beginning of end of the buffer, stop there."
   :config (ido-ubiquitous-mode 1))
 (def-package! ido-vertical-mode
   :after ido
-  :config (ido-vertical-mode 1))
+  :config (ido-vertical-mode 1)
+  :custom (ido-vertical-show-count t))
 (def-package! smex
   :after ido
   :bind (("M-x" . smex)
@@ -129,6 +130,7 @@ point reaches the beginning of end of the buffer, stop there."
 ;; Turn on ido-mode
 (ido-mode 1)
 (ido-everywhere 1)
+(setf ido-enable-flex-matching t)
 (setf magit-completing-read-function #'magit-ido-completing-read)
 
 (provide 'init)
