@@ -72,6 +72,12 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-d" . windsize-right)))
 (def-package! zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
+(defun lyn-pulse-point (&rest _)
+  "Pulse at point."
+
+  (pulse-momentary-highlight-one-line (point)))
+(advice-add 'recenter-top-bottom
+            :after #'lyn-pulse-point)
 
 ;;;; Major Modes
 (def-package! haml-mode
