@@ -130,8 +130,8 @@ point reaches the beginning of end of the buffer, stop there."
 ;; Turn on ido-mode
 (ido-mode 1)
 (ido-everywhere 1)
-(setf ido-enable-flex-matching t)
-(setf magit-completing-read-function #'magit-ido-completing-read)
+(setf ido-enable-flex-matching t
+      magit-completing-read-function #'magit-ido-completing-read)
 
 (provide 'init)
 ;;; init.el ends here
