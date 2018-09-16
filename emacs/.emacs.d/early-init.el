@@ -127,17 +127,11 @@ through to `use-package'."
 (push '(width . 100) default-frame-alist)
 (push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
 
-(def-package! doom-themes
-  :config
-  (load-theme 'doom-one t)
-  (doom-themes-visual-bell-config))
+(def-package! srcery-theme
+  :config (load-theme 'srcery t))
 (def-package! minions
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))
-(def-package! solaire-mode
-  :hook (((after-revert change-major-mode ediff-prepare-buffer) . turn-on-solaire-mode)
-         (minibuffer-setup . solaire-mode-in-minibuffer))
-  :config (solaire-mode-swap-bg))
 
 (add-hook 'prog-mode-hook #'column-number-mode)
 (add-hook 'prog-mode-hook #'show-paren-mode)
