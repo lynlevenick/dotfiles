@@ -31,6 +31,3 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
-
-Style/TrailingUnderscoreVariable:
-  Enabled: false
