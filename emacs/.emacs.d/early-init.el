@@ -127,13 +127,12 @@ through to `use-package'."
 (push '(width . 100) default-frame-alist)
 (push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
 
-(def-package! srcery-theme
-  :config (load-theme 'srcery t))
+(def-package! atom-one-dark-theme
+  :config (load-theme 'atom-one-dark t))
 (def-package! minions
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))
 
-(add-hook 'prog-mode-hook #'column-number-mode)
 (add-hook 'prog-mode-hook #'show-paren-mode)
 
 (provide 'early-init)
