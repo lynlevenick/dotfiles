@@ -8,7 +8,7 @@
 
 ;;;; Defaults
 (def-package! exec-path-from-shell
-  :config (exec-path-from-shell-initialize))
+  :hook (after-init . exec-path-from-shell-initialize))
 (bind-key "C-c i" #'imenu)
 (bind-key "s-`" #'ns-next-frame)
 
@@ -38,7 +38,7 @@ point reaches the beginning of end of the buffer, stop there."
 (global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
 
 (def-package! editorconfig
-  :config (editorconfig-mode))
+  :hook (after-init . editorconfig-mode))
 (def-package! flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
@@ -55,10 +55,11 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! company
   :hook (prog-mode . company-mode))
 (def-package! magit)
+(def-package! mode-line-bell
+  :hook (after-init . mode-line-bell-mode))
 (def-package! projectile
-  :demand
   :bind-keymap (("s-p" . projectile-command-map))
-  :config (projectile-mode 1))
+  :hook (after-init . projectile-mode))
 (def-package! transpose-frame
   :bind (("C-c t" . transpose-frame)))
 (def-package! windsize
@@ -100,10 +101,9 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Searching
 (def-package! anzu
-  :demand
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp))
-  :config (global-anzu-mode))
+  :hook (after-init . global-anzu-mode))
 (def-package! avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
