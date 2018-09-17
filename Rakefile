@@ -123,7 +123,7 @@ ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
 task :ssh => [*ssh_files]
 
-desc "Install dev environment"
+desc "Install dev environment for this repo"
 task :devenv => [PWD.join(".bundle")]
 file PWD.join(".bundle") => "/usr/local/bin/ruby" do
   sh "bundle", "install",
