@@ -28,9 +28,9 @@ module Stow
   class << self
     # Retrieve a list of files in a directory
     def sources(from)
-      from.glob("**/*", File::FNM_DOTMATCH)
-          .map(&Pathname.method(:new))
-          .select(&:file?)
+      Dir.glob(from.join("**/*"), File::FNM_DOTMATCH)
+         .map(&Pathname.method(:new))
+         .select(&:file?)
     end
 
     # Transform a source filename into a destination filename
