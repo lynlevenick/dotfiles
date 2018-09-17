@@ -47,6 +47,7 @@ module Stow
 
         if target.exist?
           next if target.symlink? && target.realpath == source.cleanpath
+
           raise "fatal: File exists: #{target}"
         end
 

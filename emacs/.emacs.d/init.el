@@ -95,6 +95,42 @@ point reaches the beginning of end of the buffer, stop there."
   :mode "\\.rs\\'")
 
 ;; Language <-> Flycheck Integration
+(with-eval-after-load 'flycheck
+  (defun lyn-flycheck-bundle-exec (executable special &rest args)
+    "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
+
+    `(,executable "exec" ,special . ,args))
+
+  (defvar lyn-flycheck-handle-alist
+    '(("bundle" . lyn-flycheck-bundle-exec))
+    "How to transform a special-cased executable for a command.")
+  (defvar lyn-flycheck-wrap-alist
+    '(("rubocop" . "bundle"))
+    "Executables to transform for special casing.")
+
+  (defun lyn-flycheck-executable-find (executable)
+    "Fake COMMAND for specific cases, to e.g. run rubocop through bundle exec."
+
+    (let* ((file (file-name-nondirectory executable))
+           (mapped (alist-get file lyn-flycheck-wrap-alist nil :remove #'string=)))
+      (if mapped
+          (concat (flycheck-default-executable-find mapped) "://" file)
+        (flycheck-default-executable-find executable))))
+  (setf flycheck-executable-find #'lyn-flycheck-executable-find)
+
+  (defun lyn-flycheck-command-wrapper (command)
+    "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
+
+    (let* ((components (split-string (car command) "://"))
+           (executable (nth 0 components))
+           (special (nth 1 components))
+           (file (file-name-nondirectory executable)))
+      (if special
+          (apply (alist-get file lyn-flycheck-handle-alist nil :remove #'string=)
+                 executable special (cdr command))
+        command)))
+  (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
+
 (def-package! flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
