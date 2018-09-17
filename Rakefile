@@ -61,7 +61,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs git homebrew python readline ripgrep ruby ssh]
+task :default => %i[bash emacs git homebrew python readline ripgrep ruby ssh
+                    devenv]
 
 bash_files = Stow.stow(PWD.join("bash"))
 desc "Configure bash"
@@ -71,7 +72,7 @@ emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
 task :emacs => ["/Applications/Emacs.app",
                 *emacs_files]
-file "/Applications/Emacs.app" => ["/usr/local/bin/brew"] do
+file "/Applications/Emacs.app" => "/usr/local/bin/brew" do
   sh "brew", "cask", "install", "emacs"
   sh "touch", "-c", "/Applications/Emacs.app"
 end
@@ -121,3 +122,13 @@ end
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
 task :ssh => [*ssh_files]
+
+desc "Install dev environment for self"
+task :devenv => [PWD.join(".bundle")]
+file PWD.join(".bundle") => "/usr/local/bin/ruby" do
+  sh "bundle", "install",
+     "--gemfile", PWD.join("Gemfile").to_s,
+     "--path", PWD.join(".bundle").to_s
+
+  sh "touch", "-c", PWD.join(".bundle").to_s
+end
