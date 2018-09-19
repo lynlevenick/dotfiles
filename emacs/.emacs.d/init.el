@@ -86,12 +86,8 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! js2-mode
   :mode ("\\.js\\'"
          ("\\.jsx\\'" . js2-jsx-mode)))
-(def-package! htmlize
-  :after org)
 (def-package! org
   :mode ("\\.org\\'" . org-mode))
-(def-package! ox-reveal
-  :after org)
 (setf ruby-align-chained-calls t
       ruby-insert-encoding-magic-comment nil)
 (def-package! rust-mode
