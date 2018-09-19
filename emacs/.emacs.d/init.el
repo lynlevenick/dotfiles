@@ -83,6 +83,9 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Major Modes
 (def-package! haml-mode
   :mode "\\.haml\\'")
+(def-package! js2-mode
+  :mode ("\\.js\\'"
+         ("\\.jsx\\'" . js2-jsx-mode)))
 (def-package! htmlize
   :after org)
 (def-package! org
