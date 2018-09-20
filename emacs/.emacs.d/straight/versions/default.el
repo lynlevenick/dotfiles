@@ -28,6 +28,7 @@
  ("minions" . "2f5e73e15d0021e7ba26cf09f1cd2734b018fb69")
  ("mode-line-bell" . "dcfad0929a606af0e836d93e78be989a8ac16f87")
  ("no-littering" . "3f6d290bb43d75ba749d56fffc21c15f1d4157d2")
+ ("olivetti" . "02272654f1d920ea2da5a4b553acd5e5cc096ab1")
  ("org" . "fa3dab48d0c0f954bfb70977cd8f5278b6f324ae")
  ("pkg-info.el" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")
  ("projectile" . "0944c25d7679621cef1473ebb81cb560e9547a34")
