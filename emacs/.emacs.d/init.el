@@ -93,7 +93,7 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! rust-mode
   :mode "\\.rs\\'")
 
-;; Language <-> Flycheck Integration
+;; Language Integration
 (with-eval-after-load 'flycheck
   (defun lyn-flycheck-bundle-exec (executable special &rest args)
     "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
@@ -130,6 +130,7 @@ point reaches the beginning of end of the buffer, stop there."
         command)))
   (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
 
+(def-package! eglot)
 (def-package! flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
