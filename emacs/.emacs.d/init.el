@@ -57,8 +57,6 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! magit)
 (def-package! mode-line-bell
   :hook (after-init . mode-line-bell-mode))
-(def-package! olivetti
-  :bind (("C-c o" . olivetti-mode)))
 (def-package! projectile
   :bind-keymap (("s-p" . projectile-command-map))
   :hook (after-init . projectile-mode))
