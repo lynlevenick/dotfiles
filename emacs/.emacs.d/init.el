@@ -55,6 +55,8 @@ point reaches the beginning of end of the buffer, stop there."
 (def-package! company
   :hook (prog-mode . company-mode))
 (def-package! magit)
+(def-package! magit-gitflow
+  :hook (magit-mode . turn-on-magit-gitflow))
 (def-package! mode-line-bell
   :hook (after-init . mode-line-bell-mode))
 (def-package! projectile
@@ -92,6 +94,8 @@ point reaches the beginning of end of the buffer, stop there."
       ruby-insert-encoding-magic-comment nil)
 (def-package! rust-mode
   :mode "\\.rs\\'")
+(def-package! yaml-mode
+  :mode "\\.ya?ml\\'")
 
 ;; Language Integration
 (with-eval-after-load 'flycheck

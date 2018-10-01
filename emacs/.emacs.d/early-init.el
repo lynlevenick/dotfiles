@@ -37,7 +37,8 @@
 (prefer-coding-system 'utf-8-unix)
 
 ;;;; package.el replacement
-(setf straight-check-for-modifications '(check-on-save find-when-checking))
+(setf straight-check-for-modifications '(check-on-save find-when-checking)
+      straight-recipes-gnu-elpa-use-mirror t)
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -105,9 +106,7 @@ through to `use-package'."
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
-(setf frame-title-format nil
-      show-paren-delay 0
-      ns-use-proxy-icon nil)
+(setf show-paren-delay 0)
 (setq-default mode-line-format
               (cl-set-difference mode-line-format
                                  '(mode-line-front-space mode-line-mule-info mode-line-client)))
@@ -117,7 +116,7 @@ through to `use-package'."
 (push '(font . "Menlo-12") default-frame-alist)
 (push '(height . 50) default-frame-alist)
 (push '(width . 100) default-frame-alist)
-(push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
+(push '(ns . ((ns-appearance . dark))) window-system-default-frame-alist)
 
 (def-package! srcery-theme
   :config (load-theme 'srcery t))
