@@ -7,7 +7,7 @@
   (load (concat user-emacs-directory "early-init") nil t))
 
 ;;;; Defaults
-(def-package! exec-path-from-shell
+(use-package exec-path-from-shell
   :hook (after-init . exec-path-from-shell-initialize))
 (bind-key "C-c i" #'imenu)
 (bind-key "s-`" #'ns-next-frame)
@@ -37,34 +37,34 @@ point reaches the beginning of end of the buffer, stop there."
       (move-beginning-of-line 1))))
 (global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
 
-(def-package! editorconfig
+(use-package editorconfig
   :hook (after-init . editorconfig-mode))
-(def-package! flycheck
+(use-package flycheck
   :hook (prog-mode . flycheck-mode)
   :custom (flycheck-errors-delay 0.25))
-(def-package! ws-butler
+(use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
-(def-package! ace-window
+(use-package ace-window
   :bind (("C-x o" . ace-window))
   :custom
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
   (aw-scope 'frame))
-(def-package! company
+(use-package company
   :hook (prog-mode . company-mode))
-(def-package! magit)
-(def-package! magit-gitflow
+(use-package magit)
+(use-package magit-gitflow
   :hook (magit-mode . turn-on-magit-gitflow))
-(def-package! mode-line-bell
+(use-package mode-line-bell
   :hook (after-init . mode-line-bell-mode))
-(def-package! projectile
+(use-package projectile
   :bind-keymap (("s-p" . projectile-command-map))
   :hook (after-init . projectile-mode))
-(def-package! transpose-frame
+(use-package transpose-frame
   :bind (("C-c t" . transpose-frame)))
-(def-package! windsize
+(use-package windsize
   :bind (("C-s-<up>" . windsize-up)
          ("C-s-<down>" . windsize-down)
          ("C-s-<left>" . windsize-left)
@@ -73,7 +73,7 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-s" . windsize-down)
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
-(def-package! zygospore
+(use-package zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 (defun lyn-pulse-point (&rest _)
   "Pulse at point."
@@ -83,21 +83,21 @@ point reaches the beginning of end of the buffer, stop there."
             :after #'lyn-pulse-point)
 
 ;;;; Major Modes
-(def-package! elm-mode
+(use-package elm-mode
   :mode "\\.elm\\'"
   :custom (elm-format-command "npm run elm-format"))
-(def-package! haml-mode
+(use-package haml-mode
   :mode "\\.haml\\'")
-(def-package! js2-mode
+(use-package js2-mode
   :mode ("\\.js\\'"
          ("\\.jsx\\'" . js2-jsx-mode)))
-(def-package! org
+(use-package org
   :mode ("\\.org\\'" . org-mode))
 (setf ruby-align-chained-calls t
       ruby-insert-encoding-magic-comment nil)
-(def-package! rust-mode
+(use-package rust-mode
   :mode "\\.rs\\'")
-(def-package! yaml-mode
+(use-package yaml-mode
   :mode "\\.ya?ml\\'")
 
 ;; Language Integration
@@ -136,17 +136,17 @@ point reaches the beginning of end of the buffer, stop there."
                  executable special (cdr command))
         command)))
   (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
-(def-package! eglot)
-(def-package! flycheck-rust
+(use-package eglot)
+(use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
 
 ;;;; Searching
-(def-package! anzu
+(use-package anzu
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp))
   :hook (after-init . global-anzu-mode))
-(def-package! avy
+(use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
          ("C-c n" . avy-goto-line-below)
@@ -155,22 +155,22 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-c s" . avy-goto-char-2-below))
   :config (advice-add 'avy-action-goto
                       :after #'pulse-momentary-highlight-one-line))
-(def-package! deadgrep
+(use-package deadgrep
   :bind (("C-c g" . deadgrep)))
-(def-package! flx-ido
+(use-package flx-ido
   :after ido
   :config (flx-ido-mode 1)
   :custom
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
-(def-package! ido-completing-read+
+(use-package ido-completing-read+
   :after ido
   :config (ido-ubiquitous-mode 1))
-(def-package! ido-vertical-mode
+(use-package ido-vertical-mode
   :after ido
   :config (ido-vertical-mode 1)
   :custom (ido-vertical-show-count t))
-(def-package! smex
+(use-package smex
   :after ido
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands))

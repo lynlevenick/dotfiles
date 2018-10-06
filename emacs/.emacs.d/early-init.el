@@ -51,21 +51,9 @@
   (load bootstrap-file nil t))
 
 (straight-use-package 'use-package)
-(defmacro def-package! (recipe-or-name &rest body)
-  "Call `straight-use-package' followed by `use-package'.
+(setf straight-use-package-by-default t)
 
-If RECIPE-OR-NAME is a list, it is assumed to be a `straight-use-package'
-recipe. Otherwise, it is assumed to be a `use-package' name. BODY is passed
-through to `use-package'."
-  (declare (indent defun))
-
-  (cond ((listp recipe-or-name)
-         `(progn (straight-use-package ,recipe-or-name)
-		 (use-package . (,(car (elt recipe-or-name 1)) . ,body))))
-        (`(progn (straight-use-package ',recipe-or-name)
-                 (use-package ,recipe-or-name . ,body)))))
-
-(def-package! no-littering)
+(use-package no-littering)
 
 ;;;; General
 (setf
@@ -118,9 +106,9 @@ through to `use-package'."
 (push '(width . 100) default-frame-alist)
 (push '(ns . ((ns-appearance . dark))) window-system-default-frame-alist)
 
-(def-package! srcery-theme
+(use-package srcery-theme
   :config (load-theme 'srcery t))
-(def-package! minions
+(use-package minions
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))
 
