@@ -83,6 +83,9 @@ point reaches the beginning of end of the buffer, stop there."
             :after #'lyn-pulse-point)
 
 ;;;; Major Modes
+(def-package! elm-mode
+  :mode "\\.elm\\'"
+  :custom (elm-format-command "npm run elm-format"))
 (def-package! haml-mode
   :mode "\\.haml\\'")
 (def-package! js2-mode
@@ -133,7 +136,6 @@ point reaches the beginning of end of the buffer, stop there."
                  executable special (cdr command))
         command)))
   (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
-
 (def-package! eglot)
 (def-package! flycheck-rust
   :after (flycheck rust-mode)
