@@ -61,8 +61,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs git homebrew python readline ripgrep ruby ssh
-                    devenv]
+task :default => %i[bash emacs fish fish:bass git homebrew python readline
+                    ripgrep ruby ssh devenv]
 
 bash_files = Stow.stow(PWD.join("bash"))
 desc "Configure bash"
@@ -75,6 +75,40 @@ task :emacs => ["/Applications/Emacs.app",
 file "/Applications/Emacs.app" => "/usr/local/bin/brew" do
   sh "brew", "cask", "install", "emacs"
   sh "touch", "-c", "/Applications/Emacs.app"
+end
+
+fish_files = Stow.stow(PWD.join("fish"))
+desc "Install and configure fish"
+task :fish => ["/usr/local/bin/fish",
+               *fish_files]
+file "/usr/local/bin/fish" => "/usr/local/bin/brew" do
+  sh "brew", "install", "fish"
+  sh "touch", "-c", "/usr/local/bin/fish"
+
+  Open3.pipeline_r(
+    ["dscl", ".", "-read", ENV["HOME"], "UserShell"],
+    ["cut", "-d", " ", "-f", "2"]
+  ) do |pipe, _|
+    path = pipe.read
+
+    if path != "/usr/local/bin/fish"
+      Open3.pipeline_w(
+        ["sudo", "tee", "-a", "/etc/shells"]
+      ) do |pipe, _|
+        puts "Adding fish to list of standard shells"
+        pipe.write("/usr/local/bin/fish\n")
+      end
+
+      sh "chsh", "-s", "/usr/local/bin/fish"
+    end
+  end
+end
+
+namespace :fish do
+  fish_bass_files = Stow.stow(PWD.join("fish-bass/functions"),
+                              into: Pathname.new(ENV["HOME"]).join(".config/fish/functions"))
+  desc "Configure bass for fish"
+  task :bass => [*fish_bass_files]
 end
 
 git_files = Stow.stow(PWD.join("git"))
