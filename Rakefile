@@ -61,7 +61,7 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs fish fish:bass git homebrew python readline
+task :default => %i[bash emacs fish fish:bass git homebrew login python readline
                     ripgrep ruby ssh devenv]
 
 bash_files = Stow.stow(PWD.join("bash"))
@@ -123,6 +123,10 @@ file "/usr/local/bin/brew" do
   sh "brew", "update"
   sh "touch", "-c", "/usr/local/bin/brew"
 end
+
+login_files = Stow.stow(PWD.join("login"))
+desc "Configure login"
+task :login => [*login_files]
 
 desc "Install python"
 task :python => ["/usr/local/bin/python3"]
