@@ -85,29 +85,24 @@ file "/usr/local/bin/fish" => "/usr/local/bin/brew" do
   sh "brew", "install", "fish"
   sh "touch", "-c", "/usr/local/bin/fish"
 
-  Open3.pipeline_r(
-    ["dscl", ".", "-read", ENV["HOME"], "UserShell"],
-    ["cut", "-d", " ", "-f", "2"]
-  ) do |pipe, _|
-    path = pipe.read.strip
-
-    if path != "/usr/local/bin/fish"
-      unless File.foreach("/etc/shells").any? { |l| l.strip == "/usr/local/bin/fish" }
-        # Add fish to /etc/shells
-        Open3.popen2("sudo", "tee", "-a", "/etc/shells") do |input, _, _|
-          puts "Adding fish to list of standard shells"
-          input.write("/usr/local/bin/fish\n")
-        end
-      end
-
-      sh "chsh", "-s", "/usr/local/bin/fish"
+  unless File.foreach("/etc/shells").any?(&"/usr/local/bin/fish\n".method(:==))
+    # Add fish to /etc/shells
+    Open3.popen2("sudo", "tee", "-a", "/etc/shells") do |input, _, _|
+      puts "Adding fish to list of standard shells"
+      input.write("/usr/local/bin/fish\n")
     end
+  end
+
+  Open3.popen2("dscl", ".", "-read", ENV["HOME"], "UserShell") do |_, output, _|
+    path = /(\/.*$)/.match(output.read.strip)[1]
+    sh "chsh", "-s", "/usr/local/bin/fish" unless path == "/usr/local/bin/fish"
   end
 end
 
 namespace :fish do
   fish_bass_files = Stow.stow(PWD.join("fish-bass/functions"),
-                              into: Pathname.new(ENV["HOME"]).join(".config/fish/functions"))
+                              into: Pathname.new(ENV["HOME"])
+                                            .join(".config/fish/functions"))
   desc "Configure bass for fish"
   task :bass => [*fish_bass_files]
 end
