@@ -1,5 +1,6 @@
-export CLICOLOR="1"
+export CLICOLOR=1
 export EDITOR="emacs -nw"
+export LSCOLORS=ExFxCxDxBxegedabagacad
 export VISUAL="emacs"
 
 if [ -n "${TERM}" ]; then
