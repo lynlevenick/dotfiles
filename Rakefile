@@ -94,7 +94,7 @@ file "/usr/local/bin/fish" => "/usr/local/bin/brew" do
   end
 
   Open3.popen2("dscl", ".", "-read", ENV["HOME"], "UserShell") do |_, output, _|
-    path = /(\/.*$)/.match(output.read.strip)[1]
+    path = output.read.strip[/(\/.*$)/, 1]
     sh "chsh", "-s", "/usr/local/bin/fish" unless path == "/usr/local/bin/fish"
   end
 end
