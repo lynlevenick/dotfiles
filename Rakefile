@@ -61,8 +61,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs fish fish:bass git homebrew login python readline
-                    ripgrep ruby ssh devenv]
+task :default => %i[bash emacs git homebrew login python readline ripgrep ruby
+                    ssh devenv]
 
 bash_files = Stow.stow(PWD.join("bash"))
 desc "Configure bash"
@@ -75,36 +75,6 @@ task :emacs => ["/Applications/Emacs.app",
 file "/Applications/Emacs.app" => "/usr/local/bin/brew" do
   sh "brew", "cask", "install", "emacs"
   sh "touch", "-c", "/Applications/Emacs.app"
-end
-
-fish_files = Stow.stow(PWD.join("fish"))
-desc "Install and configure fish"
-task :fish => ["/usr/local/bin/fish",
-               *fish_files]
-file "/usr/local/bin/fish" => "/usr/local/bin/brew" do
-  sh "brew", "install", "fish"
-  sh "touch", "-c", "/usr/local/bin/fish"
-
-  unless File.foreach("/etc/shells").any?(&"/usr/local/bin/fish\n".method(:==))
-    # Add fish to /etc/shells
-    Open3.popen2("sudo", "tee", "-a", "/etc/shells") do |input, _, _|
-      puts "Adding fish to list of standard shells"
-      input.write("/usr/local/bin/fish\n")
-    end
-  end
-
-  Open3.popen2("dscl", ".", "-read", ENV["HOME"], "UserShell") do |_, output, _|
-    path = output.read.strip[/(\/.*$)/, 1]
-    sh "chsh", "-s", "/usr/local/bin/fish" unless path == "/usr/local/bin/fish"
-  end
-end
-
-namespace :fish do
-  fish_bass_files = Stow.stow(PWD.join("fish-bass/functions"),
-                              into: Pathname.new(ENV["HOME"])
-                                            .join(".config/fish/functions"))
-  desc "Configure bass for fish"
-  task :bass => [*fish_bass_files]
 end
 
 git_files = Stow.stow(PWD.join("git"))
