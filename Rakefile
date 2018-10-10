@@ -89,14 +89,15 @@ file "/usr/local/bin/fish" => "/usr/local/bin/brew" do
     ["dscl", ".", "-read", ENV["HOME"], "UserShell"],
     ["cut", "-d", " ", "-f", "2"]
   ) do |pipe, _|
-    path = pipe.read
+    path = pipe.read.strip
 
     if path != "/usr/local/bin/fish"
-      Open3.pipeline_w(
-        ["sudo", "tee", "-a", "/etc/shells"]
-      ) do |pipe, _|
-        puts "Adding fish to list of standard shells"
-        pipe.write("/usr/local/bin/fish\n")
+      unless File.foreach("/etc/shells").any? { |l| l.strip == "/usr/local/bin/fish" }
+        # Add fish to /etc/shells
+        Open3.popen2("sudo", "tee", "-a", "/etc/shells") do |input, _, _|
+          puts "Adding fish to list of standard shells"
+          input.write("/usr/local/bin/fish\n")
+        end
       end
 
       sh "chsh", "-s", "/usr/local/bin/fish"
