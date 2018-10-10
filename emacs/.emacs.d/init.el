@@ -100,7 +100,7 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
 
-;; Language Integration
+;; Major Mode Integration
 (with-eval-after-load 'flycheck
   (defun lyn-flycheck-bundle-exec (executable special &rest args)
     "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
