@@ -58,6 +58,21 @@ module Stow
   end
 end
 
+def brew(formula, as = Pathname.new("/usr/local/bin").join(formula).to_s,
+         dependencies: [])
+  file as => dependencies << "/usr/local/bin/brew" do
+    sh "brew", "install", formula
+    sh "touch", "-c", as
+  end
+end
+
+def cask(formula, as, dependencies: [])
+  file as => dependencies << "/usr/local/bin/brew" do
+    sh "brew", "cask", "install", formula
+    sh "touch", "-c", as
+  end
+end
+
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
@@ -72,10 +87,7 @@ emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
 task :emacs => ["/Applications/Emacs.app",
                 *emacs_files]
-file "/Applications/Emacs.app" => "/usr/local/bin/brew" do
-  sh "brew", "cask", "install", "emacs"
-  sh "touch", "-c", "/Applications/Emacs.app"
-end
+cask "emacs", "/Applications/Emacs.app"
 
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
@@ -100,10 +112,7 @@ task :login => [*login_files]
 
 desc "Install python"
 task :python => ["/usr/local/bin/python3"]
-file "/usr/local/bin/python3" => "/usr/local/bin/brew" do
-  sh "brew", "install", "python"
-  sh "touch", "-c", "/usr/local/bin/python3"
-end
+brew "python", "/usr/local/bin/python3"
 
 readline_files = Stow.stow(PWD.join("readline"))
 desc "Configure readline"
@@ -111,17 +120,11 @@ task :readline => [*readline_files]
 
 desc "Install ripgrep"
 task :ripgrep => ["/usr/local/bin/rg"]
-file "/usr/local/bin/rg" => "/usr/local/bin/brew" do
-  sh "brew", "install", "ripgrep"
-  sh "touch", "-c", "/usr/local/bin/rg"
-end
+brew "ripgrep", "/usr/local/bin/rg"
 
 desc "Install ruby"
 task :ruby => ["/usr/local/bin/ruby"]
-file "/usr/local/bin/ruby" => "/usr/local/bin/brew" do
-  sh "brew", "install", "ruby"
-  sh "touch", "-c", "/usr/local/bin/ruby"
-end
+brew "ruby"
 
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
