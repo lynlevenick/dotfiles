@@ -91,10 +91,16 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package js2-mode
   :mode ("\\.js\\'"
          ("\\.jsx\\'" . js2-jsx-mode)))
+(use-package lua-mode
+  :mode "\\.lua\\'")
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (setf ruby-align-chained-calls t
       ruby-insert-encoding-magic-comment nil)
+(use-package pico8-mode
+  :after lua-mode
+  :straight (pico8-mode :type git :host github :repo "Kaali/pico8-mode")
+  :mode "\\.p8\\'")
 (use-package rust-mode
   :mode "\\.rs\\'")
 (use-package yaml-mode
