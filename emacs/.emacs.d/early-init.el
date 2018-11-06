@@ -104,6 +104,9 @@
 (push '(font . "Menlo-12") default-frame-alist)
 (push '(height . 50) default-frame-alist)
 (push '(width . 100) default-frame-alist)
+
+(setq frame-title-format nil
+      ns-use-proxy-icon nil)
 (push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
 
 (use-package srcery-theme
