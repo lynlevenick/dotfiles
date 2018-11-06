@@ -56,6 +56,7 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . company-mode))
 (use-package magit)
 (use-package magit-gitflow
+  :after magit
   :hook (magit-mode . turn-on-magit-gitflow))
 (use-package mode-line-bell
   :hook (after-init . mode-line-bell-mode))
