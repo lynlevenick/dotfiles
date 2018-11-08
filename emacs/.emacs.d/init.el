@@ -90,9 +90,11 @@ point reaches the beginning of end of the buffer, stop there."
   :mode "\\.haml\\'")
 (use-package js2-mode
   :mode ("\\.js\\'"
-         ("\\.jsx\\'" . js2-jsx-mode)))
+         ("\\.jsx\\'" . js2-jsx-mode))
+  :custom (js2-skip-preprocessor-directives t))
 (use-package lua-mode
-  :mode "\\.lua\\'")
+  :mode "\\.lua\\'"
+  :custom (lua-indent-level 2))
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (setf ruby-align-chained-calls t
