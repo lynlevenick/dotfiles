@@ -54,7 +54,9 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-scope 'frame))
 (use-package company
   :hook (prog-mode . company-mode))
-(use-package magit)
+(use-package magit
+  :custom
+  (magit-list-refs-sortby "-committerdate"))
 (use-package magit-gitflow
   :after magit
   :hook (magit-mode . turn-on-magit-gitflow))
@@ -96,17 +98,10 @@ point reaches the beginning of end of the buffer, stop there."
   :mode ("\\.js\\'"
          ("\\.jsx\\'" . js2-jsx-mode))
   :custom (js2-skip-preprocessor-directives t))
-(use-package lua-mode
-  :mode "\\.lua\\'"
-  :custom (lua-indent-level 2))
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (setf ruby-align-chained-calls t
       ruby-insert-encoding-magic-comment nil)
-(use-package pico8-mode
-  :after lua-mode
-  :straight (pico8-mode :type git :host github :repo "Kaali/pico8-mode")
-  :mode "\\.p8\\'")
 (use-package rust-mode
   :mode "\\.rs\\'")
 (use-package yaml-mode
