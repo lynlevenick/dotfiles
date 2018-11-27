@@ -89,9 +89,6 @@ point reaches the beginning of end of the buffer, stop there."
             :after #'lyn-pulse-point)
 
 ;;;; Major Modes
-(use-package elm-mode
-  :mode "\\.elm\\'"
-  :custom (elm-format-command "npm run elm-format"))
 (use-package haml-mode
   :mode "\\.haml\\'")
 (use-package js2-mode
@@ -122,10 +119,10 @@ point reaches the beginning of end of the buffer, stop there."
     "Executables to transform for special casing.")
 
   (defun lyn-flycheck-executable-find (executable)
-    "Fake COMMAND for specific cases, to e.g. run rubocop through bundle exec."
+    "Fake EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
 
     (let* ((file (file-name-nondirectory executable))
-           (mapped (alist-get file lyn-flycheck-wrap-alist nil :remove #'string=)))
+           (mapped (alist-get file lyn-flycheck-wrap-alist nil nil #'string=)))
       (if mapped
           (concat (flycheck-default-executable-find mapped) "://" file)
         (flycheck-default-executable-find executable))))
@@ -139,7 +136,7 @@ point reaches the beginning of end of the buffer, stop there."
            (special (nth 1 components))
            (file (file-name-nondirectory executable)))
       (if special
-          (apply (alist-get file lyn-flycheck-handle-alist nil :remove #'string=)
+          (apply (alist-get file lyn-flycheck-handle-alist nil nil #'string=)
                  executable special (cdr command))
         command)))
   (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
