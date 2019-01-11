@@ -33,8 +33,11 @@
 (run-with-idle-timer 3 nil #'finalize-gc)
 
 ;;;; Unicode
+(charset-priority-list)
 (set-charset-priority 'unicode)
 (prefer-coding-system 'utf-8-unix)
+(set-default-coding-systems 'utf-8-unix)
+(setq-default buffer-file-coding-system 'utf-8-unix)
 
 ;;;; package.el replacement
 (setf straight-check-for-modifications '(check-on-save find-when-checking)

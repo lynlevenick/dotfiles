@@ -85,8 +85,6 @@ point reaches the beginning of end of the buffer, stop there."
     (pulse-momentary-highlight-one-line (point))))
 (advice-add 'recenter-top-bottom
             :after #'lyn-pulse-point)
-(advice-add 'pop-global-mark
-            :after #'lyn-pulse-point)
 
 ;;;; Major Modes
 (use-package haml-mode
