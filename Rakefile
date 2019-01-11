@@ -76,8 +76,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs git homebrew login python readline ripgrep ruby
-                    ssh devenv]
+task :default => %i[bash emacs git homebrew login python readline ripgrep ssh
+                    devenv]
 
 bash_files = Stow.stow(PWD.join("bash"))
 desc "Configure bash"
@@ -99,7 +99,7 @@ file "/usr/local/bin/brew" do
   Open3.pipeline(
     ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
     "ruby",
-  ).all(&:zero?) or raise "fatal: Homebrew install failed"
+  ).all?(&:zero?) or raise "fatal: Homebrew install failed"
 
   sh "brew", "doctor"
   sh "brew", "update"
@@ -122,17 +122,20 @@ desc "Install ripgrep"
 task :ripgrep => ["/usr/local/bin/rg"]
 brew "ripgrep", "/usr/local/bin/rg"
 
-desc "Install ruby"
-task :ruby => ["/usr/local/bin/ruby"]
-brew "ruby"
-
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
 task :ssh => [*ssh_files]
 
+desc "Install bundler"
+task :bundle => ["/usr/local/bin/bundle"]
+file "/usr/local/bin/bundle" do
+  sh "sudo", "gem", "install", "bundler"
+  sh "touch", "-c", "/usr/local/bin/bundler"
+end
+
 desc "Install dev environment for this repo"
 task :devenv => [PWD.join(".bundle")]
-file PWD.join(".bundle") => "/usr/local/bin/ruby" do
+file PWD.join(".bundle") => "/usr/local/bin/bundle" do
   sh "bundle", "install",
      "--gemfile", PWD.join("Gemfile").to_s,
      "--jobs", "2",
