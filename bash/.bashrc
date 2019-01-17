@@ -31,7 +31,7 @@ __pathadd() {
 
 if [ -d "${HOME}/.cargo" ]; then
     export CARGO_HOME="${HOME}/.cargo"
-    __pathadd "${HOME}/.cargo/bin"
+    __pathadd "${CARGO_HOME}/bin"
 fi
 
 if [ -r "${HOME}/.nvm/nvm.sh" ]; then
