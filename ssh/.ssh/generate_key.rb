@@ -25,7 +25,7 @@ def keygen(output_name, comment: nil, type: "ed25519")
   args = ["ssh-keygen", "-f", output_name, "-t", type]
   args.concat(["-C", comment]) if comment.present?
 
-  system(*args)
+  system({ "SSH_USE_STRONG_RNG" => "1" }, *args)
 end
 
 identifier = ask("Identifier")
