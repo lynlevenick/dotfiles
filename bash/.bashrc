@@ -10,13 +10,22 @@ if [ -n "${TERM}" ]; then
             printf '%s' "${__ps1_err_color}"
         fi
     }
-    export PS1="\[$(tput sgr0)\$(__ps1_err)\]\\$\[$(tput sgr0)\] "
+    __reset_color="$(tput sgr0)"
+    export PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
+
+    alias please='sudo $(history -p !!)'
 
     HISTCONTROL='ignoredups:erasedups'
     shopt -s histappend
 fi
 
 if [ -d "${HOME}/.cargo" ]; then
+    export CARGO_HOME="${HOME}/.cargo"
+
+    if [ -d "${HOME}/.rustup" ]; then
+        export RUSTUP_HOME="${HOME}/.rustup"
+    fi
+
     export PATH="${PATH}:${HOME}/.cargo/bin"
 fi
 
