@@ -1,4 +1,4 @@
-if [ -n "${TERM}" ]; then
+if [ -t 1 ]; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
     export LSCOLORS='ExFxCxDxBxegedabagacad'
@@ -11,7 +11,7 @@ if [ -n "${TERM}" ]; then
         fi
     }
     __reset_color="$(tput sgr0)"
-    export PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
+    PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
 
     alias please='sudo $(history -p !!)'
 
@@ -19,9 +19,17 @@ if [ -n "${TERM}" ]; then
     shopt -s histappend
 fi
 
+__pathadd() {
+    # Adds a path to $PATH only if it isn't already present
+    case ":${PATH:=$1}:" in
+        *:$1:*) ;;
+        *) PATH="${PATH}:$1" ;;
+    esac
+}
+
 if [ -d "${HOME}/.cargo" ]; then
     export CARGO_HOME="${HOME}/.cargo"
-    export PATH="${PATH}:${HOME}/.cargo/bin"
+    __pathadd "${HOME}/.cargo/bin"
 fi
 
 if [ -r "${HOME}/.nvm/nvm.sh" ]; then
@@ -35,5 +43,5 @@ fi
 
 if [ -r "${HOME}/.rvm/scripts/rvm" ]; then
     source "${HOME}/.rvm/scripts/rvm"
-    export PATH="${PATH}:${HOME}/.rvm/bin"
+    __pathadd "${HOME}/.rvm/bin"
 fi
