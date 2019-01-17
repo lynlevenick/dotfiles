@@ -15,8 +15,10 @@ if [ -t 1 ]; then
 
     alias please='sudo $(history -p !!)'
 
-    HISTCONTROL='ignoredups:erasedups'
-    shopt -s histappend
+    if [ "$(command -v shopt)" = "shopt" ]; then
+        HISTCONTROL='ignoredups:erasedups'
+        shopt -s histappend
+    fi
 fi
 
 __pathadd() {
@@ -34,7 +36,7 @@ fi
 
 if [ -r "${HOME}/.nvm/nvm.sh" ]; then
     export NVM_DIR="${HOME}/.nvm"
-    source "${NVM_DIR}/nvm.sh"
+    . "${NVM_DIR}/nvm.sh"
 fi
 
 if [ -d "${HOME}/.rustup" ]; then
@@ -42,6 +44,6 @@ if [ -d "${HOME}/.rustup" ]; then
 fi
 
 if [ -r "${HOME}/.rvm/scripts/rvm" ]; then
-    source "${HOME}/.rvm/scripts/rvm"
+    . "${HOME}/.rvm/scripts/rvm"
     __pathadd "${HOME}/.rvm/bin"
 fi
