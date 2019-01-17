@@ -21,11 +21,6 @@ fi
 
 if [ -d "${HOME}/.cargo" ]; then
     export CARGO_HOME="${HOME}/.cargo"
-
-    if [ -d "${HOME}/.rustup" ]; then
-        export RUSTUP_HOME="${HOME}/.rustup"
-    fi
-
     export PATH="${PATH}:${HOME}/.cargo/bin"
 fi
 
@@ -37,4 +32,8 @@ fi
 if [ -r "${HOME}/.rvm/scripts/rvm" ]; then
     source "${HOME}/.rvm/scripts/rvm"
     export PATH="${PATH}:${HOME}/.rvm/bin"
+fi
+
+if [ -d "${HOME}/.rustup" ]; then
+    export RUSTUP_HOME="${HOME}/.rustup"
 fi
