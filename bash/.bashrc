@@ -29,11 +29,11 @@ if [ -r "${HOME}/.nvm/nvm.sh" ]; then
     source "${NVM_DIR}/nvm.sh"
 fi
 
+if [ -d "${HOME}/.rustup" ]; then
+    export RUSTUP_HOME="${HOME}/.rustup"
+fi
+
 if [ -r "${HOME}/.rvm/scripts/rvm" ]; then
     source "${HOME}/.rvm/scripts/rvm"
     export PATH="${PATH}:${HOME}/.rvm/bin"
-fi
-
-if [ -d "${HOME}/.rustup" ]; then
-    export RUSTUP_HOME="${HOME}/.rustup"
 fi
