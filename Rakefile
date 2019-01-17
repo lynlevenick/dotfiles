@@ -76,12 +76,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[bash emacs git homebrew login python readline ripgrep ssh
+task :default => %i[emacs git homebrew login python readline ripgrep sh ssh
                     devenv]
-
-bash_files = Stow.stow(PWD.join("bash"))
-desc "Configure bash"
-task :bash => [*bash_files]
 
 emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
@@ -121,6 +117,10 @@ task :readline => [*readline_files]
 desc "Install ripgrep"
 task :ripgrep => ["/usr/local/bin/rg"]
 brew "ripgrep", "/usr/local/bin/rg"
+
+sh_files = Stow.stow(PWD.join("sh"))
+desc "Configure sh"
+task :sh => [*sh_files]
 
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
