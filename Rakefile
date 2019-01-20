@@ -130,7 +130,8 @@ desc "Install bundler"
 task :bundle => ["/usr/local/bin/bundle"]
 file "/usr/local/bin/bundle" do
   sh "sudo", "gem", "install", "bundler"
-  sh "touch", "-c", "/usr/local/bin/bundler"
+  sh "sudo", "touch", "-c", "/usr/local/bin/bundle"
+  sh "sudo", "touch", "-c", "/usr/local/bin/bundler"
 end
 
 desc "Install dev environment for this repo"
