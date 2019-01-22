@@ -85,10 +85,16 @@ task :emacs => ["/Applications/Emacs.app",
                 *emacs_files]
 cask "emacs", "/Applications/Emacs.app"
 
+needed_fonts = {
+  "font-symbola" => "#{ENV['HOME']}/Library/Fonts/Symbola_Hinted.ttf",
+  "homebrew/cask-fonts/font-go-mono-nerd-font" =>
+    "#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf",
+}
 desc "Install fonts"
-task :fonts => ["#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf"]
-cask "homebrew/cask-fonts/font-go-mono-nerd-font",
-     "#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf"
+task :fonts => [*needed_fonts.values]
+needed_fonts.each do |cask_name, font_path|
+  cask cask_name, font_path
+end
 
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"

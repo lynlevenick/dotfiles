@@ -3,6 +3,8 @@
 ;; Emacs 27+ introduces early-init.el, run before package and UI initialization
 ;;; Code:
 
+(require 'cl-lib)
+
 ;;;; Disable gc and file name handlers until startup is finished
 (setf file-name-handler-alist nil)
 (defun restore-file-name-handler ()
@@ -104,7 +106,19 @@
 (setq-default cursor-type 'bar
               echo-keystrokes 0.25
               truncate-lines t)
-(push '(font . "GoMono Nerd Font-14") default-frame-alist)
+
+(defconst lyn-font-size 14
+  "Size at which to render fonts.")
+(defconst lyn-font-stack '("GoMono Nerd Font" "Menlo")
+  "Fonts to render with, in priority order.")
+(defun lyn-font-available-p (name)
+  "NAME when NAME is available as a font for Emacs to use. Nil otherwise."
+
+  (car (member name (font-family-list))))
+(let ((available (cl-some #'lyn-font-available-p lyn-font-stack)))
+  (when available
+    (push `(font . ,(concat available "-" (number-to-string lyn-font-size))) default-frame-alist)))
+
 (push '(height . 50) default-frame-alist)
 (push '(width . 100) default-frame-alist)
 
