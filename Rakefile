@@ -76,14 +76,19 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[emacs git homebrew login python readline ripgrep sh ssh
-                    devenv]
+task :default => %i[emacs fonts git homebrew login python readline ripgrep sh
+                    ssh devenv]
 
 emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
 task :emacs => ["/Applications/Emacs.app",
                 *emacs_files]
 cask "emacs", "/Applications/Emacs.app"
+
+desc "Install fonts"
+task :fonts => ["#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf"]
+cask "homebrew/cask-fonts/font-go-mono-nerd-font",
+     "#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf"
 
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
