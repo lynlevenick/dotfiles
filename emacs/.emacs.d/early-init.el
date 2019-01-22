@@ -3,8 +3,6 @@
 ;; Emacs 27+ introduces early-init.el, run before package and UI initialization
 ;;; Code:
 
-(require 'cl-lib)
-
 ;;;; Disable gc and file name handlers until startup is finished
 (setf file-name-handler-alist nil)
 (defun restore-file-name-handler ()

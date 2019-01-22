@@ -78,13 +78,6 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-d" . windsize-right)))
 (use-package zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
-(defun lyn-pulse-point (&rest _)
-  "Pulse at point."
-
-  (when (called-interactively-p 'interactive)
-    (pulse-momentary-highlight-one-line (point))))
-(advice-add 'recenter-top-bottom
-            :after #'lyn-pulse-point)
 
 ;;;; Major Modes
 (use-package haml-mode
@@ -154,9 +147,7 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-c n" . avy-goto-line-below)
          ("C-c p" . avy-goto-line-above)
          ("C-c r" . avy-goto-char-2-above)
-         ("C-c s" . avy-goto-char-2-below))
-  :config (advice-add 'avy-action-goto
-                      :after #'pulse-momentary-highlight-one-line))
+         ("C-c s" . avy-goto-char-2-below)))
 (use-package deadgrep
   :bind (("C-c g" . deadgrep)))
 (use-package flx-ido
