@@ -13,7 +13,7 @@
 (bind-key "s-`" #'ns-next-frame)
 
 ;;;; Editing
-(defun lyn-smarter-move-beginning-of-line (arg)
+(defun lyn-smart-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
 
 Move point to the first non-whitespace character on this line.
@@ -35,7 +35,7 @@ point reaches the beginning of end of the buffer, stop there."
     (back-to-indentation)
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
-(global-set-key [remap move-beginning-of-line] #'lyn-smarter-move-beginning-of-line)
+(global-set-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
 
 (use-package editorconfig
   :hook (after-init . editorconfig-mode))
