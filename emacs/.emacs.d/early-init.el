@@ -32,6 +32,12 @@
 (disable-gc)
 (run-with-idle-timer 3 nil #'finalize-gc)
 
+;;;; Disable VC mode
+(with-eval-after-load 'vc
+  (setf vc-handled-backends nil)
+  (remove-hook 'find-file-hook 'vc-find-file-hook)
+  (remove-hook 'find-file-hook 'vc-refresh-state))
+
 ;;;; Unicode
 (charset-priority-list)
 (set-charset-priority 'unicode)
@@ -98,12 +104,13 @@
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (setf show-paren-delay 0)
-(setq-default mode-line-format
-              (cl-set-difference mode-line-format
-                                 '(mode-line-front-space mode-line-mule-info mode-line-client)))
 (setq-default cursor-type 'bar
               echo-keystrokes 0.25
               truncate-lines t)
+
+(setq-default mode-line-format
+              (cl-set-difference mode-line-format
+                                 '(mode-line-front-space mode-line-mule-info mode-line-client)))
 
 (defconst lyn-font-size 14
   "Size at which to render fonts.")
