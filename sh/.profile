@@ -13,8 +13,6 @@ if [ -t 1 ]; then
     __reset_color="$(tput sgr0)"
     PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
 
-    alias please='sudo $(history -p !!)'
-
     if [ "$(command -v shopt)" = "shopt" ]; then
         HISTCONTROL='ignoredups:erasedups'
         shopt -s histappend
