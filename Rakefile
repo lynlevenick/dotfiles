@@ -93,9 +93,7 @@ needed_fonts = {
 }.freeze
 desc "Install fonts"
 task :fonts => [*needed_fonts.values]
-needed_fonts.each do |cask_name, font_path|
-  cask cask_name, font_path
-end
+needed_fonts.each do |formula, path| cask formula, path end
 
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
