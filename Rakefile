@@ -86,7 +86,8 @@ task :emacs => ["/Applications/Emacs.app",
 cask "emacs", "/Applications/Emacs.app"
 
 needed_fonts = {
-  "font-symbola" => "#{ENV['HOME']}/Library/Fonts/Symbola_Hinted.ttf",
+  "homebrew/cask-fonts/font-symbola" =>
+    "#{ENV['HOME']}/Library/Fonts/Symbola_Hinted.ttf",
   "homebrew/cask-fonts/font-go-mono-nerd-font" =>
     "#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf",
 }.freeze

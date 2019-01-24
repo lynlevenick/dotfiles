@@ -1,19 +1,24 @@
 #! /usr/bin/env ruby
+# frozen_string_literal: true
 
 # Provide ActiveSupport-style Object#blank? and Object#present? methods
-class Object
-  def blank?
-    if respond_to?(:empty?)
-      empty?
-    else
-      nil?
+module Presence
+  refine Object do
+    def blank?
+      if respond_to?(:empty?)
+        empty?
+      else
+        nil?
+      end
+    end
+
+    def present?
+      !blank?
     end
   end
-
-  def present?
-    !blank?
-  end
 end
+
+using Presence
 
 def ask(question)
   $stdout.print("#{question}: ")
