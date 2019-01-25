@@ -8,7 +8,9 @@
 
 ;;;; Defaults
 (use-package exec-path-from-shell
-  :hook (after-init . exec-path-from-shell-initialize))
+  :hook
+  (after-init . exec-path-from-shell-initialize)
+  (projectile-after-switch-project-hook . exec-path-from-shell-initialize))
 (bind-key "C-c i" #'imenu)
 (bind-key "s-`" #'ns-next-frame)
 
