@@ -114,7 +114,7 @@
 
 (defconst lyn-font-size 14
   "Size at which to render fonts.")
-(defconst lyn-font-stack '("GoMono Nerd Font" "Menlo")
+(defconst lyn-font-stack '("Triplicate T4c", "GoMono Nerd Font" "Menlo")
   "Fonts to render with, in priority order.")
 (defun lyn-font-available-p (name)
   "NAME when NAME is available as a font for Emacs to use. Nil otherwise."
