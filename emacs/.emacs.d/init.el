@@ -85,13 +85,14 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package haml-mode
   :mode "\\.haml\\'")
 (use-package js2-mode
-  :mode ("\\.js\\'"
-         ("\\.jsx\\'" . js2-jsx-mode))
+  :mode "\\.js\\'"
   :custom (js2-skip-preprocessor-directives t))
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (setf ruby-align-chained-calls t
       ruby-insert-encoding-magic-comment nil)
+(use-package rjsx-mode
+  :mode "\\.jsx\\'")
 (use-package rust-mode
   :mode "\\.rs\\'")
 (use-package yaml-mode
@@ -133,10 +134,18 @@ point reaches the beginning of end of the buffer, stop there."
                  executable special (cdr command))
         command)))
   (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
-(use-package eglot)
+(use-package add-node-modules-path
+  :after prettier-js
+  :hook (prettier-js-mode . add-node-modules-path))
 (use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
+(use-package prettier-js
+  :init
+  (with-eval-after-load 'js2-mode
+    (add-hook 'js2-mode-hook #'prettier-js-mode))
+  (with-eval-after-load 'rjsx-mode
+    (add-hook 'rjsx-mode-hook #'prettier-js-mode)))
 
 ;;;; Searching
 (use-package anzu
