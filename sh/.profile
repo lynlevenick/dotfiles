@@ -1,3 +1,5 @@
+#!/usr/bin/env false
+
 if [ -t 1 ]; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
