@@ -1,3 +1,7 @@
 #!/usr/bin/env false
 
-[ -r "${HOME}/.bashrc" ] && . "${HOME}/.bashrc"
+if [ -r "${HOME}/.bashrc" ]; then
+    . "${HOME}/.bashrc"
+elif [ -r "${HOME}/.profile" ]; then
+    . "${HOME}/.profile"
+fi
