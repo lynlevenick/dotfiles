@@ -48,6 +48,7 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
+(add-hook 'prog-mode-hook #'show-paren-mode)
 (use-package ace-window
   :bind (("C-x o" . ace-window))
   :custom
@@ -56,6 +57,14 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-scope 'frame))
 (use-package company
   :hook (prog-mode . company-mode))
+(use-package dired :straight nil
+  :custom
+  (dired-auto-revert-buffer t)
+  (dired-dwim-target t)
+  (wdired-allow-to-change-permissions t)
+  (wdired-allow-redirect-links t))
+(use-package dired-x :straight nil
+  :after dired)
 (use-package magit
   :custom
   (magit-list-refs-sortby "-committerdate"))
@@ -182,8 +191,13 @@ point reaches the beginning of end of the buffer, stop there."
 ;; Turn on ido-mode
 (ido-mode 1)
 (ido-everywhere 1)
-(setf ido-enable-flex-matching t
+(setf ido-auto-merge-work-directories-length -1
+      ido-enable-flex-matching t
       magit-completing-read-function #'magit-ido-completing-read)
+
+;;;; Late loads
+(use-package tramp
+  :defer 3)
 
 (provide 'init)
 ;;; init.el ends here
