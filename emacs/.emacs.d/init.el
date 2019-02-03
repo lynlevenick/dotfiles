@@ -66,8 +66,10 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package dired-x :straight nil
   :after dired)
 (use-package magit
+  :defer 1
   :custom
-  (magit-list-refs-sortby "-committerdate"))
+  (magit-list-refs-sortby "-committerdate")
+  (magit-completing-read-function #'magit-ido-completing-read))
 (use-package magit-gitflow
   :after magit
   :hook (magit-mode . turn-on-magit-gitflow))
@@ -176,6 +178,14 @@ point reaches the beginning of end of the buffer, stop there."
   :custom
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
+(use-package ido
+  :defer 1
+  :config
+  (ido-mode 1)
+  (ido-everywhere 1)
+  :custom
+  (ido-auto-merge-work-directories-length -1)
+  (ido-enable-flex-matching t))
 (use-package ido-completing-read+
   :after ido
   :config (ido-ubiquitous-mode 1))
@@ -188,16 +198,10 @@ point reaches the beginning of end of the buffer, stop there."
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands))
   :config (smex-initialize))
-;; Turn on ido-mode
-(ido-mode 1)
-(ido-everywhere 1)
-(setf ido-auto-merge-work-directories-length -1
-      ido-enable-flex-matching t
-      magit-completing-read-function #'magit-ido-completing-read)
 
 ;;;; Late loads
 (use-package tramp
-  :defer 3)
+  :defer 1)
 
 (provide 'init)
 ;;; init.el ends here
