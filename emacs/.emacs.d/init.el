@@ -13,7 +13,7 @@
   (projectile-after-switch-project . exec-path-from-shell-initialize))
 (use-package imenu
   :bind (("C-c i" . imenu)))
-(bind-key "s-`" #'ns-next-frame)
+(when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
 ;;;; Editing
 (defun lyn-smart-move-beginning-of-line (arg)
