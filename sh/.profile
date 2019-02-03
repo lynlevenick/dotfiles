@@ -18,7 +18,6 @@ if [ -t 1 ]; then
 
     if [ "$(command -v shopt)" = "shopt" ]; then
         HISTCONTROL='ignoredups:erasedups'
-        # shellcheck disable=SC2039
         shopt -s histappend
     fi
 fi
