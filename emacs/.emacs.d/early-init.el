@@ -26,11 +26,12 @@
 (defun lyn-gc-finalize ()
   "Finalize garbage collection reset and add minibuffer hooks."
 
+  (remove-hook 'pre-command-hook #'lyn-gc-finalize)
   (lyn-gc-restore)
   (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
   (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
 (lyn-gc-disable)
-(run-with-idle-timer 3 nil #'lyn-gc-finalize)
+(add-hook 'pre-command-hook #'lyn-gc-finalize)
 
 ;;;; Disable VC mode
 (with-eval-after-load 'vc
