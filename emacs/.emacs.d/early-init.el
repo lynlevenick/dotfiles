@@ -59,8 +59,9 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil t))
 
-(straight-use-package 'use-package)
-(setf straight-use-package-by-default t)
+(eval-when-compile
+  (straight-use-package 'use-package)
+  (setf straight-use-package-by-default t))
 
 (use-package no-littering)
 
@@ -96,6 +97,7 @@
  ;; Broken OS behavior
  dired-use-ls-dired nil
  use-dialog-box nil)
+;; Disable tabs almost everywhere
 (setq-default indent-tabs-mode nil)
 
 ;;;; Theme
