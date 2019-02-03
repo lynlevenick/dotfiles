@@ -139,26 +139,5 @@
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))
 
-(defun lyn-dashboard-buffer (&optional switch)
-  "Get the *dashboard* buffer, for `initial-buffer-choice' or SWITCH to it.
-
-When called interactively, switch to the *dashboard* buffer."
-  (interactive "p")
-
-  (if switch
-      (progn
-        (switch-to-buffer "*dashboard*")
-        (dashboard-refresh-buffer))
-    (get-buffer "*dashboard*")))
-(bind-key "C-c d" #'lyn-dashboard-buffer)
-(use-package dashboard
-  :config (dashboard-setup-startup-hook)
-  :custom
-  (dashboard-items '((recents . 10)
-                     (bookmarks . 5)
-                     (projects . 5)))
-  (dashboard-startup-banner 'logo)
-  (initial-buffer-choice #'lyn-dashboard-buffer))
-
 (provide 'early-init)
 ;;; early-init.el ends here
