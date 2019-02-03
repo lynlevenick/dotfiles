@@ -66,7 +66,8 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package dired-x :straight nil
   :after dired)
 (use-package magit
-  :defer 1
+  :defer 5
+  :bind (("C-x g" . magit-status))
   :custom
   (magit-list-refs-sortby "-committerdate")
   (magit-completing-read-function #'magit-ido-completing-read))
@@ -78,6 +79,8 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package projectile
   :bind-keymap (("s-p" . projectile-command-map))
   :hook (after-init . projectile-mode))
+(use-package tramp
+  :defer 3)
 (use-package transpose-frame
   :bind (("C-c t" . transpose-frame)))
 (use-package windsize
@@ -198,10 +201,6 @@ point reaches the beginning of end of the buffer, stop there."
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands))
   :config (smex-initialize))
-
-;;;; Late loads
-(use-package tramp
-  :defer 1)
 
 (provide 'init)
 ;;; init.el ends here
