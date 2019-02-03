@@ -5,38 +5,38 @@
 
 ;;;; Disable gc and file name handlers until startup is finished
 (setf file-name-handler-alist nil)
-(defun restore-file-name-handler ()
+(defun lyn-file-name-handler-restore ()
   "Restore default file name handler after Emacs has finished starting up."
 
   (setf file-name-handler-alist
         (append (car (get 'file-name-handler-alist 'standard-value))
                 file-name-handler-alist)))
-(add-hook 'emacs-startup-hook #'restore-file-name-handler)
+(add-hook 'emacs-startup-hook #'lyn-file-name-handler-restore)
 
-(defun disable-gc ()
+(defun lyn-gc-disable ()
   "Turn off garbage collection."
 
   (setf gc-cons-percentage 1.0
         gc-cons-threshold most-positive-fixnum))
-(defun restore-gc ()
+(defun lyn-gc-restore ()
   "Enable garbage collection."
 
   (setf gc-cons-percentage (car (get 'gc-cons-percentage 'standard-value))
         gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value))))
-(defun finalize-gc ()
+(defun lyn-gc-finalize ()
   "Finalize garbage collection reset and add minibuffer hooks."
 
-  (restore-gc)
-  (add-hook 'minibuffer-setup-hook #'disable-gc)
-  (add-hook 'minibuffer-exit-hook #'restore-gc))
-(disable-gc)
-(run-with-idle-timer 3 nil #'finalize-gc)
+  (lyn-gc-restore)
+  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
+  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
+(lyn-gc-disable)
+(run-with-idle-timer 3 nil #'lyn-gc-finalize)
 
 ;;;; Disable VC mode
 (with-eval-after-load 'vc
   (setf vc-handled-backends nil)
-  (remove-hook 'find-file-hook 'vc-find-file-hook)
-  (remove-hook 'find-file-hook 'vc-refresh-state))
+  (remove-hook 'find-file-hook #'vc-find-file-hook)
+  (remove-hook 'find-file-hook #'vc-refresh-state))
 
 ;;;; Unicode
 (charset-priority-list)
@@ -107,7 +107,7 @@
 
 (setf show-paren-delay 0)
 (setq-default cursor-type 'bar
-              echo-keystrokes 0.25
+              echo-keystrokes 0.01
               truncate-lines t)
 
 (setq-default mode-line-format
@@ -119,15 +119,12 @@
 (defconst lyn-font-stack '("Triplicate T4c", "GoMono Nerd Font" "Menlo")
   "Fonts to render with, in priority order.")
 (defun lyn-font-available-p (name)
-  "NAME when NAME is available as a font for Emacs to use. Nil otherwise."
+  "Return NAME when NAME is available as a font. Nil otherwise."
 
   (car (member name (font-family-list))))
 (let ((available (cl-some #'lyn-font-available-p lyn-font-stack)))
   (when available
     (push `(font . ,(concat available "-" (number-to-string lyn-font-size))) default-frame-alist)))
-
-(push '(height . 50) default-frame-alist)
-(push '(width . 100) default-frame-alist)
 
 (setq frame-title-format nil
       ns-use-proxy-icon nil)
