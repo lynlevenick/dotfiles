@@ -11,7 +11,8 @@
   :hook
   (after-init . exec-path-from-shell-initialize)
   (projectile-after-switch-project . exec-path-from-shell-initialize))
-(bind-key "C-c i" #'imenu)
+(use-package imenu
+  :bind (("C-c i" . imenu)))
 (bind-key "s-`" #'ns-next-frame)
 
 ;;;; Editing
