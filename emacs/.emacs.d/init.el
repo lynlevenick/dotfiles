@@ -42,13 +42,46 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package editorconfig
   :hook (after-init . editorconfig-mode))
 (use-package flycheck
+  :init
+  (defvar lyn-flycheck-handle-alist
+    '(("bundle" . lyn-flycheck-bundle-exec))
+    "How to transform a special-cased executable for a command.")
+  (defvar lyn-flycheck-wrap-alist
+    '(("rubocop" . "bundle"))
+    "Executables to transform for special casing.")
   :hook (prog-mode . flycheck-mode)
-  :custom (flycheck-errors-delay 0.25))
+  :config
+  (defun lyn-flycheck-bundle-exec (executable special &rest args)
+    "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
+
+    `(,executable "exec" ,special . ,args))
+  (defun lyn-flycheck-executable-find (executable)
+    "Fake EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
+
+    (let* ((file (file-name-nondirectory executable))
+           (mapped (alist-get file lyn-flycheck-wrap-alist nil nil #'string=)))
+      (if mapped
+          (concat (flycheck-default-executable-find mapped) "://" file)
+        (flycheck-default-executable-find executable))))
+  (defun lyn-flycheck-command-wrapper (command)
+    "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
+
+    (let* ((components (split-string (car command) "://"))
+           (executable (nth 0 components))
+           (special (nth 1 components))
+           (file (file-name-nondirectory executable)))
+      (if special
+          (apply (alist-get file lyn-flycheck-handle-alist nil nil #'string=)
+                 executable special (cdr command))
+        command)))
+  :custom
+  (flycheck-errors-delay 0.25)
+  (flycheck-executable-find #'lyn-flycheck-executable-find)
+  (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Interaction
-(add-hook 'prog-mode-hook #'show-paren-mode)
 (use-package ace-window
   :bind (("C-x o" . ace-window))
   :custom
@@ -66,8 +99,13 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package dired-x :straight nil
   :after dired)
 (use-package magit
-  :defer 5
-  :bind (("C-x g" . magit-status))
+  :init
+  (defun lyn-magit-lazy-load ()
+    "Remove this function from `find-file-hook' and load magit."
+
+    (remove-hook 'find-file-hook #'lyn-magit-lazy-load)
+    (require 'magit))
+  :hook (find-file . lyn-magit-lazy-load)
   :custom
   (magit-list-refs-sortby "-committerdate")
   (magit-completing-read-function #'magit-ido-completing-read))
@@ -76,11 +114,19 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (magit-mode . turn-on-magit-gitflow))
 (use-package mode-line-bell
   :hook (after-init . mode-line-bell-mode))
+(use-package paren :straight nil
+  :hook (prog-mode . show-paren-mode))
 (use-package projectile
   :bind-keymap (("s-p" . projectile-command-map))
   :hook (after-init . projectile-mode))
 (use-package tramp
-  :defer 3)
+  :init
+  (defun lyn-tramp-lazy-load ()
+    "Remove this function from `post-self-insert-hook' and load tramp."
+
+    (remove-hook 'post-self-insert-hook #'lyn-tramp-lazy-load)
+    (require 'tramp))
+  :hook (post-self-insert . lyn-tramp-lazy-load))
 (use-package transpose-frame
   :bind (("C-c t" . transpose-frame)))
 (use-package windsize
@@ -113,41 +159,6 @@ point reaches the beginning of end of the buffer, stop there."
   :mode "\\.ya?ml\\'")
 
 ;; Major Mode Integration
-(with-eval-after-load 'flycheck
-  (defun lyn-flycheck-bundle-exec (executable special &rest args)
-    "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
-
-    `(,executable "exec" ,special . ,args))
-
-  (defvar lyn-flycheck-handle-alist
-    '(("bundle" . lyn-flycheck-bundle-exec))
-    "How to transform a special-cased executable for a command.")
-  (defvar lyn-flycheck-wrap-alist
-    '(("rubocop" . "bundle"))
-    "Executables to transform for special casing.")
-
-  (defun lyn-flycheck-executable-find (executable)
-    "Fake EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
-
-    (let* ((file (file-name-nondirectory executable))
-           (mapped (alist-get file lyn-flycheck-wrap-alist nil nil #'string=)))
-      (if mapped
-          (concat (flycheck-default-executable-find mapped) "://" file)
-        (flycheck-default-executable-find executable))))
-  (setf flycheck-executable-find #'lyn-flycheck-executable-find)
-
-  (defun lyn-flycheck-command-wrapper (command)
-    "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
-
-    (let* ((components (split-string (car command) "://"))
-           (executable (nth 0 components))
-           (special (nth 1 components))
-           (file (file-name-nondirectory executable)))
-      (if special
-          (apply (alist-get file lyn-flycheck-handle-alist nil nil #'string=)
-                 executable special (cdr command))
-        command)))
-  (setf flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
 (use-package add-node-modules-path
   :after prettier-js
   :hook (prettier-js-mode . add-node-modules-path))
@@ -155,11 +166,10 @@ point reaches the beginning of end of the buffer, stop there."
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
 (use-package prettier-js
-  :init
-  (with-eval-after-load 'js2-mode
-    (add-hook 'js2-mode-hook #'prettier-js-mode))
-  (with-eval-after-load 'rjsx-mode
-    (add-hook 'rjsx-mode-hook #'prettier-js-mode)))
+  :after js2-mode
+  :hook
+  (js2-mode . prettier-js-mode)
+  (js2-jsx-mode . prettier-js-mode))
 
 ;;;; Searching
 (use-package anzu
@@ -182,10 +192,14 @@ point reaches the beginning of end of the buffer, stop there."
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
 (use-package ido
-  :defer 1
-  :config
-  (ido-mode 1)
-  (ido-everywhere 1)
+  :init
+  (defun lyn-ido-lazy-load ()
+    "Remove this function from `pre-command-hook' and enable `ido-mode' and `ido-everywhere'."
+
+    (remove-hook 'pre-command-hook #'lyn-ido-lazy-load)
+    (ido-mode 1)
+    (ido-everywhere 1))
+  :hook (pre-command . lyn-ido-lazy-load)
   :custom
   (ido-auto-merge-work-directories-length -1)
   (ido-enable-flex-matching t))
