@@ -28,6 +28,8 @@
 
   (remove-hook 'pre-command-hook #'lyn-gc-finalize)
   (lyn-gc-restore)
+  ;; Additionally disable and restore gc on minibuffer,
+  ;; as smex allocates a lot of memory
   (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
   (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
 (lyn-gc-disable)
@@ -35,9 +37,7 @@
 
 ;;;; Disable VC mode
 (with-eval-after-load 'vc
-  (setf vc-handled-backends nil)
-  (remove-hook 'find-file-hook #'vc-find-file-hook)
-  (remove-hook 'find-file-hook #'vc-refresh-state))
+  (setf vc-handled-backends nil))
 
 ;;;; Unicode
 (charset-priority-list)
