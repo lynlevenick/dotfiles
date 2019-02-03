@@ -176,6 +176,15 @@ point reaches the beginning of end of the buffer, stop there."
   (js2-jsx-mode . prettier-js-mode))
 
 ;;;; Searching
+(use-package amx
+  :init
+  (defun lyn-amx-lazy-load ()
+    "Remove this function from `pre-command-hook' and enable `amx-mode'."
+
+    (remove-hook 'pre-command-hook #'lyn-amx-lazy-load)
+    (amx-mode))
+  :bind (("M-X" . amx-major-mode-commands))
+  :hook (pre-command . lyn-amx-lazy-load))
 (use-package anzu
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp))
@@ -214,11 +223,6 @@ point reaches the beginning of end of the buffer, stop there."
   :after ido
   :config (ido-vertical-mode 1)
   :custom (ido-vertical-show-count t))
-(use-package smex
-  :after ido
-  :bind (("M-x" . smex)
-         ("M-X" . smex-major-mode-commands))
-  :config (smex-initialize))
 
 (provide 'init)
 ;;; init.el ends here
