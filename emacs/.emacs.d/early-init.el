@@ -99,9 +99,9 @@
 (setq-default indent-tabs-mode nil)
 
 ;;;; Theme
-(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (setf show-paren-delay 0)
 (setq-default cursor-type 'bar
@@ -143,10 +143,11 @@
 When called interactively, switch to the *dashboard* buffer."
   (interactive "p")
 
-  (if (not switch)
-      (get-buffer "*dashboard*")
-    (switch-to-buffer "*dashboard*")
-    (dashboard-refresh-buffer)))
+  (if switch
+      (progn
+        (switch-to-buffer "*dashboard*")
+        (dashboard-refresh-buffer))
+    (get-buffer "*dashboard*")))
 (bind-key "C-c d" #'lyn-dashboard-buffer)
 (use-package dashboard
   :config (dashboard-setup-startup-hook)
