@@ -149,10 +149,13 @@ point reaches the beginning of end of the buffer, stop there."
   :custom (js2-skip-preprocessor-directives t))
 (use-package org
   :mode ("\\.org\\'" . org-mode))
-(setf ruby-align-chained-calls t
-      ruby-insert-encoding-magic-comment nil)
 (use-package rjsx-mode
   :mode "\\.jsx\\'")
+(use-package ruby-mode :straight nil
+  :defer
+  :custom
+  (ruby-align-chained-calls t)
+  (ruby-insert-magic-encoding-comment nil))
 (use-package rust-mode
   :mode "\\.rs\\'")
 (use-package yaml-mode
