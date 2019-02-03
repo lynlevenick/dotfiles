@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
-if [ -r "${HOME}/.bashrc" ]; then
+if test -r "${HOME}/.bashrc"; then
     . "${HOME}/.bashrc"
-elif [ -r "${HOME}/.profile" ]; then
+elif test -r "${HOME}/.profile"; then
     . "${HOME}/.profile"
 fi

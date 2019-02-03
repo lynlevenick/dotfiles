@@ -1,3 +1,5 @@
 #!/usr/bin/env false
 
-[ -r "${HOME}/.profile" ] && . "${HOME}/.profile"
+if test -r "${HOME}/.profile"; then
+    . "${HOME}/.profile"
+fi

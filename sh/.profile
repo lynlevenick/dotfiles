@@ -1,6 +1,6 @@
 #!/usr/bin/env false
 
-if [ -t 1 ]; then
+if test -t 1; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
     export LSCOLORS='ExFxCxDxBxegedabagacad'
@@ -30,21 +30,21 @@ __pathadd() {
     esac
 }
 
-if [ -d "${HOME}/.cargo" ]; then
+if test -d "${HOME}/.cargo"; then
     export CARGO_HOME="${HOME}/.cargo"
     __pathadd "${CARGO_HOME}/bin"
 fi
 
-if [ -r "${HOME}/.nvm/nvm.sh" ]; then
+if test -r "${HOME}/.nvm/nvm.sh"; then
     export NVM_DIR="${HOME}/.nvm"
     . "${NVM_DIR}/nvm.sh"
 fi
 
-if [ -d "${HOME}/.rustup" ]; then
+if test -d "${HOME}/.rustup"; then
     export RUSTUP_HOME="${HOME}/.rustup"
 fi
 
-if [ -r "${HOME}/.rvm/scripts/rvm" ]; then
+if test -r "${HOME}/.rvm/scripts/rvm"; then
     . "${HOME}/.rvm/scripts/rvm"
     __pathadd "${HOME}/.rvm/bin"
 fi
