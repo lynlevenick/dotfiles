@@ -8,9 +8,12 @@
 
 ;;;; Defaults
 (use-package exec-path-from-shell
+  :commands exec-path-from-shell-initialize
+  :init
+  (with-eval-after-load 'projectile
+    (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
   :hook
-  (after-init . exec-path-from-shell-initialize)
-  (projectile-after-switch-project . exec-path-from-shell-initialize))
+  (after-init . exec-path-from-shell-initialize))
 (use-package imenu
   :bind (("C-c i" . imenu)))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
@@ -164,8 +167,12 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;; Major Mode Integration
 (use-package add-node-modules-path
-  :after prettier-js
-  :hook (prettier-js-mode . add-node-modules-path))
+  :commands add-node-modules-path
+  :init
+  (with-eval-after-load 'prettier-js
+    (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
+  :hook
+  (css-mode . add-node-modules-path))
 (use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
