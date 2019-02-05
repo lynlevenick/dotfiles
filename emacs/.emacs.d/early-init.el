@@ -37,7 +37,8 @@
 
 ;;;; Disable VC mode
 (with-eval-after-load 'vc
-  (setf vc-handled-backends nil))
+  (remove-hook 'find-file-hook #'vc-find-file-hook)
+  (remove-hook 'find-file-hook #'vc-refresh-state))
 
 ;;;; Unicode
 (charset-priority-list)
