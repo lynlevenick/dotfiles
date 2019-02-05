@@ -14,13 +14,13 @@ Used to generate symbols for the hook functions.")
   "Execute BODY after HOOK is run, one time."
   (declare (indent defun))
 
-  (let ((hook-sym (make-symbol (concat "with-hook-once--" (number-to-string lyn-with-hook-once--count)))))
+  (let ((name (make-symbol (concat "with-hook-once--" (number-to-string lyn-with-hook-once--count)))))
     (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
     `(progn
-       (defun ,hook-sym ()
-         (remove-hook ,hook #',hook-sym)
+       (defun ,name ()
+         (remove-hook ,hook #',name)
          . ,body)
-       (add-hook ,hook #',hook-sym))))
+       (add-hook ,hook #',name))))
 
 ;;;; Defaults
 (use-package add-node-modules-path
