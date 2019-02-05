@@ -14,12 +14,13 @@ Used to generate symbols for the hook functions.")
   "Execute BODY after HOOK is run, one time."
   (declare (indent defun))
 
-  (let ((name (make-symbol (concat "with-hook-once--" (number-to-string lyn-with-hook-once--count)))))
+  (let ((name (make-symbol (concat "with-hook-once--hook-" (number-to-string lyn-with-hook-once--count)))))
     (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
     `(progn
-       (defun ,name ()
-         (remove-hook ,hook #',name)
-         . ,body)
+       (unless (fboundp ',name)
+         (defun ,name ()
+           (remove-hook ,hook #',name)
+           . ,body))
        (add-hook ,hook #',name))))
 
 ;;;; Defaults
