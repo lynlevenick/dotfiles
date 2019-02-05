@@ -14,8 +14,7 @@ Used to generate symbols for the hook functions.")
   "Execute BODY after HOOK is run, one time."
   (declare (indent defun))
 
-  (let* ((hook-id lyn-with-hook-once--count)
-         (hook-sym (make-symbol (concat "with-hook-once--" (number-to-string hook-id)))))
+  (let ((hook-sym (make-symbol (concat "with-hook-once--" (number-to-string lyn-with-hook-once--count)))))
     (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
     `(progn
        (defun ,hook-sym ()
