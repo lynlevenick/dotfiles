@@ -6,14 +6,36 @@
 (unless (bound-and-true-p early-init-file)
   (load (concat user-emacs-directory "early-init") nil t))
 
+(defvar lyn-with-hook-once--count 0
+  "The number of times `lyn-with-hook-once' has been called.
+
+Used to generate symbols for the hook functions.")
+(defmacro lyn-with-hook-once (hook &rest body)
+  "Execute BODY after HOOK is run, one time."
+  (declare (indent defun))
+
+  (let* ((hook-id lyn-with-hook-once--count)
+         (hook-sym (make-symbol (concat "with-hook-once--" (number-to-string hook-id)))))
+    (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
+    `(progn
+       (defun ,hook-sym ()
+         (remove-hook ,hook #',hook-sym)
+         . ,body)
+       (add-hook ,hook #',hook-sym))))
+
 ;;;; Defaults
+(use-package add-node-modules-path
+  :commands (add-node-modules-path)
+  :init
+  (with-eval-after-load 'prettier-js
+    (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
+  :hook (css-mode . add-node-modules-path))
 (use-package exec-path-from-shell
-  :commands exec-path-from-shell-initialize
+  :commands (exec-path-from-shell-initialize)
   :init
   (with-eval-after-load 'projectile
     (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
-  :hook
-  (after-init . exec-path-from-shell-initialize))
+  :hook (after-init . exec-path-from-shell-initialize))
 (use-package imenu
   :bind (("C-c i" . imenu)))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
@@ -103,13 +125,8 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package dired-x :straight nil
   :after dired)
 (use-package magit
-  :init
-  (defun lyn-magit-lazy-load ()
-    "Remove this function from `find-file-hook' and load magit."
-
-    (remove-hook 'find-file-hook #'lyn-magit-lazy-load)
-    (require 'magit))
-  :hook (find-file . lyn-magit-lazy-load)
+  :defer
+  :init (lyn-with-hook-once 'find-file-hook (require 'magit))
   :custom
   (magit-list-refs-sortby "-committerdate")
   (magit-completing-read-function #'magit-ido-completing-read))
@@ -124,13 +141,8 @@ point reaches the beginning of end of the buffer, stop there."
   :bind-keymap (("s-p" . projectile-command-map))
   :hook (after-init . projectile-mode))
 (use-package tramp
-  :init
-  (defun lyn-tramp-lazy-load ()
-    "Remove this function from `post-self-insert-hook' and load tramp."
-
-    (remove-hook 'post-self-insert-hook #'lyn-tramp-lazy-load)
-    (require 'tramp))
-  :hook (post-self-insert . lyn-tramp-lazy-load))
+  :defer
+  :init (lyn-with-hook-once 'post-self-insert-hook (require 'tramp)))
 (use-package transpose-frame
   :bind (("C-c t" . transpose-frame)))
 (use-package windsize
@@ -159,20 +171,13 @@ point reaches the beginning of end of the buffer, stop there."
   :defer
   :custom
   (ruby-align-chained-calls t)
-  (ruby-insert-magic-encoding-comment nil))
+  (ruby-insert-encoding-magic-comment nil))
 (use-package rust-mode
   :mode "\\.rs\\'")
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
 
 ;; Major Mode Integration
-(use-package add-node-modules-path
-  :commands add-node-modules-path
-  :init
-  (with-eval-after-load 'prettier-js
-    (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
-  :hook
-  (css-mode . add-node-modules-path))
 (use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
@@ -184,14 +189,9 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Searching
 (use-package amx
-  :init
-  (defun lyn-amx-lazy-load ()
-    "Remove this function from `pre-command-hook' and enable `amx-mode'."
-
-    (remove-hook 'pre-command-hook #'lyn-amx-lazy-load)
-    (amx-mode))
-  :bind (("M-X" . amx-major-mode-commands))
-  :hook (pre-command . lyn-amx-lazy-load))
+  :commands (amx-mode)
+  :init (lyn-with-hook-once 'pre-command-hook (amx-mode))
+  :bind (("M-X" . amx-major-mode-commands)))
 (use-package anzu
   :bind (("M-%" . anzu-query-replace)
          ("C-M-%" . anzu-query-replace-regexp))
@@ -212,14 +212,12 @@ point reaches the beginning of end of the buffer, stop there."
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
 (use-package ido
+  :defer
+  :commands (ido-mode ido-everywhere)
   :init
-  (defun lyn-ido-lazy-load ()
-    "Remove this function from `pre-command-hook' and enable `ido-mode' and `ido-everywhere'."
-
-    (remove-hook 'pre-command-hook #'lyn-ido-lazy-load)
+  (lyn-with-hook-once 'pre-command-hook
     (ido-mode 1)
     (ido-everywhere 1))
-  :hook (pre-command . lyn-ido-lazy-load)
   :custom
   (ido-auto-merge-work-directories-length -1)
   (ido-enable-flex-matching t))
