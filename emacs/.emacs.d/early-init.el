@@ -29,7 +29,7 @@
   (remove-hook 'pre-command-hook #'lyn-gc-finalize)
   (lyn-gc-restore)
   ;; Additionally disable and restore gc on minibuffer,
-  ;; as smex allocates a lot of memory
+  ;; as amx presumably allocates a lot of memory like smex
   (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
   (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
 (lyn-gc-disable)

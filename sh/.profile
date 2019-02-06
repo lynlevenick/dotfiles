@@ -9,14 +9,14 @@ if test -t 1; then
     __ps1_err_color="$(tput setaf 1)"
     __ps1_err() {
         # shellcheck disable=SC2181
-        if [ "$?" -ne 0 ]; then
+        if test "$?" -ne 0; then
             printf '%s' "${__ps1_err_color}"
         fi
     }
     __reset_color="$(tput sgr0)"
     PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
 
-    if [ "$(command -v shopt)" = "shopt" ]; then
+    if test "$(command -v shopt)" = "shopt"; then
         HISTCONTROL='ignoredups:erasedups'
         shopt -s histappend
     fi
