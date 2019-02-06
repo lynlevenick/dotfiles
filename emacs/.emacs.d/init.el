@@ -11,7 +11,14 @@
 
 Used to generate symbols for the hook functions.")
 (defmacro lyn-with-hook-once (hook &rest body)
-  "Execute BODY after HOOK is run, one time."
+  "Arrange to execute BODY when HOOK is run, one time.
+
+If called repeatedly before HOOK runs, BODY will be run
+only once.
+
+If called twice, with HOOK running in between, BODY will
+have executed once and be arranged to be executed once
+more."
   (declare (indent defun))
 
   (let ((name (make-symbol (concat "with-hook-once--hook-" (number-to-string lyn-with-hook-once--count)))))
