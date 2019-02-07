@@ -11,14 +11,7 @@
 
 Used to generate symbols for the hook functions.")
 (defmacro lyn-with-hook-once (hook &rest body)
-  "Arrange to execute BODY when HOOK is run, one time.
-
-If called repeatedly before HOOK runs, BODY will be run
-only once.
-
-If called twice, with HOOK running in between, BODY will
-have executed once and be arranged to be executed once
-more."
+  "Arrange to execute BODY once, the next time HOOK is run."
   (declare (indent defun))
 
   (let ((name (make-symbol (concat "with-hook-once--hook-" (number-to-string lyn-with-hook-once--count)))))
@@ -43,7 +36,7 @@ more."
   (with-eval-after-load 'projectile
     (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
   :hook (after-init . exec-path-from-shell-initialize))
-(use-package imenu
+(use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
@@ -218,7 +211,7 @@ point reaches the beginning of end of the buffer, stop there."
   :custom
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
-(use-package ido
+(use-package ido :straight nil
   :defer
   :commands (ido-mode ido-everywhere)
   :init
