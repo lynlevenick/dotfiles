@@ -64,7 +64,7 @@ point reaches the beginning of end of the buffer, stop there."
     (back-to-indentation)
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
-(global-set-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
+(bind-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
 
 (use-package editorconfig
   :hook (after-init . editorconfig-mode))
@@ -110,7 +110,8 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Interaction
 (use-package ace-window
-  :bind (("C-x o" . ace-window))
+  :commands (ace-window)
+  :init (bind-key [remap other-window] #'ace-window)
   :custom
   (aw-background nil)
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
@@ -156,7 +157,8 @@ point reaches the beginning of end of the buffer, stop there."
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
 (use-package zygospore
-  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
+  :commands (zygospore-toggle-delete-other-windows)
+  :init (bind-key [remap delete-other-windows] #'zygospore-toggle-delete-other-windows))
 
 ;;;; Major Modes
 (use-package haml-mode
@@ -194,8 +196,10 @@ point reaches the beginning of end of the buffer, stop there."
   :init (lyn-with-hook-once 'pre-command-hook (amx-mode))
   :bind (("M-X" . amx-major-mode-commands)))
 (use-package anzu
-  :bind (("M-%" . anzu-query-replace)
-         ("C-M-%" . anzu-query-replace-regexp))
+  :commands (anzu-query-replace anzu-query-replace-regexp)
+  :init
+  (bind-key [remap query-replace] #'anzu-query-replace)
+  (bind-key [remap query-replace-regexp] #'anzu-query-replace-regexp)
   :hook (after-init . global-anzu-mode))
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
