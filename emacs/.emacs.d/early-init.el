@@ -36,9 +36,7 @@
 (add-hook 'pre-command-hook #'lyn-gc-finalize)
 
 ;;;; Disable VC mode
-(with-eval-after-load 'vc
-  (remove-hook 'find-file-hook #'vc-find-file-hook)
-  (remove-hook 'find-file-hook #'vc-refresh-state))
+(remove-hook 'find-file-hook #'vc-refresh-state)
 
 ;;;; Unicode
 (charset-priority-list)
@@ -49,7 +47,8 @@
 
 ;;;; package.el replacement
 (setf straight-check-for-modifications '(check-on-save find-when-checking)
-      straight-recipes-gnu-elpa-use-mirror t)
+      straight-recipes-gnu-elpa-use-mirror t
+      straight-use-package-by-default t)
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -61,8 +60,9 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil t))
 
-(straight-use-package 'use-package)
-(setf straight-use-package-by-default t)
+(eval-when-compile
+  (setf use-package-expand-minimally t)
+  (straight-use-package 'use-package))
 
 (use-package no-littering)
 

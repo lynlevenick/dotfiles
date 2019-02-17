@@ -4,7 +4,7 @@
 ;;; Code:
 
 (unless (bound-and-true-p early-init-file)
-  (load (concat user-emacs-directory "early-init") nil t))
+  (require 'early-init (concat user-emacs-directory "early-init")))
 
 (defvar lyn-with-hook-once--count 0
   "The number of times `lyn-with-hook-once' has been called.
@@ -30,6 +30,7 @@ Used to generate symbols for the hook functions.")
   (with-eval-after-load 'prettier-js
     (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
   :hook (css-mode . add-node-modules-path))
+(use-package bind-key)
 (use-package exec-path-from-shell
   :commands (exec-path-from-shell-initialize)
   :init
