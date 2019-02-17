@@ -42,7 +42,7 @@ if test -t 1; then
         __ef_action "$(__ef_files | __ef_fzf --query="$*")"
     }
     efp() {
-        __ef_action "$(__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) echo {}: binary file ;; *) ('"${__ef_highlighter}"') | head -n "$((LINES * 4))" ;; esac')"
+        __ef_action "$(__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) printf '\''%s: binary file'\'' {} ;; *) ('"${__ef_highlighter}"') | head -n "$((LINES * 4))" ;; esac')"
     }
 fi
 
