@@ -4,7 +4,7 @@ if test -t 1; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
     export LSCOLORS='ExFxCxDxBxegedabagacad'
-    export VISUAL="${EDITOR}"
+    export VISUAL='emacs'
 
     __ps1_err_color="$(tput setaf 1)"
     __ps1_err() {
