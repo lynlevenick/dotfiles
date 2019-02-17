@@ -21,12 +21,25 @@ if test -t 1; then
         shopt -s histappend
     fi
 
-    ef() {
-        __files="$(rg --files --hidden -0 2>/dev/null | fzf-tmux --read0 --print0 --exit-0 --select-1 --multi --query="$*")"
-
+    __ef_action() {
         if test -n "${__files}"; then
             printf "%s" "${__files}" | xargs -0 "${VISUAL:-${EDITOR:-vi}}"
         fi
+    }
+    __ef_files() {
+        rg --files --hidden -0 "$@" 2>/dev/null
+    }
+    __ef_fzf() {
+        fzf-tmux --read0 --print0 --exit-0 --select-1 --multi "$@"
+    }
+
+    ef() {
+        __files="$(__ef_files | __ef_fzf --query="$*")"
+        __ef_action
+    }
+    efp() {
+        __files="$(__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) echo {}: binary file ;; *) cat {} || head -n "${LINES}" ;; esac')"
+        __ef_action
     }
 fi
 
