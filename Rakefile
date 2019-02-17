@@ -76,13 +76,13 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[emacs fonts git homebrew login python readline ripgrep sh
-                    ssh devenv]
+task :default => %i[emacs fonts fzf git homebrew login python readline ripgrep
+                    sh ssh devenv]
 
 emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
-task :emacs => ["/Applications/Emacs.app",
-                *emacs_files]
+multitask :emacs => ["/Applications/Emacs.app",
+                     *emacs_files]
 cask "emacs", "/Applications/Emacs.app"
 
 needed_fonts = {
@@ -95,9 +95,13 @@ desc "Install fonts"
 task :fonts => [*needed_fonts.values]
 needed_fonts.each do |formula, path| cask formula, path end
 
+desc "Install fzf"
+task :fzf => ["/usr/local/bin/fzf"]
+brew "fzf", "/usr/local/bin/fzf"
+
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
-task :git => [*git_files]
+multitask :git => [*git_files]
 
 desc "Install homebrew"
 task :homebrew => ["/usr/local/bin/brew"]
@@ -114,7 +118,7 @@ end
 
 login_files = Stow.stow(PWD.join("login"))
 desc "Configure login"
-task :login => [*login_files]
+multitask :login => [*login_files]
 
 desc "Install python"
 task :python => ["/usr/local/bin/python3"]
@@ -122,7 +126,7 @@ brew "python", "/usr/local/bin/python3"
 
 readline_files = Stow.stow(PWD.join("readline"))
 desc "Configure readline"
-task :readline => [*readline_files]
+multitask :readline => [*readline_files]
 
 desc "Install ripgrep"
 task :ripgrep => ["/usr/local/bin/rg"]
@@ -130,11 +134,11 @@ brew "ripgrep", "/usr/local/bin/rg"
 
 sh_files = Stow.stow(PWD.join("sh"))
 desc "Configure sh"
-task :sh => [*sh_files]
+multitask :sh => [*sh_files]
 
 ssh_files = Stow.stow(PWD.join("ssh"))
 desc "Configure ssh"
-task :ssh => [*ssh_files]
+multitask :ssh => [*ssh_files]
 
 desc "Install bundler"
 task :bundle => ["/usr/local/bin/bundle"]

@@ -20,6 +20,14 @@ if test -t 1; then
         HISTCONTROL='ignoredups:erasedups'
         shopt -s histappend
     fi
+
+    ef() {
+        __files="$(rg --files --hidden -0 2>/dev/null | fzf-tmux --read0 --print0 --exit-0 --select-1 --multi --query="$*")"
+
+        if test -n "${__files}"; then
+            printf "%s" "${__files}" | xargs -0 "${VISUAL:-${EDITOR:-vi}}"
+        fi
+    }
 fi
 
 __pathadd() {

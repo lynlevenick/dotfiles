@@ -226,8 +226,7 @@ point reaches the beginning of end of the buffer, stop there."
   :config (ido-ubiquitous-mode 1))
 (use-package ido-vertical-mode
   :after ido
-  :config (ido-vertical-mode 1)
-  :custom (ido-vertical-show-count t))
+  :config (ido-vertical-mode 1))
 
 (provide 'init)
 ;;; init.el ends here

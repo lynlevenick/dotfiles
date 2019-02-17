@@ -61,9 +61,8 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil t))
 
-(eval-when-compile
-  (straight-use-package 'use-package)
-  (setf straight-use-package-by-default t))
+(straight-use-package 'use-package)
+(setf straight-use-package-by-default t)
 
 (use-package no-littering)
 
@@ -134,6 +133,7 @@
 
 (use-package srcery-theme
   :config (load-theme 'srcery t))
+
 (use-package minions
   :config (minions-mode 1)
   :custom (minions-mode-line-lighter "\u2026"))
