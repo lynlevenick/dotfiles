@@ -76,8 +76,8 @@ end
 PWD = Pathname.new(__FILE__).dirname.freeze
 
 desc "Install and configure all programs"
-task :default => %i[emacs fonts fzf git homebrew login python readline ripgrep
-                    sh ssh devenv]
+task :default => %i[emacs fonts fzf git highlight homebrew login python
+                    readline ripgrep sh ssh devenv]
 
 emacs_files = Stow.stow(PWD.join("emacs"))
 desc "Install and configure emacs"
@@ -102,6 +102,10 @@ brew "fzf", "/usr/local/bin/fzf"
 git_files = Stow.stow(PWD.join("git"))
 desc "Configure git"
 multitask :git => [*git_files]
+
+desc "Install highlight"
+task :highlight => ["/usr/local/bin/highlight"]
+brew "highlight", "/usr/local/bin/highlight"
 
 desc "Install homebrew"
 task :homebrew => ["/usr/local/bin/brew"]

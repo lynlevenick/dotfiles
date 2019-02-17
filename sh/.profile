@@ -32,13 +32,18 @@ if test -t 1; then
     __ef_fzf() {
         fzf-tmux --read0 --print0 --exit-0 --select-1 --multi "$@"
     }
+    if command -v highlight >/dev/null; then
+        __ef_highlighter='highlight --out-format=ansi {} 2>/dev/null || cat {}'
+    else
+        __ef_highlighter='cat {}'
+    fi
 
     ef() {
         __files="$(__ef_files | __ef_fzf --query="$*")"
         __ef_action
     }
     efp() {
-        __files="$(__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) echo {}: binary file ;; *) cat {} || head -n "${LINES}" ;; esac')"
+        __files="$(__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) echo {}: binary file ;; *) '"${__ef_highlighter}"' || head -n "${LINES}" ;; esac')"
         __ef_action
     }
 fi
