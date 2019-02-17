@@ -26,16 +26,6 @@ if test -t 1; then
             ${VISUAL:-${EDITOR:-vi}} -- "${1%??}"
         fi
     }
-    __ef_safety() {
-        printf '$'
-    }
-
-    __ef_files() {
-        rg --files --hidden -0 "$@" 2>/dev/null
-    }
-    __ef_fzf() {
-        fzf-tmux --read0 --exit-0 --select-1 "$@"
-    }
 
     if command -v highlight >/dev/null; then
         __ef_highlighter='(highlight --out-format=ansi {} 2>/dev/null || cat {})'
@@ -44,10 +34,18 @@ if test -t 1; then
     fi
 
     ef() {
-        __ef_action "$( (__ef_files | __ef_fzf --query="$*") && __ef_safety)"
-    }
-    efp() {
-        __ef_action "$( (__ef_files | __ef_fzf --query="$*" --preview='case "$(file --mime {})" in *binary*) printf '\''%s: binary file'\'' {} ;; *) '"${__ef_highlighter}"' | head -n "$((LINES * 4))" ;; esac') && __ef_safety)"
+        __ef_action "$(
+            (rg --files --hidden --null 2>/dev/null |
+             fzf-tmux --read0 --select-1 --query="$*" \
+                       --bind '?:toggle-preview' \
+                       --preview '
+                           case "$(file --mime {})" in *binary*)
+                               printf '\''%s: binary file'\'' {} ;;
+                               *) '"${__ef_highlighter}"' |
+                                  head -n "$((LINES * 4))" ;;
+                           esac'
+            ) && printf '$'
+        )"
     }
 fi
 
