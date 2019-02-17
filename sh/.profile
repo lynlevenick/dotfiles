@@ -4,7 +4,7 @@ if test -t 1; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
     export LSCOLORS='ExFxCxDxBxegedabagacad'
-    export VISUAL='emacs'
+    export VISUAL="${EDITOR}"
 
     __ps1_err_color="$(tput setaf 1)"
     __ps1_err() {
@@ -23,7 +23,7 @@ if test -t 1; then
 
     __ef_action() {
         if test -n "$@"; then
-            "${VISUAL:-${EDITOR:-vi}}" -- "$@"
+            ${VISUAL:-${EDITOR:-vi}} -- "$@"
         fi
     }
     __ef_files() {
