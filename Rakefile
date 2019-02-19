@@ -36,7 +36,7 @@ module Stow
     # Transform a source filename into a destination filename
     def target(source, from, into)
       dirname = source.dirname.relative_path_from(from)
-      into.join(dirname).join(source.basename)
+      into.join(dirname, source.basename)
     end
 
     # Create a rake task to symlink target to source
