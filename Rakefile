@@ -157,7 +157,6 @@ task :devenv => [PWD.join(".bundle")]
 file PWD.join(".bundle") => "/usr/local/bin/bundle" do
   sh "bundle", "install",
      "--gemfile", PWD.join("Gemfile").to_s,
-     "--jobs", "2",
      "--path", PWD.join(".bundle").to_s
 
   sh "touch", "-c", PWD.join(".bundle").to_s
