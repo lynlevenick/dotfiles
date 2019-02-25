@@ -39,6 +39,7 @@ Used to generate symbols for the hook functions.")
   :hook (after-init . exec-path-from-shell-initialize))
 (use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
+
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
 ;;;; Editing

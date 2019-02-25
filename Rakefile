@@ -5,14 +5,67 @@ abort "Don't run this as root!" if Process.uid.zero?
 require "open3"
 require "pathname"
 
-# Create rake tasks that emulate GNU Stow
+PWD = Pathname.new(__dir__).freeze
+
+# Create Rake tasks to install software through Homebrew
+module Brew
+  extend Rake::DSL
+
+  # Install through standard Homebrew
+  def self.brew(formula,
+                as: Pathname.new("/usr/local/bin").join(formula.to_s),
+                **kwargs)
+    easy_install(formula, as: as, **kwargs) do
+      sh "brew", "install", formula.to_s
+      sh "touch", "-c", as.to_s
+    end
+  end
+
+  # Install through Homebrew Cask
+  def self.cask(formula, as:, **kwargs)
+    easy_install(formula, as: as, **kwargs) do
+      sh "brew", "cask", "install", formula.to_s
+      sh "touch", "-c", as.to_s
+    end
+  end
+
+  class << self
+    # Generate a description for a formula and dependencies
+    def easy_description(formula, dependencies: [])
+      ["Install",
+       dependencies.nil? || dependencies.empty? ? nil : "and configure",
+       formula.to_s].compact.join(" ")
+    end
+
+    # Create tasks to structure setting up a formula then
+    # yield to a block for installation
+    def easy_install(formula,
+                     describe: true,
+                     as:, dependencies: [], binary_dependencies: [])
+      raise ArgumentError, "Must pass a block" unless block_given?
+
+      desc easy_description(formula, dependencies: dependencies) if describe
+      multitask formula => [as.to_s, *dependencies]
+      file as.to_s => binary_dependencies.dup << "/usr/local/bin/brew" do
+        yield
+      end
+    end
+  end
+end
+
+# Create Rake tasks that emulate GNU Stow
 module Stow
   extend Rake::DSL
 
-  # Create a set of rake tasks that will link all files from the source
-  # directory to the destination directory and return the identifiers
-  # of those tasks
-  def self.stow(from, into: ENV["HOME"])
+  def self.stow(target, from: PWD.join(target.to_s), **kwargs)
+    dependencies = tasks(from, **kwargs)
+    desc "Configure #{target}"
+    multitask target => dependencies
+  end
+
+  # Create tasks to link all files from the source directory
+  # to the destination directory and return the targets
+  def self.tasks(from, into: ENV["HOME"])
     from = Pathname.new(from).expand_path
     into = Pathname.new(into).expand_path
 
@@ -59,51 +112,12 @@ module Stow
   end
 end
 
-def easy_description(formula, dependencies: [])
-  ["Install",
-   dependencies.nil? || dependencies.empty? ? nil : "and configure",
-   formula.to_s].compact.join(" ")
-end
-
-def easy_install(formula, as:, dependencies: [], binary_dependencies: [])
-  raise ArgumentError, "Must pass a block" unless block_given?
-
-  desc easy_description(formula, dependencies: dependencies)
-  task formula => [as, *dependencies]
-  file as => binary_dependencies.dup << "/usr/local/bin/brew" do
-    yield
-  end
-end
-
-def brew(formula,
-         as: Pathname.new("/usr/local/bin").join(formula.to_s).to_s,
-         **kwargs)
-  easy_install(formula, as: as, **kwargs) do
-    sh "brew", "install", formula.to_s
-    sh "touch", "-c", as
-  end
-end
-
-def cask(formula,
-         as:,
-         binary_dependencies: [])
-  file as => binary_dependencies.dup << "/usr/local/bin/brew" do
-    sh "brew", "cask", "install", formula.to_s
-    sh "touch", "-c", as
-  end
-end
-
-PWD = Pathname.new(__dir__).freeze
-
 desc "Install and configure all programs"
 task default: %i[emacs fonts fzf git highlight homebrew login python
                  readline ripgrep sh ssh devenv]
 
-emacs_files = Stow.stow(PWD.join("emacs"))
-desc "Install and configure emacs"
-multitask emacs: ["/Applications/Emacs.app",
-                  *emacs_files]
-cask "emacs", as: "/Applications/Emacs.app"
+Brew.cask :emacs, as: "/Applications/Emacs.app",
+                  dependencies: Stow.tasks(PWD.join("emacs"))
 
 fonts_to_install = {
   "homebrew/cask-fonts/font-symbola" =>
@@ -112,16 +126,16 @@ fonts_to_install = {
     "#{ENV['HOME']}/Library/Fonts/Go Mono Nerd Font Complete.ttf",
 }.freeze
 desc "Install fonts"
-task fonts: [*fonts_to_install.values]
-fonts_to_install.each do |formula, path| cask formula, as: path end
+task fonts: [*fonts_to_install.keys]
+fonts_to_install.each do |formula, path|
+  Brew.cask formula, as: path, describe: false
+end
 
-brew :fzf
+Brew.brew :fzf
 
-git_files = Stow.stow(PWD.join("git"))
-desc "Configure git"
-multitask git: [*git_files]
+Stow.stow :git
 
-brew :highlight
+Brew.brew :highlight
 
 desc "Install homebrew"
 task homebrew: ["/usr/local/bin/brew"]
@@ -136,25 +150,17 @@ file "/usr/local/bin/brew" do
   sh "touch", "-c", "/usr/local/bin/brew"
 end
 
-login_files = Stow.stow(PWD.join("login"))
-desc "Configure login"
-multitask login: [*login_files]
+Stow.stow :login
 
-brew :python, as: "/usr/local/bin/python3"
+Brew.brew :python, as: "/usr/local/bin/python3"
 
-readline_files = Stow.stow(PWD.join("readline"))
-desc "Configure readline"
-multitask readline: [*readline_files]
+Stow.stow :readline
 
-brew :ripgrep, as: "/usr/local/bin/rg"
+Brew.brew :ripgrep, as: "/usr/local/bin/rg"
 
-sh_files = Stow.stow(PWD.join("sh"))
-desc "Configure sh"
-multitask sh: [*sh_files]
+Stow.stow :sh
 
-ssh_files = Stow.stow(PWD.join("ssh"))
-desc "Configure ssh"
-multitask ssh: [*ssh_files]
+Stow.stow :ssh
 
 desc "Install bundler"
 task bundle: ["/usr/local/bin/bundle"]
