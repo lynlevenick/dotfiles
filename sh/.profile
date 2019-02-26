@@ -37,14 +37,16 @@ if test -t 1; then
         __ef_action "$(
             (rg --files --hidden --null 2>/dev/null |
              fzf-tmux --read0 --select-1 --query="$*" \
-                       --bind '?:toggle-preview' \
-                       --preview '
-                           case "$(file --mime {})" in *binary*)
-                               printf '\''%s: binary file'\'' {} ;;
-                               *) '"${__ef_highlighter}"' |
+                      --bind '?:toggle-preview' \
+                      --preview '
+                          case "$(file --mime {})" in
+                              *binary*)
+                                  printf '\''%s: binary file'\'' {} ;;
+                              *)
+                                  '"${__ef_highlighter}"' |
                                   head -n "$((LINES * 4))" ;;
-                           esac' \
-                       --preview-window hidden
+                          esac' \
+                      --preview-window hidden
             ) && printf '$'
         )"
     }
