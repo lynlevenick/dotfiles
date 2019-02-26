@@ -36,7 +36,10 @@ Used to generate symbols for the hook functions.")
   :init
   (with-eval-after-load 'projectile
     (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
-  :hook (after-init . exec-path-from-shell-initialize))
+  :hook (after-init . exec-path-from-shell-initialize)
+  :custom
+  (exec-path-from-shell-arguments nil)
+  (exec-path-from-shell-check-startup-files nil))
 (use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
 
