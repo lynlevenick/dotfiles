@@ -43,7 +43,8 @@ if test -t 1; then
                                printf '\''%s: binary file'\'' {} ;;
                                *) '"${__ef_highlighter}"' |
                                   head -n "$((LINES * 4))" ;;
-                           esac'
+                           esac' \
+                       --preview-window hidden
             ) && printf '$'
         )"
     }
