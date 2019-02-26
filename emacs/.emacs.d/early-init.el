@@ -123,9 +123,10 @@
   "Return NAME when NAME is available as a font. Nil otherwise."
 
   (car (member name (font-family-list))))
-(let ((available (cl-some #'lyn-font-available-p lyn-font-stack)))
-  (when available
-    (push `(font . ,(concat available "-" (number-to-string lyn-font-size))) default-frame-alist)))
+(let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
+  (when font
+    (push (cons 'font (concat font "-" (number-to-string lyn-font-size)))
+          default-frame-alist)))
 
 (setq frame-title-format nil
       ns-use-proxy-icon nil)
