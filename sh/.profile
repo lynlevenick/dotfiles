@@ -79,14 +79,14 @@ INSERT INTO dirs (dir, frecency)
     ON CONFLICT (dir) DO UPDATE SET
     frecency = frecency + excluded.frecency;
 SQL
-        __zsql_count="$(
+        __zsql_sum="$(
             sqlite3 "${__zsql_cache}" <<SQL
 .timeout 1000
 SELECT SUM(frecency) FROM dirs;
 SQL
         )"
 
-        if test "${__zsql_count}" -gt 1000; then
+        if test "${__zsql_sum}" -gt 1000; then
             sqlite3 "${__zsql_cache}" <<SQL
 .timeout 1000
 BEGIN TRANSACTION;
@@ -107,12 +107,21 @@ SQL
     }
 
     z() {
-        __zsql_action "$(
-            sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --query="$*" --tiebreak=index --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
+        if test -n "$*"; then
+            __zsql_action "$(
+                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --tiebreak=index --filter="$*" | head -n1 && printf '$'
 .mode tcl
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
-        )"
+            )"
+        else
+            __zsql_action "$(
+                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --tiebreak=index --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
+.mode tcl
+SELECT dir FROM dirs ORDER BY frecency DESC;
+SQL
+            )"
+        fi
     }
 fi
 
