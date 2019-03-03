@@ -102,21 +102,21 @@ SQL
 
     __zsql_action() {
         if test -n "${1%??}"; then
-            cd "${1%??}" || printf "fatal: Could not cd to '%s'" "${1%??}"
+            cd "${1%??}" || printf "fatal: cd: %s" "${1%??}"
         fi
     }
 
     z() {
         if test -n "$*"; then
             __zsql_action "$(
-                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --tiebreak=index --filter="$*" | head -n1 && printf '$'
+                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --filter="$*" | head -n1 && printf '$'
 .mode tcl
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
             )"
         else
             __zsql_action "$(
-                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --tiebreak=index --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
+                sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
 .mode tcl
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
