@@ -6,7 +6,7 @@
 ;;;; Disable gc and file name handlers until startup is finished
 (setf file-name-handler-alist nil)
 (defun lyn-file-name-handler-restore ()
-  "Restore default file name handler after Emacs has finished starting up."
+  "Restore the default file name handler."
 
   (setf file-name-handler-alist
         (append (car (get 'file-name-handler-alist 'standard-value))
@@ -24,12 +24,12 @@
   (setf gc-cons-percentage (car (get 'gc-cons-percentage 'standard-value))
         gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value))))
 (defun lyn-gc-finalize ()
-  "Finalize garbage collection reset and add minibuffer hooks."
+  "Reset garbage collection and add minibuffer hooks to toggle it."
 
   (remove-hook 'pre-command-hook #'lyn-gc-finalize)
   (lyn-gc-restore)
   ;; Additionally disable and restore gc on minibuffer,
-  ;; as amx presumably allocates a lot of memory like smex
+  ;; as amx/flx allocate a lot of memory
   (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
   (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
 (lyn-gc-disable)
@@ -61,7 +61,6 @@
   (load bootstrap-file nil t))
 
 (eval-when-compile
-  (setf use-package-expand-minimally t)
   (straight-use-package 'use-package))
 
 (use-package no-littering)

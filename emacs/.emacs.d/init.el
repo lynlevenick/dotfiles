@@ -32,7 +32,6 @@ Used to generate symbols for the hook functions.")
   :hook (css-mode . add-node-modules-path))
 (use-package bind-key)
 (use-package exec-path-from-shell
-  :commands (exec-path-from-shell-initialize)
   :init
   (with-eval-after-load 'projectile
     (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
@@ -43,6 +42,7 @@ Used to generate symbols for the hook functions.")
 (use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
 
+(bind-key "C-?" #'undo-only)
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
 ;;;; Editing
@@ -71,7 +71,8 @@ point reaches the beginning of end of the buffer, stop there."
 (bind-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
 
 (use-package editorconfig
-  :hook (after-init . editorconfig-mode))
+  :commands (editorconfig-mode)
+  :init (lyn-with-hook-once 'find-file-hook (editorconfig-mode 1)))
 (use-package flycheck
   :init
   (defvar lyn-flycheck-handle-alist
@@ -140,12 +141,14 @@ point reaches the beginning of end of the buffer, stop there."
   :after magit
   :hook (magit-mode . turn-on-magit-gitflow))
 (use-package mode-line-bell
-  :hook (after-init . mode-line-bell-mode))
+  :commands (mode-line-bell-mode)
+  :init (lyn-with-hook-once 'pre-command-hook (mode-line-bell-mode 1)))
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode))
 (use-package projectile
+  :commands (projectile-mode)
   :bind-keymap (("s-p" . projectile-command-map))
-  :hook (after-init . projectile-mode))
+  :init (lyn-with-hook-once 'pre-command-hook (projectile-mode 1)))
 (use-package tramp
   :defer
   :init (lyn-with-hook-once 'post-self-insert-hook (require 'tramp)))
@@ -200,11 +203,11 @@ point reaches the beginning of end of the buffer, stop there."
   :init (lyn-with-hook-once 'pre-command-hook (amx-mode))
   :bind (("M-X" . amx-major-mode-commands)))
 (use-package anzu
-  :commands (anzu-query-replace anzu-query-replace-regexp)
+  :commands (anzu-query-replace anzu-query-replace-regexp global-anzu-mode)
   :init
   (bind-key [remap query-replace] #'anzu-query-replace)
   (bind-key [remap query-replace-regexp] #'anzu-query-replace-regexp)
-  :hook (after-init . global-anzu-mode))
+  (lyn-with-hook-once 'pre-command-hook (global-anzu-mode 1)))
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
