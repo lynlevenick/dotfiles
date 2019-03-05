@@ -58,12 +58,11 @@ if test -t 1; then
             mkdir -p "$(dirname "${__zsql_cache}")"
 
             sqlite3 "${__zsql_cache}" <<SQL
-CREATE TABLE meta (version TEXT, current_at TEXT);
+PRAGMA journal_mode=WAL;
+
 CREATE TABLE dirs (dir TEXT, frecency INTEGER);
 CREATE UNIQUE INDEX index_by_dir ON dirs (dir);
 CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
-
-INSERT INTO meta (version, current_at) VALUES ('0.1.0', datetime());
 SQL
         fi
 
@@ -73,7 +72,7 @@ SQL
     __zsql_add_async() {
         __zsql_escaped="$(printf '%s$' "${1}" | sed 's/'\''/'\'\''/g')"
         sqlite3 "${__zsql_cache}" <<SQL
-.timeout 1000
+.timeout 100
 INSERT INTO dirs (dir, frecency)
     VALUES ('${__zsql_escaped%?}', 1)
     ON CONFLICT (dir) DO UPDATE SET
@@ -81,14 +80,14 @@ INSERT INTO dirs (dir, frecency)
 SQL
         __zsql_sum="$(
             sqlite3 "${__zsql_cache}" <<SQL
-.timeout 1000
+.timeout 100
 SELECT SUM(frecency) FROM dirs;
 SQL
         )"
 
-        if test "${__zsql_sum}" -gt 1000; then
+        if test "0${__zsql_sum}" -gt 1000; then
             sqlite3 "${__zsql_cache}" <<SQL
-.timeout 1000
+.timeout 100
 BEGIN TRANSACTION;
 UPDATE dirs SET frecency = CAST(frecency * 0.9 AS INTEGER);
 DELETE FROM dirs WHERE frecency <= 0;
@@ -111,6 +110,7 @@ SQL
             __zsql_action "$(
                 sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --filter="$*" | head -n1 && printf '$'
 .mode tcl
+.timeout 100
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
             )"
@@ -118,6 +118,7 @@ SQL
             __zsql_action "$(
                 sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
 .mode tcl
+.timeout 100
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
             )"
