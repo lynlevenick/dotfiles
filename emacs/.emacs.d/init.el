@@ -45,6 +45,8 @@ Used to generate symbols for the hook functions.")
 (bind-key "C-?" #'undo-only)
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
+(run-with-idle-timer 5 nil #'server-start)
+
 ;;;; Editing
 (defun lyn-smart-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
