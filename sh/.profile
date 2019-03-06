@@ -57,7 +57,7 @@ if test -t 1; then
         if test ! -r "${__zsql_cache}"; then
             mkdir -p "$(dirname "${__zsql_cache}")"
 
-            sqlite3 "${__zsql_cache}" <<SQL
+            sqlite3 "${__zsql_cache}" <<SQL >/dev/null
 PRAGMA journal_mode=WAL;
 
 CREATE TABLE dirs (dir TEXT, frecency INTEGER);
