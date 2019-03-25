@@ -27,6 +27,8 @@ Used to generate symbols for the hook functions.")
 (use-package add-node-modules-path
   :commands (add-node-modules-path)
   :init
+  (with-eval-after-load 'elm-mode
+    (add-hook 'elm-mode-hook #'add-node-modules-path))
   (with-eval-after-load 'prettier-js
     (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
   :hook (css-mode . add-node-modules-path))
@@ -37,7 +39,7 @@ Used to generate symbols for the hook functions.")
     (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
   :hook (after-init . exec-path-from-shell-initialize)
   :custom
-  (exec-path-from-shell-arguments nil)
+  (exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-check-startup-files nil))
 (use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
@@ -145,6 +147,34 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package mode-line-bell
   :commands (mode-line-bell-mode)
   :init (lyn-with-hook-once 'pre-command-hook (mode-line-bell-mode 1)))
+(use-package multi-term
+  :commands (multi-term multi-term-dedicated-window-p)
+  :init
+  (defun lyn-multi-term-dedicated-dwim ()
+    "Close dedicated terminal if focused, or focus the dedicated terminal."
+    (interactive)
+
+    (cond ((multi-term-dedicated-window-p)
+           (multi-term-dedicated-close))
+          ((multi-term-dedicated-exist-p)
+           (select-window multi-term-dedicated-window))
+          ((progn
+             (multi-term-dedicated-open)
+             (select-window multi-term-dedicated-window)))))
+  :bind (("C-c d" . lyn-multi-term-dedicated-dwim)
+         ("C-c t" . multi-term))
+  :custom
+  (term-bind-key-alist '(("<C-tab>" . multi-term-next)
+                         ("<C-S-tab>" . multi-term-prev)
+                         ("C-c C-c" . term-interrupt-subjob)
+                         ("C-y" . term-paste)
+                         ("<C-backspace>" . term-send-raw)
+                         ("M-b" . term-send-raw-meta)
+                         ("M-f" . term-send-raw-meta)
+                         ("M-d" . term-send-raw-meta)
+                         ("<M-backspace>" . term-send-raw-meta)
+                         ("<M-left>" . term-send-backward-word)
+                         ("<M-right>" . term-send-forward-word))))
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode))
 (use-package projectile
@@ -155,7 +185,7 @@ point reaches the beginning of end of the buffer, stop there."
   :defer
   :init (lyn-with-hook-once 'post-self-insert-hook (require 'tramp)))
 (use-package transpose-frame
-  :bind (("C-c t" . transpose-frame)))
+  :bind (("C-c /" . transpose-frame)))
 (use-package windsize
   :bind (("C-s-<up>" . windsize-up)
          ("C-s-<down>" . windsize-down)
@@ -170,15 +200,22 @@ point reaches the beginning of end of the buffer, stop there."
   :init (bind-key [remap delete-other-windows] #'zygospore-toggle-delete-other-windows))
 
 ;;;; Major Modes
+(use-package elm-mode
+  :commands (company-elm)
+  :mode "\\.elm\\'"
+  :config (add-to-list 'company-backends #'company-elm)
+  :custom (elm-format-on-save t))
 (use-package haml-mode
   :mode "\\.haml\\'")
 (use-package js2-mode
-  :mode "\\.js\\'"
+  :defer
   :custom (js2-skip-preprocessor-directives t))
+(use-package nim-mode
+  :mode "\\.nim\\(s\\|ble\\)?\\'")
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (use-package rjsx-mode
-  :mode "\\.jsx\\'")
+  :mode "\\.jsx?\\'")
 (use-package ruby-mode :straight nil
   :defer
   :custom
@@ -186,6 +223,8 @@ point reaches the beginning of end of the buffer, stop there."
   (ruby-insert-encoding-magic-comment nil))
 (use-package rust-mode
   :mode "\\.rs\\'")
+(use-package web-mode
+  :mode "\\.njkl?\\'")
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
 
@@ -194,10 +233,13 @@ point reaches the beginning of end of the buffer, stop there."
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
 (use-package prettier-js
-  :after js2-mode
-  :hook
-  (js2-mode . prettier-js-mode)
-  (js2-jsx-mode . prettier-js-mode))
+  :commands (prettier-js-mode)
+  :init
+  (with-eval-after-load 'js2-mode
+    (add-hook 'js2-mode-hook #'prettier-js-mode)
+    (add-hook 'js2-jsx-mode-hook #'prettier-js-mode))
+  (with-eval-after-load 'rjsx-mode
+    (add-hook 'rjsx-mode-hook #'prettier-js-mode)))
 
 ;;;; Searching
 (use-package amx
