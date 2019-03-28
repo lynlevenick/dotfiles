@@ -175,6 +175,13 @@ point reaches the beginning of end of the buffer, stop there."
                          ("<M-backspace>" . term-send-raw-meta)
                          ("<M-left>" . term-send-backward-word)
                          ("<M-right>" . term-send-forward-word))))
+(use-package nswbuff
+  :bind (("<C-tab>" . nswbuff-switch-to-next-buffer)
+         ("<C-S-tab>" . nswbuff-switch-to-previous-buffer))
+  :custom
+  (nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list)
+  (nswbuff-clear-delay 1)
+  (nswbuff-display-intermediate-buffers t))
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode))
 (use-package projectile
@@ -212,6 +219,9 @@ point reaches the beginning of end of the buffer, stop there."
   :custom (js2-skip-preprocessor-directives t))
 (use-package nim-mode
   :mode "\\.nim\\(s\\|ble\\)?\\'")
+(use-package nov
+  :mode ("\\.epub\\'" . nov-mode)
+  :custom (nov-text-width 60))
 (use-package org
   :mode ("\\.org\\'" . org-mode))
 (use-package rjsx-mode

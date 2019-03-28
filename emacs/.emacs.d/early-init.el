@@ -124,8 +124,8 @@
   (car (member name (font-family-list))))
 (let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
   (when font
-    (push (cons 'font (concat font "-" (number-to-string lyn-font-size)))
-          default-frame-alist)))
+    (set-face-font 'default (concat font "-" (number-to-string lyn-font-size)))))
+(set-face-font 'variable-pitch (concat "Charter-" (number-to-string lyn-font-size)))
 
 (setq frame-title-format nil
       ns-use-proxy-icon nil)
