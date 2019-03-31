@@ -29,8 +29,10 @@ Used to generate symbols for the hook functions.")
   :init
   (with-eval-after-load 'elm-mode
     (add-hook 'elm-mode-hook #'add-node-modules-path))
-  (with-eval-after-load 'prettier-js
-    (add-hook 'prettier-js-mode-hook #'add-node-modules-path))
+  (with-eval-after-load 'rjsx-mode
+    (add-hook 'rjsx-mode-hook #'add-node-modules-path))
+  (with-eval-after-load 'typescript-mode
+    (add-hook 'typescript-mode-hook #'add-node-modules-path))
   :hook (css-mode . add-node-modules-path))
 (use-package bind-key)
 (use-package exec-path-from-shell
@@ -226,9 +228,6 @@ otherwise `default-directory'."
   :custom (elm-format-on-save t))
 (use-package haml-mode
   :mode "\\.haml\\'")
-(use-package js2-mode
-  :defer
-  :custom (js2-skip-preprocessor-directives t))
 (use-package nim-mode
   :mode "\\.nim\\(s\\|ble\\)?\\'")
 (use-package nov
@@ -245,6 +244,18 @@ otherwise `default-directory'."
   (ruby-insert-encoding-magic-comment nil))
 (use-package rust-mode
   :mode "\\.rs\\'")
+(use-package tide
+  :commands (tide-setup)
+  :init
+  (defun lyn-tide-setup ()
+    "Prepare for Typescript development."
+
+    (tide-setup)
+    (tide-hl-identifier-mode 1)
+    (add-hook 'before-save-hook #'tide-format-before-save nil :local))
+  (add-hook 'typescript-mode-hook #'lyn-tide-setup))
+(use-package typescript-mode
+  :mode "\\.tsx?\\'")
 (use-package web-mode
   :mode "\\.njkl?\\'")
 (use-package yaml-mode
@@ -257,9 +268,6 @@ otherwise `default-directory'."
 (use-package prettier-js
   :commands (prettier-js-mode)
   :init
-  (with-eval-after-load 'js2-mode
-    (add-hook 'js2-mode-hook #'prettier-js-mode)
-    (add-hook 'js2-jsx-mode-hook #'prettier-js-mode))
   (with-eval-after-load 'rjsx-mode
     (add-hook 'rjsx-mode-hook #'prettier-js-mode)))
 
