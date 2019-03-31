@@ -14,7 +14,12 @@ if test -t 1; then
         fi
     }
     __reset_color="$(tput sgr0)"
-    PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
+    case "${TERM}" in
+        eterm*)
+            PS1="\[${__reset_color}\]\w \[$(__ps1_err)\]\\$\[${__reset_color}\] " ;;
+        *)
+            PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
+    esac
 
     if test "$(command -v shopt)" = "shopt"; then
         HISTCONTROL='ignoredups:erasedups'

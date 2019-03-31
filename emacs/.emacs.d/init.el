@@ -150,6 +150,18 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package multi-term
   :commands (multi-term multi-term-dedicated-window-p)
   :init
+  (defun lyn-multi-term-dwim (&optional dedicated)
+    "Create new terminal in the project root if available,
+otherwise `default-directory'."
+    (interactive)
+
+    (let ((open-command (if dedicated
+                            #'multi-term-dedicated-open
+                          #'multi-term)))
+      (if (projectile-project-p)
+          (projectile-with-default-dir (projectile-project-root)
+            (funcall open-command))
+        (funcall open-command))))
   (defun lyn-multi-term-dedicated-dwim ()
     "Close dedicated terminal if focused, or focus the dedicated terminal."
     (interactive)
@@ -159,10 +171,10 @@ point reaches the beginning of end of the buffer, stop there."
           ((multi-term-dedicated-exist-p)
            (select-window multi-term-dedicated-window))
           ((progn
-             (multi-term-dedicated-open)
+             (lyn-multi-term-dwim :dedicated)
              (select-window multi-term-dedicated-window)))))
   :bind (("C-c d" . lyn-multi-term-dedicated-dwim)
-         ("C-c t" . multi-term))
+         ("C-c t" . lyn-multi-term-dwim))
   :custom
   (term-bind-key-alist '(("<C-tab>" . multi-term-next)
                          ("<C-S-tab>" . multi-term-prev)
