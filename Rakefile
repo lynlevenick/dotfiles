@@ -143,7 +143,7 @@ file "/usr/local/bin/brew" do
   Open3.pipeline(
     ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
     "ruby",
-  ).all?(&:zero?) or raise "fatal: Homebrew install failed"
+  ).map(&:exitstatus).all?(&:zero?) or raise "fatal: Homebrew install failed"
 
   sh "brew", "doctor"
   sh "brew", "update"
