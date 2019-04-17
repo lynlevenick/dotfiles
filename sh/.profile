@@ -90,7 +90,7 @@ SELECT SUM(frecency) FROM dirs;
 SQL
         )"
 
-        if test "0${__zsql_sum}" -gt 1000; then
+        if test "0${__zsql_sum}" -gt 5000; then
             sqlite3 "${__zsql_cache}" <<SQL
 .timeout 100
 BEGIN TRANSACTION;
