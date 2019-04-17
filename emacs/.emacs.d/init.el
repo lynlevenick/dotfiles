@@ -52,6 +52,14 @@ Used to generate symbols for the hook functions.")
 (run-with-idle-timer 5 nil #'server-start)
 
 ;;;; Editing
+(defun lyn-smart-isearch-delete-char ()
+  "Delete the failed portion of the search string or the last character."
+  (interactive)
+
+  (with-isearch-suspended
+   (setf isearch-new-string (substring isearch-string 0 (or (isearch-fail-pos) (1- (length isearch-string))))
+         isearch-new-message (mapconcat 'isearch-text-char-description isearch-new-string ""))))
+(bind-key [remap isearch-delete-char] #'lyn-smart-isearch-delete-char)
 (defun lyn-smart-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
 
