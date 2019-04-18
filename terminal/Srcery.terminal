@@ -1187,9 +1187,9 @@
 	AAAZAAAAAAAAAAAAAAAAAAAA2Q==
 	</data>
 	<key>UseBoldFonts</key>
-	<false/>
-	<key>UseBrightBold</key>
 	<true/>
+	<key>UseBrightBold</key>
+	<false/>
 	<key>VisualBell</key>
 	<true/>
 	<key>blackColour</key>
