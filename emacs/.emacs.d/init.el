@@ -91,10 +91,10 @@ point reaches the beginning of end of the buffer, stop there."
   :init
   (defvar lyn-flycheck-handle-alist
     '(("bundle" . lyn-flycheck-bundle-exec))
-    "How to transform a special-cased executable for a command.")
+    "How to transform a executable with a schema for a command.")
   (defvar lyn-flycheck-wrap-alist
     '(("rubocop" . "bundle"))
-    "Executables to transform for special casing.")
+    "Executables and the schema to prepend to them for `lyn-flycheck-handle-alist'.")
   :hook (prog-mode . flycheck-mode)
   :config
   (defun lyn-flycheck-bundle-exec (executable special &rest args)
@@ -121,7 +121,7 @@ point reaches the beginning of end of the buffer, stop there."
                  executable special (cdr command))
         command)))
   :custom
-  (flycheck-errors-delay 0.25)
+  (flycheck-display-errors-delay 0.25)
   (flycheck-executable-find #'lyn-flycheck-executable-find)
   (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
 (use-package ws-butler
