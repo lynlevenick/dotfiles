@@ -88,6 +88,7 @@
  ;; Quiet byte compilation
  byte-compile-warnings '(not free-vars unresolved noruntime lexical)
  ;; Security
+ auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")
  gnutls-verify-error t
  tls-checktrust t
  tls-program '("gnutls-cli --x509cafile %t -p %p %h"
