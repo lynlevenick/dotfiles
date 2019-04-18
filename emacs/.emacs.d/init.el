@@ -59,7 +59,7 @@ Used to generate symbols for the hook functions.")
   (with-isearch-suspended
    (setf isearch-new-string (substring isearch-string 0 (or (isearch-fail-pos) (1- (length isearch-string))))
          isearch-new-message (mapconcat 'isearch-text-char-description isearch-new-string ""))))
-(bind-key [remap isearch-delete-char] #'lyn-smart-isearch-delete-char)
+(bind-key [remap isearch-delete-char] #'lyn-smart-isearch-delete-char isearch-mode-map)
 (defun lyn-smart-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
 
@@ -145,6 +145,8 @@ point reaches the beginning of end of the buffer, stop there."
   (wdired-allow-redirect-links t))
 (use-package dired-x :straight nil
   :after dired)
+(use-package forge
+  :after magit)
 (use-package magit
   :defer
   :init (lyn-with-hook-once 'find-file-hook (require 'magit))
