@@ -1,7 +1,7 @@
 [core]
-	excludesfile = ~/.gitignore
+  excludesfile = ~/.gitignore
 [user]
-	name = Lyn Levenick
-	email = lyn.levenick@gmail.com
+  name = Lyn Levenick
+  email = lyn.levenick@gmail.com
 [github]
-	user = lynlevenick
+  user = lynlevenick
