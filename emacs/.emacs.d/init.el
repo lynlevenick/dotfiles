@@ -27,13 +27,14 @@ Used to generate symbols for the hook functions.")
 (use-package add-node-modules-path
   :commands (add-node-modules-path)
   :init
+  (with-eval-after-load 'css-mode
+    (add-hook 'css-mode-hook #'add-node-modules-path))
   (with-eval-after-load 'elm-mode
     (add-hook 'elm-mode-hook #'add-node-modules-path))
   (with-eval-after-load 'rjsx-mode
     (add-hook 'rjsx-mode-hook #'add-node-modules-path))
   (with-eval-after-load 'typescript-mode
-    (add-hook 'typescript-mode-hook #'add-node-modules-path))
-  :hook (css-mode . add-node-modules-path))
+    (add-hook 'typescript-mode-hook #'add-node-modules-path)))
 (use-package bind-key)
 (use-package exec-path-from-shell
   :init
