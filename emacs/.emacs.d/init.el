@@ -11,7 +11,11 @@
 
 Used to generate symbols for the hook functions.")
 (defmacro lyn-with-hook-once (hook &rest body)
-  "Arrange to execute BODY once, the next time HOOK is run."
+  "Arrange to execute BODY once, the next time HOOK is run.
+
+This function is especially helpful when configuring package initialization.
+A global mode, or one which maps keys, can be set to run only after some
+context-relevant thing has happened, rather than loading immediately."
   (declare (indent defun))
 
   (let ((name (make-symbol (concat "with-hook-once--hook-" (number-to-string lyn-with-hook-once--count)))))
@@ -73,7 +77,8 @@ Used to generate symbols for the hook functions.")
 
 Move point to the first non-whitespace character on this line.
 If point is already there, move to the beginning of the line.
-Effectively toggle between the first non-whitespace character and
+
+Effectively toggles between the first non-whitespace character and
 the beginning of the line.
 
 If ARG is not nil or 1, move forward ARG - 1 lines first. If
@@ -94,7 +99,9 @@ point reaches the beginning of end of the buffer, stop there."
 
 (use-package editorconfig
   :commands (editorconfig-mode)
-  :init (lyn-with-hook-once 'find-file-hook (editorconfig-mode 1)))
+  :init
+  (lyn-with-hook-once 'find-file-hook
+    (editorconfig-mode 1)))
 (use-package flycheck
   :init
   (defvar lyn-flycheck-handle-alist
@@ -157,7 +164,9 @@ point reaches the beginning of end of the buffer, stop there."
   :after magit)
 (use-package magit
   :defer
-  :init (lyn-with-hook-once 'find-file-hook (require 'magit))
+  :init
+  (lyn-with-hook-once 'find-file-hook
+    (require 'magit))
   :custom
   (magit-list-refs-sortby "-committerdate")
   (magit-completing-read-function #'magit-ido-completing-read))
@@ -166,13 +175,15 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (magit-mode . turn-on-magit-gitflow))
 (use-package mode-line-bell
   :commands (mode-line-bell-mode)
-  :init (lyn-with-hook-once 'pre-command-hook (mode-line-bell-mode 1)))
+  :init
+  (lyn-with-hook-once 'pre-command-hook
+    (mode-line-bell-mode 1)))
 (use-package multi-term
   :commands (multi-term multi-term-dedicated-window-p)
   :init
   (defun lyn-multi-term-dwim (&optional dedicated)
     "Create new terminal in the project root if available,
-otherwise `default-directory'."
+otherwise in `default-directory'."
     (interactive)
 
     (let ((open-command (if dedicated
@@ -214,15 +225,29 @@ otherwise `default-directory'."
   (nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list)
   (nswbuff-clear-delay 1)
   (nswbuff-display-intermediate-buffers t))
+(use-package olivetti
+  :commands (turn-on-olivetti-mode)
+  :init
+  (with-eval-after-load 'org
+    (add-hook 'org-mode-hook #'turn-on-olivetti-mode)))
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode))
+(use-package paren-face
+  :commands (global-paren-face-mode)
+  :init
+  (lyn-with-hook-once 'after-change-major-mode-hook
+    (global-paren-face-mode)))
 (use-package projectile
   :commands (projectile-mode)
   :bind-keymap (("s-p" . projectile-command-map))
-  :init (lyn-with-hook-once 'pre-command-hook (projectile-mode 1)))
+  :init
+  (lyn-with-hook-once 'pre-command-hook
+    (projectile-mode 1)))
 (use-package tramp
   :defer
-  :init (lyn-with-hook-once 'post-self-insert-hook (require 'tramp)))
+  :init
+  (lyn-with-hook-once 'post-self-insert-hook
+    (require 'tramp)))
 (use-package transpose-frame
   :bind (("C-c /" . transpose-frame)))
 (use-package windsize
@@ -252,7 +277,36 @@ otherwise `default-directory'."
   :mode ("\\.epub\\'" . nov-mode)
   :custom (nov-text-width 60))
 (use-package org
-  :mode ("\\.org\\'" . org-mode))
+  :mode ("\\.org\\'" . org-mode)
+  :hook ((org-mode . variable-pitch-mode)
+         (org-mode . visual-line-mode))
+  :custom
+  (org-adapt-indentation nil)
+  (org-hide-emphasis-markers t)
+  (org-hide-leading-stars t)
+  (org-special-ctrl-k t)
+  (org-support-shift-select t)
+  :custom-face
+  ;; Fix heading size
+  (org-level-1               ((t (:weight semi-bold :height 1.0))))
+  (org-level-2               ((t (:weight semi-bold :height 1.0))))
+  (org-level-3               ((t (:weight semi-bold :height 1.0))))
+  (org-level-4               ((t (:weight semi-bold :height 1.0))))
+  (org-level-5               ((t (:weight semi-bold :height 1.0))))
+  ;; Fix link styling - TODO: color?
+  (org-link                  ((t (:underline nil))))
+  ;; These faces work better in monospace
+  (org-block                 ((t (:inherit fixed-pitch))))
+  (org-block-begin-line      ((t (:inherit fixed-pitch))))
+  (org-block-end-line        ((t (:inherit fixed-pitch))))
+  (org-checkbox              ((t (:inherit fixed-pitch))))
+  (org-code                  ((t (:inherit fixed-pitch))))
+  (org-document-info-keyword ((t (:inherit fixed-pitch))))
+  (org-formula               ((t (:inherit fixed-pitch))))
+  (org-latex-and-related     ((t (:inherit fixed-pitch))))
+  (org-meta-line             ((t (:inherit fixed-pitch))))
+  (org-table                 ((t (:inherit fixed-pitch))))
+  (org-verbatim              ((t (:inherit fixed-pitch)))))
 (use-package rjsx-mode
   :mode "\\.jsx?\\'")
 (use-package ruby-mode :straight nil
@@ -292,14 +346,17 @@ otherwise `default-directory'."
 ;;;; Searching
 (use-package amx
   :commands (amx-mode)
-  :init (lyn-with-hook-once 'pre-command-hook (amx-mode))
+  :init
+  (lyn-with-hook-once 'pre-command-hook
+    (amx-mode))
   :bind (("M-X" . amx-major-mode-commands)))
 (use-package anzu
   :commands (anzu-query-replace anzu-query-replace-regexp global-anzu-mode)
   :init
   (bind-key [remap query-replace] #'anzu-query-replace)
   (bind-key [remap query-replace-regexp] #'anzu-query-replace-regexp)
-  (lyn-with-hook-once 'pre-command-hook (global-anzu-mode 1)))
+  (lyn-with-hook-once 'pre-command-hook
+    (global-anzu-mode 1)))
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)

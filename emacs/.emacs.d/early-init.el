@@ -61,7 +61,9 @@
   (load bootstrap-file nil t))
 
 (eval-when-compile
-  (straight-use-package 'use-package))
+  (straight-use-package 'use-package)
+  (setf use-package-expand-minimally t
+        use-package-verbose nil))
 
 (use-package no-littering)
 
@@ -125,7 +127,8 @@
   (car (member name (font-family-list))))
 (let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
   (when font
-    (set-face-font 'default (concat font "-" (number-to-string lyn-font-size)))))
+    (set-face-font 'default (concat font "-" (number-to-string lyn-font-size)))
+    (set-face-font 'fixed-pitch (concat font "-" (number-to-string lyn-font-size)))))
 (set-face-font 'variable-pitch (concat "Charter-" (number-to-string lyn-font-size)))
 
 (setq frame-title-format nil
