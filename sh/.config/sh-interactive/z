@@ -49,8 +49,10 @@ __zsql_add() {
 }
 
 __zsql_action() {
-    if test -n "${1%??}"; then
-        cd "${1%??}" || printf "fatal: cd: %s" "${1%??}"
+    if test "$1" = '$'; then
+        printf "fatal: z: Not in history\n"
+    elif test -n "${1%??}"; then
+        cd "${1%??}" 2>/dev/null || printf "fatal: cd: %s not found\n" "${1%??}"
     fi
 }
 
