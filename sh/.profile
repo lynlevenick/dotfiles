@@ -6,43 +6,47 @@ if test -t 1; then
     export LSCOLORS='ExFxCxDxBxegedabagacad'
     export VISUAL='emacsclient -ua emacs'
 
-    __ps1_err_color="$(tput setaf 1)"
+    __attr_reset="$(tput sgr0)"
+
+    __attr_red="$(tput setaf 1)"
+    __attr_reverse="$(tput rev)"
+
     __ps1_err() {
         # shellcheck disable=SC2181
         if test "$?" -ne 0; then
-            printf '%s' "${__ps1_err_color}"
+            printf '%s' "${__attr_red}"
         fi
     }
-    __reset_attrs="$(tput sgr0)"
     case "${TERM}" in
         eterm*)
-            PS1="\[${__reset_attrs}\]\w \[\$(__ps1_err)\]\\$\[${__reset_attrs}\] " ;;
+            PS1="\[${__attr_reset}\]\w \[\$(__ps1_err)\]\\$\[${__attr_reset}\] " ;;
         *)
-            PS1="\[${__reset_attrs}\$(__ps1_err)\]\\$\[${__reset_attrs}\] "
+            PS1="\[${__attr_reset}\$(__ps1_err)\]\\$\[${__attr_reset}\] "
     esac
 
+    HISTCONTROL='ignoredups:erasedups'
     if test "$(command -v shopt)" = "shopt"; then
-        HISTCONTROL='ignoredups:erasedups'
         shopt -s histappend
     fi
 
-    __read_cursor_position="$(tput u7)"
-    __reverse_video="$(tput rev)"
-    __mark_unterminated() {
-        IFS='[;' read -p "${__read_cursor_position}" -s -dR __unused __cursor_row __cursor_col
-        if test "0${__cursor_col}" -gt 1; then
-            printf '%s\n' "${__reset_attrs}${__reverse_video}%"
-        fi
-    }
-
-    if test -n "${__read_cursor_position}"; then
+    if tput u7 >/dev/null; then
         # Terminal supports output of cursor position
+        __read_cursor_position="$(tput u7)"
+        __mark_unterminated() {
+            IFS='[;' read -p "${__read_cursor_position}" -s -dR __unused __cursor_row __cursor_col
+            if test "0${__cursor_col}" -gt 1; then
+                printf '%s\n' "${__attr_reset}${__attr_reverse}%"
+            fi
+        }
+
         PROMPT_COMMAND="__mark_unterminated;${PROMPT_COMMAND}"
     fi
 
-    for __cmd in "${HOME}/.config/sh-interactive"/*; do
-        . "${__cmd}"
-    done
+    if test -d "${HOME}/.config/sh-interactive"; then
+        for __cmd in "${HOME}/.config/sh-interactive"/*; do
+            . "${__cmd}"
+        done
+    fi
 fi
 
 __pathadd() {
