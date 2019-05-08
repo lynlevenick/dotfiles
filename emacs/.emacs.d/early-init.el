@@ -139,7 +139,7 @@
   :config (load-theme 'srcery t))
 
 (use-package minions
-  :config (minions-mode 1)
+  :config (minions-mode)
   :custom (minions-mode-line-lighter "\u2026"))
 
 (provide 'early-init)

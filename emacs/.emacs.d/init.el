@@ -101,7 +101,7 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (editorconfig-mode)
   :init
   (lyn-with-hook-once 'find-file-hook
-    (editorconfig-mode 1)))
+    (editorconfig-mode)))
 (use-package flycheck
   :init
   ;; Needed to allow (setf (url-type x) y)
@@ -178,7 +178,7 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (mode-line-bell-mode)
   :init
   (lyn-with-hook-once 'pre-command-hook
-    (mode-line-bell-mode 1)))
+    (mode-line-bell-mode)))
 (use-package multi-term
   :commands (multi-term multi-term-dedicated-window-p)
   :init
@@ -243,7 +243,7 @@ otherwise in `default-directory'."
   :bind-keymap (("s-p" . projectile-command-map))
   :init
   (lyn-with-hook-once 'pre-command-hook
-    (projectile-mode 1)))
+    (projectile-mode)))
 (use-package tramp
   :defer
   :init
@@ -324,7 +324,7 @@ otherwise in `default-directory'."
     "Prepare for Typescript development."
 
     (tide-setup)
-    (tide-hl-identifier-mode 1)
+    (tide-hl-identifier-mode)
     (add-hook 'before-save-hook #'tide-format-before-save nil :local))
   (add-hook 'typescript-mode-hook #'lyn-tide-setup))
 (use-package typescript-mode
@@ -357,7 +357,7 @@ otherwise in `default-directory'."
   (bind-key [remap query-replace] #'anzu-query-replace)
   (bind-key [remap query-replace-regexp] #'anzu-query-replace-regexp)
   (lyn-with-hook-once 'pre-command-hook
-    (global-anzu-mode 1)))
+    (global-anzu-mode)))
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
@@ -369,7 +369,7 @@ otherwise in `default-directory'."
   :bind (("C-c g" . deadgrep)))
 (use-package flx-ido
   :after ido
-  :config (flx-ido-mode 1)
+  :config (flx-ido-mode)
   :custom
   (ido-enable-flex-matching t)
   (ido-use-faces nil))
@@ -378,17 +378,17 @@ otherwise in `default-directory'."
   :commands (ido-mode ido-everywhere)
   :init
   (lyn-with-hook-once 'pre-command-hook
-    (ido-mode 1)
-    (ido-everywhere 1))
+    (ido-mode)
+    (ido-everywhere))
   :custom
   (ido-auto-merge-work-directories-length -1)
   (ido-enable-flex-matching t))
 (use-package ido-completing-read+
   :after ido
-  :config (ido-ubiquitous-mode 1))
+  :config (ido-ubiquitous-mode))
 (use-package ido-vertical-mode
   :after ido
-  :config (ido-vertical-mode 1))
+  :config (ido-vertical-mode))
 
 (provide 'init)
 ;;; init.el ends here
