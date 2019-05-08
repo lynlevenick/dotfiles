@@ -113,8 +113,8 @@ module Stow
 end
 
 desc "Install and configure all programs"
-task default: %i[emacs fonts fzf git highlight homebrew login python
-                 readline ripgrep sh ssh devenv]
+task default: %i[emacs fonts fzf git highlight homebrew python readline
+                 ripgrep sh ssh devenv]
 
 Brew.cask :emacs, as: "/Applications/Emacs.app",
                   dependencies: Stow.tasks(PWD.join("emacs"))
@@ -149,8 +149,6 @@ file "/usr/local/bin/brew" do
   sh "brew", "update"
   sh "touch", "-c", "/usr/local/bin/brew"
 end
-
-Stow.stow :login
 
 Brew.brew :python, as: "/usr/local/bin/python3"
 
