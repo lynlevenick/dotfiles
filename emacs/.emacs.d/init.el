@@ -104,6 +104,8 @@ point reaches the beginning of end of the buffer, stop there."
     (editorconfig-mode 1)))
 (use-package flycheck
   :init
+  ;; Needed to allow (setf (url-type x) y)
+  (require 'url)
   (defvar lyn-flycheck-handle-alist
     '(("bundle" . lyn-flycheck-bundle-exec))
     "How to transform a executable with a schema for a command.")
@@ -122,19 +124,18 @@ point reaches the beginning of end of the buffer, stop there."
     (let* ((file (file-name-nondirectory executable))
            (mapped (alist-get file lyn-flycheck-wrap-alist nil nil #'string=)))
       (if mapped
-          (concat (flycheck-default-executable-find mapped) "://" file)
+          (concat mapped ":" file)
         (flycheck-default-executable-find executable))))
   (defun lyn-flycheck-command-wrapper (command)
     "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
 
-    (let* ((components (split-string (car command) "://"))
-           (executable (nth 0 components))
-           (special (nth 1 components))
-           (file (file-name-nondirectory executable)))
-      (if special
-          (apply (alist-get file lyn-flycheck-handle-alist nil nil #'string=)
-                 executable special (cdr command))
-        command)))
+    (let* ((url (url-generic-parse-url (car command)))
+           (type (url-type url)))
+      (if (not type)
+          command
+        (setf (url-type url) nil)
+        (apply (alist-get (file-name-nondirectory type) lyn-flycheck-handle-alist nil nil #'string=)
+               (flycheck-default-executable-find type) (url-recreate-url url) (cdr command)))))
   :custom
   (flycheck-display-errors-delay 0.25)
   (flycheck-executable-find #'lyn-flycheck-executable-find)
