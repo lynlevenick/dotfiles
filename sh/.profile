@@ -13,17 +13,31 @@ if test -t 1; then
             printf '%s' "${__ps1_err_color}"
         fi
     }
-    __reset_color="$(tput sgr0)"
+    __reset_attrs="$(tput sgr0)"
     case "${TERM}" in
         eterm*)
-            PS1="\[${__reset_color}\]\w \[\$(__ps1_err)\]\\$\[${__reset_color}\] " ;;
+            PS1="\[${__reset_attrs}\]\w \[\$(__ps1_err)\]\\$\[${__reset_attrs}\] " ;;
         *)
-            PS1="\[${__reset_color}\$(__ps1_err)\]\\$\[${__reset_color}\] "
+            PS1="\[${__reset_attrs}\$(__ps1_err)\]\\$\[${__reset_attrs}\] "
     esac
 
     if test "$(command -v shopt)" = "shopt"; then
         HISTCONTROL='ignoredups:erasedups'
         shopt -s histappend
+    fi
+
+    __read_cursor_position="$(tput u7)"
+    __reverse_video="$(tput rev)"
+    __mark_unterminated() {
+        IFS='[;' read -p "${__read_cursor_position}" -s -dR __unused __cursor_row __cursor_col
+        if test "0${__cursor_col}" -gt 1; then
+            printf '%s\n' "${__reset_attrs}${__reverse_video}%"
+        fi
+    }
+
+    if test -n "${__read_cursor_position}"; then
+        # Terminal supports output of cursor position
+        PROMPT_COMMAND="__mark_unterminated;${PROMPT_COMMAND}"
     fi
 
     for __cmd in "${HOME}/.config/sh-interactive"/*; do
