@@ -7,9 +7,7 @@ if test -t 1; then
     export VISUAL='emacsclient -ua emacs'
 
     __attr_reset="$(tput sgr0)"
-
     __attr_red="$(tput setaf 1)"
-    __attr_reverse="$(tput rev)"
 
     __ps1_err() {
         # shellcheck disable=SC2181
