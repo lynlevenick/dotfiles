@@ -7,8 +7,6 @@ if command -v sqlite3 >/dev/null; then
         mkdir -p "$(dirname "${__zsql_cache}")"
 
         sqlite3 "${__zsql_cache}" <<SQL >/dev/null
-PRAGMA journal_mode=WAL;
-
 CREATE TABLE dirs (dir TEXT, frecency INTEGER);
 CREATE UNIQUE INDEX index_by_dir ON dirs (dir);
 CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
