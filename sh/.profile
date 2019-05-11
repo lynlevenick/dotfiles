@@ -29,20 +29,6 @@ if test -t 1; then
         shopt -s histappend
     fi
 
-    if tput u7 >/dev/null; then
-        # Only works on bash right now. Detect support?
-        # Terminal supports output of cursor position
-        __read_cursor_position="$(tput u7)"
-        __mark_unterminated() {
-            IFS='[;' read -p "${__read_cursor_position}" -rs -dR __unused __cursor_row __cursor_col
-            if test "0${__cursor_col}" -gt 1; then
-                printf '%s\n' "${__attr_reset}${__attr_reverse}%"
-            fi
-        }
-
-        PROMPT_COMMAND="__mark_unterminated;${PROMPT_COMMAND}"
-    fi
-
     if test -d "${HOME}/.config/sh-interactive"; then
         for __cmd in "${HOME}/.config/sh-interactive"/*; do
             . "${__cmd}"
