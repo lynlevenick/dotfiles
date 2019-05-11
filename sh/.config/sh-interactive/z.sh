@@ -20,16 +20,13 @@ fi
 
 __zsql_add() {
     __zsql_escaped="$(printf '%s$' "${1}" | sed 's/'\''/'\'\''/g')"
-    sqlite3 "${__zsql_cache}" <<SQL
+    __zsql_sum="$(
+        sqlite3 "${__zsql_cache}" <<SQL
 .timeout 100
 INSERT INTO dirs (dir, frecency)
     VALUES ('${__zsql_escaped%?}', 1)
     ON CONFLICT (dir) DO UPDATE SET
     frecency = frecency + excluded.frecency;
-SQL
-    __zsql_sum="$(
-        sqlite3 "${__zsql_cache}" <<SQL
-.timeout 100
 SELECT SUM(frecency) FROM dirs;
 SQL
     )"
