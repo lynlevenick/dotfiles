@@ -107,22 +107,29 @@ point reaches the beginning of end of the buffer, stop there."
   ;; Needed to allow (setf (url-type x) y)
   (require 'url)
   (defvar lyn-flycheck-handle-alist
-    '(("bundle" . lyn-flycheck-bundle-exec))
+    '(("bundle" lyn-flycheck-bundle-exec))
     "How to transform a executable with a schema for a command.")
   (defvar lyn-flycheck-wrap-alist
-    '(("rubocop" . "bundle"))
+    '(("rubocop" "bundle")
+      ("haml" "bundle"))
     "Executables and the schema to prepend to them for `lyn-flycheck-handle-alist'.")
   :hook (prog-mode . flycheck-mode)
   :config
-  (defun lyn-flycheck-bundle-exec (executable special &rest args)
-    "Transforms EXECUTABLE and SPECIAL into a command for bundler, with ARGS trailing."
+  (defun lyn-flycheck-bundle-should-enable (command)
+    "True if COMMAND should be run through bundler."
 
-    `(,executable "exec" ,special . ,args))
+    (= 0 (call-process (flycheck-default-executable-find "bundle")
+                       nil nil nil "show" command)))
+  (defun lyn-flycheck-bundle-exec (command &rest args)
+    "Transforms COMMAND into a command for bundler, with ARGS trailing."
+
+    `(,(flycheck-default-executable-find "bundle") "exec" ,command . ,args))
+
   (defun lyn-flycheck-executable-find (executable)
     "Fake EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
 
     (let* ((file (file-name-nondirectory executable))
-           (mapped (alist-get file lyn-flycheck-wrap-alist nil nil #'string=)))
+           (mapped (car (alist-get file lyn-flycheck-wrap-alist nil nil #'string=))))
       (if mapped
           (concat mapped ":" file)
         (flycheck-default-executable-find executable))))
@@ -134,8 +141,8 @@ point reaches the beginning of end of the buffer, stop there."
       (if (not type)
           command
         (setf (url-type url) nil)
-        (apply (alist-get (file-name-nondirectory type) lyn-flycheck-handle-alist nil nil #'string=)
-               (flycheck-default-executable-find type) (url-recreate-url url) (cdr command)))))
+        (apply (car (alist-get (file-name-nondirectory type) lyn-flycheck-handle-alist nil nil #'string=))
+               (url-recreate-url url) (cdr command)))))
   :custom
   (flycheck-display-errors-delay 0.25)
   (flycheck-executable-find #'lyn-flycheck-executable-find)
