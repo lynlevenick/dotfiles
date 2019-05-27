@@ -168,8 +168,6 @@ point reaches the beginning of end of the buffer, stop there."
   (wdired-allow-redirect-links t))
 (use-package dired-x :straight nil
   :after dired)
-(use-package forge
-  :after magit)
 (use-package magit
   :defer
   :init
@@ -251,7 +249,7 @@ otherwise in `default-directory'."
   :init
   (lyn-with-hook-once 'pre-command-hook
     (projectile-mode)))
-(use-package tramp
+(use-package tramp :straight nil
   :defer
   :init
   (lyn-with-hook-once 'post-self-insert-hook
