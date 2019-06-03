@@ -6,8 +6,8 @@ __ef_action() {
     fi
 }
 
-if command -v highlight >/dev/null; then
-    __ef_highlighter='(highlight --out-format=ansi {} 2>/dev/null || cat {})'
+if command -v bat >/dev/null; then
+    __ef_highlighter='(bat --color=always --paging=never --style=plain -- {} 2>/dev/null || cat {})'
 else
     __ef_highlighter='cat {}'
 fi

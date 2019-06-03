@@ -113,8 +113,12 @@ module Stow
 end
 
 desc "Install and configure all programs"
-task default: %i[emacs fonts fzf git highlight homebrew python readline
+task default: %i[bat diff-so-fancy emacs fonts fzf git homebrew python readline
                  ripgrep sh ssh devenv]
+
+Brew.brew :bat
+
+Brew.brew :'diff-so-fancy'
 
 Brew.cask :emacs, as: "/Applications/Emacs.app",
                   dependencies: Stow.tasks(PWD.join("emacs"))
@@ -134,8 +138,6 @@ end
 Brew.brew :fzf
 
 Stow.stow :git
-
-Brew.brew :highlight
 
 desc "Install homebrew"
 task homebrew: ["/usr/local/bin/brew"]
