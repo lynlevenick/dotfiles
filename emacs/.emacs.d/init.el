@@ -29,22 +29,10 @@ context-relevant thing has happened, rather than loading immediately."
 
 ;;;; Defaults
 (use-package add-node-modules-path
-  :commands (add-node-modules-path)
-  :init
-  (with-eval-after-load 'css-mode
-    (add-hook 'css-mode-hook #'add-node-modules-path))
-  (with-eval-after-load 'elm-mode
-    (add-hook 'elm-mode-hook #'add-node-modules-path))
-  (with-eval-after-load 'rjsx-mode
-    (add-hook 'rjsx-mode-hook #'add-node-modules-path))
-  (with-eval-after-load 'typescript-mode
-    (add-hook 'typescript-mode-hook #'add-node-modules-path)))
+  :hook (css-mode elm-mode rjsx-mode typescript-mode))
 (use-package bind-key)
 (use-package exec-path-from-shell
-  :init
-  (with-eval-after-load 'projectile
-    (add-hook 'projectile-after-switch-project-hook #'exec-path-from-shell-initialize))
-  :hook (after-init . exec-path-from-shell-initialize)
+  :hook ((after-init projectile-after-switch-project-hook) . exec-path-from-shell-initialize)
   :custom
   (exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-check-startup-files nil))
@@ -110,16 +98,18 @@ point reaches the beginning of end of the buffer, stop there."
     '(("bundle" lyn-flycheck-bundle-exec))
     "How to transform a executable with a schema for a command.")
   (defvar lyn-flycheck-wrap-alist
-    '(("rubocop" "bundle")
-      ("haml" "bundle"))
+    '(("rubocop" "bundle" lyn-flycheck-bundle-should-enable)
+      ("haml" "bundle" lyn-flycheck-bundle-should-enable))
     "Executables and the schema to prepend to them for `lyn-flycheck-handle-alist'.")
   :hook (prog-mode . flycheck-mode)
   :config
   (defun lyn-flycheck-bundle-should-enable (command)
     "True if COMMAND should be run through bundler."
 
-    (= 0 (call-process (flycheck-default-executable-find "bundle")
-                       nil nil nil "show" command)))
+    (let ((bundler-executable (flycheck-default-executable-find "bundle")))
+      (and bundler-executable
+           (= 0 (call-process bundler-executable
+                              nil nil nil "show" command)))))
   (defun lyn-flycheck-bundle-exec (command &rest args)
     "Transforms COMMAND into a command for bundler, with ARGS trailing."
 
@@ -129,9 +119,12 @@ point reaches the beginning of end of the buffer, stop there."
     "Fake EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
 
     (let* ((file (file-name-nondirectory executable))
-           (mapped (car (alist-get file lyn-flycheck-wrap-alist nil nil #'string=))))
-      (if mapped
-          (concat mapped ":" file)
+           (mapped (cdr (assoc-string file lyn-flycheck-wrap-alist)))
+           (mapped-schema (car mapped))
+           (mapped-check (cadr mapped)))
+      (if (or (and mapped-schema (not mapped-check))
+              (and mapped-check (funcall mapped-check file)))
+          (concat mapped-schema ":" file)
         (flycheck-default-executable-find executable))))
   (defun lyn-flycheck-command-wrapper (command)
     "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
@@ -141,8 +134,10 @@ point reaches the beginning of end of the buffer, stop there."
       (if (not type)
           command
         (setf (url-type url) nil)
-        (apply (car (alist-get (file-name-nondirectory type) lyn-flycheck-handle-alist nil nil #'string=))
-               (url-recreate-url url) (cdr command)))))
+        (apply (cadr (assoc-string (file-name-nondirectory type)
+                                   lyn-flycheck-handle-alist))
+               (url-recreate-url url)
+               (cdr command)))))
   :custom
   (flycheck-display-errors-delay 0.25)
   (flycheck-executable-find #'lyn-flycheck-executable-find)
@@ -224,18 +219,8 @@ otherwise in `default-directory'."
                          ("<M-backspace>" . term-send-raw-meta)
                          ("<M-left>" . term-send-backward-word)
                          ("<M-right>" . term-send-forward-word))))
-(use-package nswbuff
-  :bind (("<C-tab>" . nswbuff-switch-to-next-buffer)
-         ("<C-S-tab>" . nswbuff-switch-to-previous-buffer))
-  :custom
-  (nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list)
-  (nswbuff-clear-delay 1)
-  (nswbuff-display-intermediate-buffers t))
 (use-package olivetti
-  :commands (turn-on-olivetti-mode)
-  :init
-  (with-eval-after-load 'org
-    (add-hook 'org-mode-hook #'turn-on-olivetti-mode)))
+  :hook (org-mode . turn-on-olivetti-mode))
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode))
 (use-package paren-face
@@ -277,8 +262,6 @@ otherwise in `default-directory'."
   :custom (elm-format-on-save t))
 (use-package haml-mode
   :mode "\\.haml\\'")
-(use-package nim-mode
-  :mode "\\.nim\\(s\\|ble\\)?\\'")
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode)
   :custom (nov-text-width 60))
@@ -334,8 +317,6 @@ otherwise in `default-directory'."
   (add-hook 'typescript-mode-hook #'lyn-tide-setup))
 (use-package typescript-mode
   :mode "\\.tsx?\\'")
-(use-package web-mode
-  :mode "\\.njkl?\\'")
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
 
@@ -346,8 +327,7 @@ otherwise in `default-directory'."
 (use-package prettier-js
   :commands (prettier-js-mode)
   :init
-  (with-eval-after-load 'rjsx-mode
-    (add-hook 'rjsx-mode-hook #'prettier-js-mode)))
+  (add-hook 'rjsx-mode-hook #'prettier-js-mode :append))
 
 ;;;; Searching
 (use-package amx

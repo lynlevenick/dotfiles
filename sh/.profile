@@ -6,21 +6,23 @@ if test -t 1; then
     export LSCOLORS='ExFxCxDxBxegedabagacad'
     export VISUAL='emacsclient -ua emacs'
 
-    __attr_reset="$(tput sgr0)"
-    __attr_red="$(tput setaf 1)"
+    if test -n "$BASH_VERSION"; then
+        __attr_reset="$(tput sgr0)"
+        __attr_red="$(tput setaf 1)"
 
-    __ps1_err() {
-        # shellcheck disable=SC2181
-        if test "$?" -ne 0; then
-            printf '%s' "${__attr_red}"
-        fi
-    }
-    case "${TERM}" in
-        eterm*)
-            PS1="\[${__attr_reset}\]\w \[\$(__ps1_err)\]\\$\[${__attr_reset}\] " ;;
-        *)
-            PS1="\[${__attr_reset}\$(__ps1_err)\]\\$\[${__attr_reset}\] "
-    esac
+        __ps1_err() {
+            # shellcheck disable=SC2181
+            if test "$?" -ne 0; then
+                printf '%s' "${__attr_red}"
+            fi
+        }
+        case "${TERM}" in
+            eterm*)
+                PS1="\[${__attr_reset}\]\w \[\$(__ps1_err)\]\\$\[${__attr_reset}\] " ;;
+            *)
+                PS1="\[${__attr_reset}\$(__ps1_err)\]\\$\[${__attr_reset}\] "
+        esac
+    fi
 
     HISTCONTROL='ignoredups:erasedups'
     if test "$(command -v shopt)" = "shopt"; then
@@ -38,7 +40,12 @@ __pathadd() {
     # Adds a path to $PATH only if it isn't already present
     case ":${PATH:=$1}:" in
         *:$1:*) ;;
-        *) PATH="${PATH}:$1"
+        *)
+            if test "$2" = 'prepend'; then
+                PATH="$1:${PATH}"
+            else
+                PATH="${PATH}:$1"
+            fi
     esac
 }
 
