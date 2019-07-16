@@ -23,6 +23,23 @@
 
   (setf gc-cons-percentage (car (get 'gc-cons-percentage 'standard-value))
         gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value))))
+
+(defvar lyn-gc-minibuffer-timer nil
+  "Timer to restore the minibuffer.")
+(defun lyn-gc-disable-minibuffer ()
+  "Turn off garbage collection and cancel a delayed enabling of garbage collection."
+
+  (when lyn-gc-minibuffer-timer
+    (cancel-timer lyn-gc-minibuffer-timer)
+    (setf lyn-gc-minibuffer-timer nil))
+  (lyn-gc-disable))
+(defun lyn-gc-restore-minibuffer ()
+  "Schedule enabling garbage collection for idle time."
+
+  (unless lyn-gc-minibuffer-timer
+    (setf lyn-gc-minibuffer-timer
+          (run-with-idle-timer 2 nil #'lyn-gc-restore))))
+
 (defun lyn-gc-finalize ()
   "Reset garbage collection and add minibuffer hooks to toggle it."
 
@@ -30,8 +47,8 @@
   (lyn-gc-restore)
   ;; Additionally disable and restore gc on minibuffer,
   ;; as amx/flx allocate a lot of memory
-  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
-  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore))
+  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable-minibuffer)
+  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore-minibuffer))
 (lyn-gc-disable)
 (add-hook 'pre-command-hook #'lyn-gc-finalize)
 
