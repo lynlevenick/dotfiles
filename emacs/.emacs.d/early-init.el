@@ -127,8 +127,9 @@
   (car (member name (font-family-list))))
 (let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
   (when font
-    (set-face-font 'default (concat font "-" (number-to-string lyn-font-size)))
-    (set-face-font 'fixed-pitch (concat font "-" (number-to-string lyn-font-size)))))
+    (let ((sized-font (concat font "-" (number-to-string lyn-font-size))))
+      (set-face-font 'default sized-font)
+      (set-face-font 'fixed-pitch sized-font))))
 (set-face-font 'variable-pitch (concat "Charter-" (number-to-string lyn-font-size)))
 
 (setq frame-title-format nil
