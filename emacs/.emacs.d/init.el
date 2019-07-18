@@ -172,7 +172,6 @@ point reaches the beginning of end of the buffer, stop there."
   (magit-list-refs-sortby "-committerdate")
   (magit-completing-read-function #'magit-ido-completing-read))
 (use-package magit-gitflow
-  :after magit
   :hook (magit-mode . turn-on-magit-gitflow))
 (use-package mode-line-bell
   :commands (mode-line-bell-mode)
