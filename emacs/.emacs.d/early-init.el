@@ -13,9 +13,15 @@
                 file-name-handler-alist)))
 (add-hook 'emacs-startup-hook #'lyn-file-name-handler-restore)
 
+(defvar lyn-gc-delayed-restore-timer nil
+  "Timer tracking delay before restoring garbage collection.")
+
 (defun lyn-gc-disable ()
   "Turn off garbage collection."
 
+  (when lyn-gc-delayed-restore-timer
+    (cancel-timer lyn-gc-delayed-restore-timer)
+    (setf lyn-gc-delayed-restore-timer nil))
   (setf gc-cons-percentage 1.0
         gc-cons-threshold most-positive-fixnum))
 (defun lyn-gc-restore ()
@@ -23,21 +29,11 @@
 
   (setf gc-cons-percentage (car (get 'gc-cons-percentage 'standard-value))
         gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value))))
-
-(defvar lyn-gc-minibuffer-timer nil
-  "Timer to restore the minibuffer.")
-(defun lyn-gc-disable-minibuffer ()
-  "Turn off garbage collection and cancel a delayed enabling of garbage collection."
-
-  (when lyn-gc-minibuffer-timer
-    (cancel-timer lyn-gc-minibuffer-timer)
-    (setf lyn-gc-minibuffer-timer nil))
-  (lyn-gc-disable))
-(defun lyn-gc-restore-minibuffer ()
+(defun lyn-gc-restore-delayed ()
   "Schedule enabling garbage collection for idle time."
 
-  (unless lyn-gc-minibuffer-timer
-    (setf lyn-gc-minibuffer-timer
+  (unless lyn-gc-delayed-restore-timer
+    (setf lyn-gc-delayed-restore-timer
           (run-with-idle-timer 2 nil #'lyn-gc-restore))))
 
 (defun lyn-gc-finalize ()
@@ -45,10 +41,11 @@
 
   (remove-hook 'pre-command-hook #'lyn-gc-finalize)
   (lyn-gc-restore)
+
   ;; Additionally disable and restore gc on minibuffer,
   ;; as amx/flx allocate a lot of memory
-  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable-minibuffer)
-  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore-minibuffer))
+  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
+  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore-delayed))
 (lyn-gc-disable)
 (add-hook 'pre-command-hook #'lyn-gc-finalize)
 
@@ -56,7 +53,6 @@
 (remove-hook 'find-file-hook #'vc-refresh-state)
 
 ;;;; Unicode
-(charset-priority-list)
 (set-charset-priority 'unicode)
 (prefer-coding-system 'utf-8-unix)
 (set-default-coding-systems 'utf-8-unix)
