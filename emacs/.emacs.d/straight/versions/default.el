@@ -4,6 +4,7 @@
  ("avy" . "66886e265cf41c6061dc70440eb5b61fad8f48e0")
  ("cl-lib" . "e79686c4a26959c0ecba0951a7e335ed28035386")
  ("company-mode" . "ad6ff0eecca99dc5ac8b6a8a6174df7d2ad88ae7")
+ ("company-statistics" . "e62157d43b2c874d2edbd547c3bdfb05d0a7ae5c")
  ("dash.el" . "77f3bf40c9c85386a50f2dab3dc950513f6f88bd")
  ("deadgrep" . "caeb37b8d6ab83f0eba353d6bbb29678190d4419")
  ("editorconfig-emacs" . "f24f651245344f5f97c348246ce035843419b322")

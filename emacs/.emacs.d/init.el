@@ -18,18 +18,18 @@ A global mode, or one which maps keys, can be set to run only after some
 context-relevant thing has happened, rather than loading immediately."
   (declare (indent defun))
 
-  (let ((name (make-symbol (concat "with-hook-once--hook-" (number-to-string lyn-with-hook-once--count)))))
+  (let ((name (gensym)))
     (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
     `(progn
-       (unless (fboundp ',name)
+       (unless (fboundp (quote ,name))
          (defun ,name ()
-           (remove-hook ,hook #',name)
+           (remove-hook ,hook (function ,name))
            . ,body))
-       (add-hook ,hook #',name))))
+       (add-hook ,hook (function ,name)))))
 
 ;;;; Defaults
 (use-package add-node-modules-path
-  :hook (css-mode elm-mode rjsx-mode typescript-mode))
+  :hook (css-mode elm-mode js-mode rjsx-mode typescript-mode))
 (use-package bind-key)
 (use-package exec-path-from-shell
   :hook ((after-init projectile-after-switch-project-hook) . exec-path-from-shell-initialize)
@@ -101,15 +101,26 @@ point reaches the beginning of end of the buffer, stop there."
     '(("rubocop" "bundle" lyn-flycheck-bundle-should-enable)
       ("haml" "bundle" lyn-flycheck-bundle-should-enable))
     "Executables and the schema to prepend to them for `lyn-flycheck-handle-alist'.")
+  (defvar lyn-flycheck-enable-cache-sentinel (gensym)
+    "Default in reads of `lyn-flycheck-enable-cache'.")
+  (defvar lyn-flycheck-enable-cache (make-hash-table)
+    "Cache for results from `lyn-flycheck-bundle-should-enable'.")
   :hook (prog-mode . flycheck-mode)
   :config
   (defun lyn-flycheck-bundle-should-enable (command)
     "True if COMMAND should be run through bundler."
 
-    (let ((bundler-executable (flycheck-default-executable-find "bundle")))
-      (and bundler-executable
-           (= 0 (call-process bundler-executable
-                              nil nil nil "show" command)))))
+    (let* ((dir (if (projectile-project-p)
+                    (setf dir (projectile-project-root))
+                  (setf dir default-directory)))
+           (cached (gethash dir lyn-flycheck-enable-cache lyn-flycheck-enable-cache-sentinel)))
+      (if (eq cached lyn-flycheck-enable-cache-sentinel)
+          (puthash dir (let ((bundler-executable (flycheck-default-executable-find "bundle")))
+                         (and bundler-executable
+                              (= 0 (call-process bundler-executable
+                                                 nil nil nil "show" command))))
+                   lyn-flycheck-enable-cache)
+        cached)))
   (defun lyn-flycheck-bundle-exec (command &rest args)
     "Transforms COMMAND into a command for bundler, with ARGS trailing."
 
@@ -155,6 +166,11 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-scope 'frame))
 (use-package company
   :hook (prog-mode . company-mode))
+(use-package company-statistics
+  :commands (company-statistics-mode)
+  :init
+  (lyn-with-hook-once 'company-mode-hook
+    (company-statistics-mode)))
 (use-package dired :straight nil
   :custom
   (dired-auto-revert-buffer t)
@@ -314,8 +330,9 @@ otherwise in `default-directory'."
     "Prepare for Typescript development."
 
     (tide-setup)
-    (tide-hl-identifier-mode)
-    (add-hook 'before-save-hook #'tide-format-before-save nil :local))
+    (tide-hl-identifier-mode))
+  (lyn-with-hook-once 'typescript-mode-hook
+    (flycheck-add-next-checker 'typescript-tide '(warning . javascript-eslint) :append))
   (add-hook 'typescript-mode-hook #'lyn-tide-setup))
 (use-package typescript-mode
   :mode "\\.tsx?\\'")
@@ -329,6 +346,8 @@ otherwise in `default-directory'."
 (use-package prettier-js
   :commands (prettier-js-mode)
   :init
+  (add-hook 'js-mode-hook #'prettier-js-mode :append)
+  (add-hook 'typescript-mode-hook #'prettier-js-mode :append)
   (add-hook 'rjsx-mode-hook #'prettier-js-mode :append))
 
 ;;;; Searching
