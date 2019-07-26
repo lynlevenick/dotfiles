@@ -153,6 +153,12 @@ point reaches the beginning of end of the buffer, stop there."
   (flycheck-display-errors-delay 0.25)
   (flycheck-executable-find #'lyn-flycheck-executable-find)
   (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
+(use-package uniquify :straight nil
+  :defer
+  :init
+  (lyn-with-hook-once 'find-file-hook
+    (require 'uniquify))
+  :custom (uniquify-buffer-name-style 'forward))
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
 
