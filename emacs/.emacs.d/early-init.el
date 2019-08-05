@@ -129,7 +129,7 @@
 
 (setf show-paren-delay 0)
 (setq-default cursor-type 'bar
-              echo-keystrokes 0.01
+              echo-keystrokes 1e-6
               truncate-lines t)
 
 (setq-default mode-line-format
