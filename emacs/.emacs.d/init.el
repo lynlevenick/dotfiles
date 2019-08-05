@@ -6,10 +6,6 @@
 (unless (bound-and-true-p early-init-file)
   (require 'early-init (concat user-emacs-directory "early-init")))
 
-(defvar lyn-with-hook-once--count 0
-  "The number of times `lyn-with-hook-once' has been called.
-
-Used to generate symbols for the hook functions.")
 (defmacro lyn-with-hook-once (hook &rest body)
   "Arrange to execute BODY once, the next time HOOK is run.
 
@@ -19,7 +15,6 @@ context-relevant thing has happened, rather than loading immediately."
   (declare (indent defun))
 
   (let ((name (gensym)))
-    (setf lyn-with-hook-once--count (1+ lyn-with-hook-once--count))
     `(progn
        (unless (fboundp (quote ,name))
          (defun ,name ()
@@ -27,22 +22,14 @@ context-relevant thing has happened, rather than loading immediately."
            . ,body))
        (add-hook ,hook (function ,name)))))
 
-;;;; Defaults
-(use-package add-node-modules-path
-  :hook (css-mode elm-mode js-mode rjsx-mode typescript-mode))
 (use-package bind-key)
-(use-package exec-path-from-shell
-  :hook ((after-init projectile-after-switch-project-hook) . exec-path-from-shell-initialize)
-  :custom
-  (exec-path-from-shell-arguments '("-l"))
-  (exec-path-from-shell-check-startup-files nil))
+
+;;;; Defaults
 (use-package imenu :straight nil
   :bind (("C-c i" . imenu)))
 
 (bind-key "C-?" #'undo-only)
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
-
-(run-with-idle-timer 5 nil #'server-start)
 
 ;;;; Editing
 (defun lyn-smart-isearch-delete-char ()
@@ -92,8 +79,6 @@ point reaches the beginning of end of the buffer, stop there."
     (editorconfig-mode)))
 (use-package flycheck
   :init
-  ;; Needed to allow (setf (url-type x) y)
-  (require 'url)
   (defvar lyn-flycheck-handle-alist
     '(("bundle" lyn-flycheck-bundle-exec))
     "How to transform a executable with a schema for a command.")
@@ -144,7 +129,7 @@ point reaches the beginning of end of the buffer, stop there."
            (type (url-type url)))
       (if (not type)
           command
-        (setf (url-type url) nil)
+        (aset url 1 nil) ;; expanded (setf (url-type url) nil)
         (apply (cadr (assoc-string (file-name-nondirectory type)
                                    lyn-flycheck-handle-alist))
                (url-recreate-url url)
@@ -263,20 +248,6 @@ otherwise in `default-directory'."
   :init
   (lyn-with-hook-once 'post-self-insert-hook
     (require 'tramp)))
-(use-package transpose-frame
-  :bind (("C-c /" . transpose-frame)))
-(use-package windsize
-  :bind (("C-s-<up>" . windsize-up)
-         ("C-s-<down>" . windsize-down)
-         ("C-s-<left>" . windsize-left)
-         ("C-s-<right>" . windsize-right)
-         ("C-s-w" . windsize-up)
-         ("C-s-s" . windsize-down)
-         ("C-s-a" . windsize-left)
-         ("C-s-d" . windsize-right)))
-(use-package zygospore
-  :commands (zygospore-toggle-delete-other-windows)
-  :init (bind-key [remap delete-other-windows] #'zygospore-toggle-delete-other-windows))
 
 ;;;; Major Modes
 (use-package elm-mode
@@ -329,6 +300,18 @@ otherwise in `default-directory'."
   (ruby-insert-encoding-magic-comment nil))
 (use-package rust-mode
   :mode "\\.rs\\'")
+(use-package typescript-mode
+  :mode "\\.tsx?\\'")
+(use-package yaml-mode
+  :mode "\\.ya?ml\\'")
+
+;; Major Mode Integration
+(use-package flycheck-rust
+  :after (flycheck rust-mode)
+  :hook (flycheck-mode . flycheck-rust-setup))
+(use-package prettier-js
+  ;; TODO: Ordering problem r.e. Paths
+  :hook ((js-mode typescript-mode rjsx-mode) . prettier-js-mode))
 (use-package tide
   :commands (tide-setup)
   :init
@@ -340,21 +323,18 @@ otherwise in `default-directory'."
   (lyn-with-hook-once 'typescript-mode-hook
     (flycheck-add-next-checker 'typescript-tide '(warning . javascript-eslint) :append))
   (add-hook 'typescript-mode-hook #'lyn-tide-setup))
-(use-package typescript-mode
-  :mode "\\.tsx?\\'")
-(use-package yaml-mode
-  :mode "\\.ya?ml\\'")
 
-;; Major Mode Integration
-(use-package flycheck-rust
-  :after (flycheck rust-mode)
-  :hook (flycheck-mode . flycheck-rust-setup))
-(use-package prettier-js
-  :commands (prettier-js-mode)
-  :init
-  (add-hook 'js-mode-hook #'prettier-js-mode :append)
-  (add-hook 'typescript-mode-hook #'prettier-js-mode :append)
-  (add-hook 'rjsx-mode-hook #'prettier-js-mode :append))
+;;;; Paths
+;; It is important that these hooks happen before hooks that try to integrate
+;; with Javascript or Ruby or other languages.
+;; TODO: Better solution for this ordering problem
+(use-package add-node-modules-path
+  :hook (css-mode elm-mode js-mode rjsx-mode typescript-mode))
+(use-package exec-path-from-shell
+  :hook ((after-init projectile-after-switch-project-hook) . exec-path-from-shell-initialize)
+  :custom
+  (exec-path-from-shell-arguments '("-l"))
+  (exec-path-from-shell-check-startup-files nil))
 
 ;;;; Searching
 (use-package amx
@@ -401,6 +381,23 @@ otherwise in `default-directory'."
 (use-package ido-vertical-mode
   :after ido
   :config (ido-vertical-mode))
+
+;;;; Window manipulation
+(use-package transpose-frame
+  :bind (("C-c /" . transpose-frame)))
+(use-package windsize
+  :bind (("C-s-<up>" . windsize-up)
+         ("C-s-<down>" . windsize-down)
+         ("C-s-<left>" . windsize-left)
+         ("C-s-<right>" . windsize-right)
+         ("C-s-w" . windsize-up)
+         ("C-s-s" . windsize-down)
+         ("C-s-a" . windsize-left)
+         ("C-s-d" . windsize-right)))
+(use-package zygospore
+  :commands (zygospore-toggle-delete-other-windows)
+  :init (bind-key [remap delete-other-windows] #'zygospore-toggle-delete-other-windows))
+
 
 (provide 'init)
 ;;; init.el ends here

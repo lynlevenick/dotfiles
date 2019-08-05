@@ -4,11 +4,11 @@ if test -t 1; then
     export CLICOLOR='1'
     export EDITOR='emacs -nw'
     export LSCOLORS='ExFxCxDxBxegedabagacad'
-    export VISUAL='emacsclient -ua emacs'
+    export VISUAL='emacs -nw'
 
     if test -n "$BASH_VERSION"; then
-        __attr_reset="$(tput sgr0)"
         __attr_red="$(tput setaf 1)"
+        __attr_reset="$(tput sgr0)"
 
         __ps1_err() {
             # shellcheck disable=SC2181
@@ -38,6 +38,7 @@ fi
 
 __pathadd() {
     # Adds a path to $PATH only if it isn't already present
+    # Pass `prepend` as a second argument to prepend to path
     case ":${PATH:=$1}:" in
         *:$1:*) ;;
         *)
