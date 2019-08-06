@@ -113,8 +113,11 @@ module Stow
 end
 
 desc "Install and configure all programs"
-task default: %i[bat diff-so-fancy emacs fonts fzf git homebrew python readline
-                 ripgrep sh ssh devenv]
+task default: %i[alacritty bat diff-so-fancy emacs fonts fzf git homebrew python
+                 readline ripgrep sh ssh devenv]
+
+Brew.cask :alacritty, as: "/Applications/Alacritty.app",
+                      dependencies: Stow.tasks(PWD.join("alacritty"))
 
 Brew.brew :bat
 

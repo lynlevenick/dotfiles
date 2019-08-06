@@ -1145,20 +1145,26 @@
 	<key>ShowActiveProcessArgumentsInTitle</key>
 	<false/>
 	<key>ShowActiveProcessInTabTitle</key>
-	<false/>
+	<true/>
 	<key>ShowActiveProcessInTitle</key>
-	<false/>
+	<true/>
+	<key>ShowActivityIndicatorInTab</key>
+	<true/>
 	<key>ShowCommandKeyInTitle</key>
 	<false/>
 	<key>ShowDimensionsInTitle</key>
 	<false/>
+	<key>ShowRepresentedURLInTabTitle</key>
+	<false/>
 	<key>ShowRepresentedURLInTitle</key>
-	<true/>
+	<false/>
 	<key>ShowRepresentedURLPathInTabTitle</key>
 	<true/>
 	<key>ShowRepresentedURLPathInTitle</key>
 	<true/>
 	<key>ShowShellCommandInTitle</key>
+	<false/>
+	<key>ShowTTYNameInTabTitle</key>
 	<false/>
 	<key>ShowTTYNameInTitle</key>
 	<false/>

@@ -13,7 +13,7 @@ CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
 SQL
     fi
 
-    PROMPT_COMMAND="__zsql_add_async;${PROMPT_COMMAND}"
+    PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}"'__zsql_add_async'
 fi
 
 __zsql_add() {

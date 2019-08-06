@@ -153,7 +153,8 @@
 
 (setq frame-title-format nil
       ns-use-proxy-icon nil)
-(push '(ns . ((ns-transparent-titlebar . t))) window-system-default-frame-alist)
+(push '(ns . ((ns-transparent-titlebar . t)))
+      window-system-default-frame-alist)
 
 (use-package srcery-theme
   :config (load-theme 'srcery t))
