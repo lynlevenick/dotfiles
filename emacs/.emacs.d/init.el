@@ -306,12 +306,15 @@ otherwise in `default-directory'."
   :mode "\\.ya?ml\\'")
 
 ;; Major Mode Integration
+(use-package apheleia :straight (:host github :repo "raxod502/apheleia")
+  :commands (apheleia-global-mode)
+  :init
+  (lyn-with-hook-once 'find-file-hook
+    (require 'apheleia)
+    (apheleia-global-mode)))
 (use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
-(use-package prettier-js
-  ;; TODO: Ordering problem r.e. Paths
-  :hook ((js-mode typescript-mode rjsx-mode) . prettier-js-mode))
 (use-package tide
   :commands (tide-setup)
   :init
