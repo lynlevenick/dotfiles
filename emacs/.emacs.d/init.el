@@ -398,6 +398,5 @@ otherwise in `default-directory'."
   :commands (zygospore-toggle-delete-other-windows)
   :init (bind-key [remap delete-other-windows] #'zygospore-toggle-delete-other-windows))
 
-
 (provide 'init)
 ;;; init.el ends here
