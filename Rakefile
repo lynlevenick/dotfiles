@@ -17,7 +17,7 @@ module Brew
                 **kwargs)
     easy_install(formula, as: as, **kwargs) do
       sh "brew", "install", formula.to_s
-      sh "touch", "-c", as.to_s
+      sh "touch", "-h", as.to_s
     end
   end
 
@@ -25,7 +25,7 @@ module Brew
   def self.cask(formula, as:, **kwargs)
     easy_install(formula, as: as, **kwargs) do
       sh "brew", "cask", "install", formula.to_s
-      sh "touch", "-c", as.to_s
+      sh "touch", "-h", as.to_s
     end
   end
 
@@ -144,7 +144,7 @@ Stow.stow :git
 
 desc "Install homebrew"
 task homebrew: ["/usr/local/bin/brew"]
-file "/usr/local/bin/brew" do
+brew_task = file "/usr/local/bin/brew" do
   Open3.pipeline(
     ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
     "ruby",
@@ -152,7 +152,14 @@ file "/usr/local/bin/brew" do
 
   sh "brew", "doctor"
   sh "brew", "update"
-  sh "touch", "-c", "/usr/local/bin/brew"
+  sh "touch", "-h", "/usr/local/bin/brew"
+end
+
+# Monkey batch homebrew timestamp to symlink's timestamp: homebrew touches
+# itself every time it installs a package, so it'll always re-run
+# tasks otherwise
+def brew_task.timestamp
+  File.lstat("/usr/local/bin/brew").mtime
 end
 
 Brew.brew :python, as: "/usr/local/bin/python3"
@@ -169,8 +176,8 @@ desc "Install bundler"
 task bundle: ["/usr/local/bin/bundle"]
 file "/usr/local/bin/bundle" do
   sh "sudo", "gem", "install", "bundler"
-  sh "sudo", "touch", "-c", "/usr/local/bin/bundle"
-  sh "sudo", "touch", "-c", "/usr/local/bin/bundler"
+  sh "sudo", "touch", "-h", "/usr/local/bin/bundle"
+  sh "sudo", "touch", "-h", "/usr/local/bin/bundler"
 end
 
 desc "Install dev environment for this repo"
@@ -180,5 +187,5 @@ file PWD.join(".bundle") => "/usr/local/bin/bundle" do
      "--gemfile", PWD.join("Gemfile").to_s,
      "--path", PWD.join(".bundle").to_s
 
-  sh "touch", "-c", PWD.join(".bundle").to_s
+  sh "touch", "-h", PWD.join(".bundle").to_s
 end
