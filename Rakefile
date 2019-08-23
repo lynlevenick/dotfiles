@@ -144,7 +144,7 @@ Stow.stow :git
 
 desc "Install homebrew"
 task homebrew: ["/usr/local/bin/brew"]
-brew_task = file "/usr/local/bin/brew" do
+brew_task = file "/usr/local/bin/brew" do # rubocop:disable Style/BlockDelimiters
   Open3.pipeline(
     ["curl", "-fsSL", "https://raw.githubusercontent.com/Homebrew/install/master/install"],
     "ruby",
@@ -155,11 +155,15 @@ brew_task = file "/usr/local/bin/brew" do
   sh "touch", "-h", "/usr/local/bin/brew"
 end
 
-# Monkey batch homebrew timestamp to symlink's timestamp: homebrew touches
-# itself every time it installs a package, so it'll always re-run
-# tasks otherwise
+# HACK: Monkey patch homebrew's timestamp to symlink's timestamp
+#       homebrew touches itself every time it installs a package, so it'll
+#       always re-run tasks if this isn't done
 def brew_task.timestamp
-  File.lstat("/usr/local/bin/brew").mtime
+  if File.exist?("/usr/local/bin/brew")
+    File.lstat("/usr/local/bin/brew").mtime
+  else
+    Rake::LATE
+  end
 end
 
 Brew.brew :python, as: "/usr/local/bin/python3"

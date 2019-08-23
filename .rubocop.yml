@@ -6,7 +6,8 @@ Layout/EndOfLine:
 
 Metrics/LineLength:
   IgnoredPatterns:
-    - "http(?:s)?://"
+    - "https?://"
+    - "#\\s*rubocop:disable"
 
 Metrics/ModuleLength:
   Enabled: false
