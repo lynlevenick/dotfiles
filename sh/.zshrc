@@ -1,6 +1,6 @@
 #!/usr/bin/env false
 
-__rc='bash'
+__rc='zsh'
 
 if test -r "${HOME}/.profile"; then
 	. "${HOME}/.profile"

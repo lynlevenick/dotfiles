@@ -1,9 +1,9 @@
 #!/usr/bin/env false
 
-__rc='bash'
+__rc='zsh'
 
-if test -r "${HOME}/.bashrc"; then
-	. "${HOME}/.bashrc"
+if test -r "${HOME}/.zshrc"; then
+	. "${HOME}/.zshrc"
 elif test -r "${HOME}/.profile"; then
 	. "${HOME}/.profile"
 fi
