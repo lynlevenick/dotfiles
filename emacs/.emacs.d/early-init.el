@@ -161,7 +161,7 @@
 
 (use-package minions
   :config (minions-mode)
-  :custom (minions-mode-line-lighter "\u2026"))
+  :custom (minions-mode-line-lighter "\u2026")) ; Horizontal ellipsis
 
 (provide 'early-init)
 ;;; early-init.el ends here

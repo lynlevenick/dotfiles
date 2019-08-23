@@ -1,0 +1,20 @@
+This is the order in which ~use-package~ keywords are to be defined.
+
+1. ~straight~
+2. ~preface~
+3. ~demand~
+4. ~defer~
+5. ~after~
+6. ~commands~
+7. ~init~
+8. ~mode~
+9. ~magic~
+10. ~interpreter~
+11. ~hook~
+12. ~bind~
+13. ~bind*~
+14. ~bind-keymap~
+15. ~bind-keymap*~
+16. ~config~
+17. ~custom~
+18. ~custom-face~

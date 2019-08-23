@@ -6,7 +6,7 @@ Layout/EndOfLine:
 
 Metrics/LineLength:
   IgnoredPatterns:
-    - 'http(?:s)?://'
+    - "http(?:s)?://"
 
 Metrics/ModuleLength:
   Enabled: false
