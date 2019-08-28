@@ -2,8 +2,8 @@
 
 __rc='zsh'
 
-if test -r "${HOME}/.zshrc"; then
-	. "${HOME}/.zshrc"
-elif test -r "${HOME}/.profile"; then
+if test -r "${HOME}/.profile"; then
 	. "${HOME}/.profile"
 fi
+
+# zsh will source .zshrc on its own for interactive shells

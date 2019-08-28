@@ -7,6 +7,6 @@ __dynamic_title() {
 
 case "${TERM}" in
 	xterm*|alacritty)
-		PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}"'__dynamic_title' ;;
+		PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__dynamic_title" ;;
 	*)
 esac

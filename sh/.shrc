@@ -1,0 +1,16 @@
+#!/usr/bin/env false
+
+## Globally used environment variables
+
+CLICOLOR='1'; export CLICOLOR
+EDITOR='emacs -nw'; export EDITOR
+LSCOLORS='ExFxCxDxBxegedabagacad'; export LSCOLORS
+VISUAL='emacs -nw'; export VISUAL
+
+PS1='$ '
+
+if test -d "${HOME}/.config/sh-interactive"; then
+    for __cmd in "${HOME}/.config/sh-interactive"/*; do
+	. "${__cmd}"
+    done
+fi

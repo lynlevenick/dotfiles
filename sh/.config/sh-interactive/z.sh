@@ -13,7 +13,7 @@ CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
 SQL
 	fi
 
-	PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}"'__zsql_add_async'
+	PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__zsql_add_async"
 fi
 
 __zsql_add() {
@@ -47,7 +47,7 @@ __zsql_action() {
 	if test "$1" = '$'; then
 		printf "fatal: z: Not in history\n"
 	elif test -n "${1%??}"; then
-		cd "${1%??}" 2>/dev/null || printf "fatal: cd: %s not found\n" "${1%??}"
+		CDPATH= cd -- "${1%??}" 2>/dev/null || printf "fatal: cd: %s not found\n" "${1%??}"
 	fi
 }
 
