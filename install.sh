@@ -16,41 +16,41 @@ out_fail="${attr_red}\342\234\227${attr_reset}"
 
 last_out_overwrite=''
 
-out_overwrites() {
-	if test "0${last_out_overwrite}" -ne 0; then
-		printf "${cli_reset_line}"
-	fi
-	last_out_overwrite=''
-}
-
-out_overwriteable() {
+out_step() {
 	if test "0${last_out_overwrite}" -ne 0; then
 		printf "${cli_reset_line}"
 	fi
 	last_out_overwrite='1'
 }
 
+out_complete() {
+	if test "0${last_out_overwrite}" -ne 0; then
+		printf "${cli_reset_line}"
+	fi
+	last_out_overwrite=''
+}
+
 ## Status updates
 
 status_pass() {
-	out_overwrites
+	out_complete
 	printf " [${out_pass}] %s ${attr_dim}${attr_white}%*s${attr_reset}\n" "$1" "$((cli_cols - ${#1} - 7))" "$2"
 }
 
 status_fail() {
-	out_overwrites
+	out_complete
 	printf " [${out_fail}] %s ${attr_dim}${attr_white}%*s${attr_reset}\n" "$1" "$((cli_cols - ${#1} - 7))" "$2" 1>&2
 	exit 1
 }
 
 status_update() {
-	out_overwriteable
+	out_step
 	printf " [ ] %s ${attr_dim}${attr_white}%*s${attr_reset}" "$1" "$((cli_cols - ${#1} - 7))" "$2"
 }
 
 status_other() {
-	out_overwrites
-	printf " ... %s ${attr_dim}${attr_white}%*s${attr_reset}\n" "$1" "$((cli_cols - ${#1} - 7))" "$2"
+	out_step
+	printf " ... %s ${attr_dim}${attr_white}%*s${attr_reset}" "$1" "$((cli_cols - ${#1} - 7))" "$2"
 }
 
 ## Helpers
@@ -106,7 +106,7 @@ task_cask() {
 }
 
 task_stow() {
-	status_update "$1" 'configuring...'
+	status_other "$1" 'configuring...'
 	printf ' '
 
 	find "${script_dir}/$1" -type f -exec /usr/bin/env sh -c '
@@ -115,7 +115,6 @@ task_stow() {
 			if test -e "${target}"; then
 				printf '\''     Warning: %s exists\n'\'' "${target}"
 			else
-				printf '\''     Linking %s\n'\'' "${1}"
 				mkdir -p "$(dirname -- "${target}")"
 				ln -s "$1" "$target"
 			fi
@@ -175,7 +174,7 @@ task_cask alacritty '/Applications/Alacritty.app'
 task_stow emacs
 task_cask emacs '/Applications/Emacs.app'
 
-task_cask firefox '/Applications/Firefox.app'
+task_cask firefox-nightly '/Applications/Firefox Nightly.app'
 
 ## Fonts
 

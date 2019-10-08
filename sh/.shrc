@@ -7,10 +7,25 @@ EDITOR='emacs -nw'; export EDITOR
 LSCOLORS='ExFxCxDxBxegedabagacad'; export LSCOLORS
 VISUAL='emacs -nw'; export VISUAL
 
-PS1='$ '
+__attr_red="$(tput setaf 1)"
+__attr_reset="$(tput sgr0)"
+
+__ps1_err() {
+	# shellcheck disable=SC2181
+	if test "$?" -ne 0; then
+		printf '%s' "${__attr_red}"
+	fi
+}
+
+case "${TERM}" in
+	eterm*)
+		PS1="\$(eval \"\${PROMPT_COMMAND}\")${__attr_reset}\w \$(__ps1_err)\$${__attr_reset} " ;;
+	*)
+		PS1="\$(eval \"\${PROMPT_COMMAND}\")${__attr_reset}\$(__ps1_err)\$${__attr_reset} "
+esac
 
 if test -d "${HOME}/.config/sh-interactive"; then
-    for __cmd in "${HOME}/.config/sh-interactive"/*; do
-	. "${__cmd}"
-    done
+	for __cmd in "${HOME}/.config/sh-interactive"/*; do
+		. "${__cmd}"
+	done
 fi

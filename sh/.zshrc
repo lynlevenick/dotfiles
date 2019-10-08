@@ -12,29 +12,23 @@ if test -z "${__rc}"; then
 	fi
 fi
 
-if test -r "${HOME}/.shrc"; then
-	. "${HOME}/.shrc"
-fi
-
 ## zsh-specific configuration follows
-
-__attr_red="$(tput setaf 1)"
-__attr_reset="$(tput sgr0)"
 
 setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_ALL_DUPS
 HISTFILE="${HOME}/.cache/zsh_history"
+HISTSIZE='5000'
 SAVEHIST='5000'
 
 precmd() {
-    eval "${PROMPT_COMMAND}"
+	eval "${PROMPT_COMMAND}"
 }
 
 case "${TERM}" in
-    eterm*)
-	PS1="%{${__attr_reset}%}%~ %{%(0?..${__attr_red})%}%(!.#.$)%{${__attr_reset}%} " ;;
-    *)
-	PS1="%{${__attr_reset}%(0?..${__attr_red})%}%(!.#.$)%{${__attr_reset}%} "
+	eterm*)
+		PS1="%{${__attr_reset}%}%~ %{%(0?..${__attr_red})%}%(!.#.$)%{${__attr_reset}%} " ;;
+	*)
+		PS1="%{${__attr_reset}%(0?..${__attr_red})%}%(!.#.$)%{${__attr_reset}%} "
 esac
 
 bindkey '^n' history-search-forward

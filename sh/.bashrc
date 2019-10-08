@@ -12,26 +12,13 @@ if test -z "${__rc}"; then
 	fi
 fi
 
-if test -r "${HOME}/.shrc"; then
-	. "${HOME}/.shrc"
-fi
-
 ## bash-specific configuration follows
-
-__attr_red="$(tput setaf 1)"
-__attr_reset="$(tput sgr0)"
 
 HISTCONTROL='ignoredups:erasedups'
 HISTFILE="${HOME}/.cache/bash_history"
+HISTFILESIZE='5000'
 HISTSIZE='5000'
 shopt -s histappend
-
-__ps1_err() {
-	# shellcheck disable=SC2181
-	if test "$?" -ne 0; then
-		printf '%s' "${__attr_red}"
-	fi
-}
 
 case "${TERM}" in
 	eterm*)
