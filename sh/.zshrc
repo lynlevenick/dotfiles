@@ -21,6 +21,7 @@ HISTSIZE='5000'
 SAVEHIST='5000'
 
 precmd() {
+	unset CDPATH
 	eval "${PROMPT_COMMAND}"
 }
 
