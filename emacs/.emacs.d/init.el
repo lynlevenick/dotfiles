@@ -22,6 +22,23 @@ context-relevant thing has happened, rather than loading immediately."
            . ,body))
        (add-hook ,hook (function ,name)))))
 
+(defun lyn-relevant-dir (&optional dir)
+  "Return `projectile-project-root' if inside a project or DIR or `default-directory'."
+
+  (if (and (featurep 'projectile)
+           (projectile-project-p dir))
+      (projectile-project-root dir)
+    (or dir default-directory)))
+
+(defconst lyn-fetchhash--sentinel (gensym)
+  "Sentinel for `lyn-fetchhash' to detect missing values.")
+(defmacro lyn-fetchhash (key table set-when-default)
+  "Get KEY from TABLE like `gethash' or assign SET-WHEN-DEFAULT."
+
+  `(if-let ((cached (gethash ,key ,table lyn-fetchhash--sentinel))
+            ((eq cached lyn-fetchhash--sentinel)))
+       (setf (gethash ,key ,table) ,set-when-default)
+     cached))
 (use-package bind-key)
 
 ;;;; Defaults
@@ -155,8 +172,7 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (multi-term multi-term-dedicated-window-p)
   :init
   (defun lyn-multi-term-dwim (&optional dedicated)
-    "Create new terminal in the project root if available,
-otherwise in `default-directory'."
+    "Create new terminal in the project root if available, otherwise in `default-directory'."
     (interactive)
 
     (let ((open-command (if dedicated
@@ -313,29 +329,31 @@ otherwise in `default-directory'."
 If the test returns a non-nil value, then the schema will be prepended
 during discovery of the specified executable.")
 
-  (defconst lyn-flycheck-bundle-enable-cache-sentinel (gensym)
-    "Default in reads of `lyn-flycheck-bundle-enable-cache'.")
-  (defvar lyn-flycheck-bundle-enable-cache (make-hash-table)
+  (defvar lyn-flycheck--bundle-executable-cache (make-hash-table)
+    "Cache for bundle executables by project or directory.")
+  (defun lyn-flycheck--bundle-executable (dir)
+    "Retrieve cached bundle executable for DIR."
+
+    (lyn-fetchhash dir lyn-flycheck--bundle-executable-cache
+                   (flycheck-default-executable-find "bundle")))
+
+  (defvar lyn-flycheck--bundle-should-enable-cache (make-hash-table)
     "Cache for results from `lyn-flycheck-bundle-should-enable'.")
   (defun lyn-flycheck-bundle-should-enable (command)
-    "True if COMMAND should be run through bundler."
+    "True if COMMAND should be run through bundle."
 
-    (let* ((dir (if (projectile-project-p)
-                    (setf dir (projectile-project-root))
-                  (setf dir default-directory)))
-           (cached (gethash dir lyn-flycheck-bundle-enable-cache lyn-flycheck-bundle-enable-cache-sentinel)))
-      (if (eq cached lyn-flycheck-bundle-enable-cache-sentinel)
-          (puthash dir (let ((bundler-executable (flycheck-default-executable-find "bundle")))
-                         (and bundler-executable
-                              (= 0 (call-process bundler-executable
-                                                 nil nil nil "show" command))))
-                   lyn-flycheck-bundle-enable-cache)
-        cached)))
+    (let ((dir (lyn-relevant-dir)))
+      (lyn-fetchhash dir lyn-flycheck--bundle-should-enable-cache
+                     (let ((bundle-executable (lyn-flycheck--bundle-executable dir)))
+                       (and bundle-executable
+                            (= 0 (call-process bundle-executable
+                                               nil nil nil "show" command)))))))
 
   (defun lyn-flycheck-bundle-exec (command &rest args)
-    "Transforms COMMAND into a command for bundler, with ARGS trailing."
+    "Transforms COMMAND into a command for bundle, with ARGS trailing."
 
-    `(,(flycheck-default-executable-find "bundle") "exec" ,command . ,args)) ; TODO: Cache bundle executable?
+    `(,(lyn-flycheck--bundle-executable (lyn-relevant-dir))
+      "exec" ,command . ,args))
 
   (defun lyn-flycheck-executable-find (executable)
     "Wrap EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
@@ -398,7 +416,16 @@ during discovery of the specified executable.")
   ;;       on startup, and once upon visiting a projectile project, then make the
   ;;       appropriate variables local per-file per-project?
   ;; TODO: This blows away the result of add-node-modules-path
-  :hook ((after-init projectile-after-switch-project) . exec-path-from-shell-initialize)
+  ;; HACK: Doing this on every find-file is, uh, terrible. Thanks RVM!
+  :hook ((after-init . exec-path-from-shell-initialize))
+  :config
+  (defun lyn-local-exec-path ()
+    "Make exec-path-from-shell buffer-local, then call `exec-path-from-shell-initialize'."
+
+    (make-local-variable 'exec-path)
+    (exec-path-from-shell-initialize))
+
+  (add-hook 'find-file-hook #'lyn-local-exec-path)
   :custom
   (exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-check-startup-files nil))
