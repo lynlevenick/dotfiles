@@ -39,6 +39,6 @@ fi
 # General-purpose run commands we'll always source since nothing
 # gets clever and does so on its own.
 
-if test -r "${HOME}/.shrc"; then
+if test -t 1 && test -r "${HOME}/.shrc"; then
 	. "${HOME}/.shrc"
 fi
