@@ -54,7 +54,7 @@ __zsql_action() {
 z() {
 	if test -n "$*"; then
 		__zsql_action "$(
-			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --filter="$*" | head -n1 && printf '$'
+			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf --read0 --filter="$*" | head -n1 && printf '$'
 .mode tcl
 .timeout 100
 SELECT dir FROM dirs ORDER BY frecency DESC;
