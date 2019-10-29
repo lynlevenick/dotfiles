@@ -16,8 +16,12 @@ SQL
 	PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__zsql_add_async"
 fi
 
+__zsql_escape() {
+	printf '%s$' "${1}" | sed 's/'\''/'\'\''/g'
+}
+
 __zsql_add() {
-	__zsql_escaped="$(printf '%s$' "${1}" | sed 's/'\''/'\'\''/g')"
+	__zsql_escaped="$(__zsql_escape "${1}")"
 	__zsql_sum="$(
 		sqlite3 "${__zsql_cache}" <<SQL
 .timeout 100
@@ -52,12 +56,13 @@ __zsql_action() {
 }
 
 z() {
+	__zsql_escaped_pwd="$(__zsql_escape "${PWD}")"
 	if test -n "$*"; then
 		__zsql_action "$(
 			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf --read0 --print0 --filter="$*" | rg --text --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
 .mode tcl
 .timeout 100
-SELECT dir FROM dirs ORDER BY frecency DESC;
+SELECT dir FROM dirs WHERE dir != '${__zsql_escaped_pwd%?}' ORDER BY frecency DESC;
 SQL
 		)"
 	else
