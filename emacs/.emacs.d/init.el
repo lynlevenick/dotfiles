@@ -23,7 +23,7 @@ context-relevant thing has happened, rather than loading immediately."
        (add-hook ,hook (function ,name)))))
 
 (defun lyn-relevant-dir (&optional dir)
-  "Return `projectile-project-root' or fall back to DIR or `default-directory'."
+  "Return ‘projectile-project-root’ or fall back to DIR or ‘default-directory’."
 
   (if (and (featurep 'projectile)
            (projectile-project-p dir))
@@ -31,7 +31,7 @@ context-relevant thing has happened, rather than loading immediately."
     (or dir default-directory)))
 
 (defconst lyn-fetchhash--sentinel (gensym)
-  "Sentinel for `lyn-fetchhash' to detect missing values.")
+  "Sentinel for ‘lyn-fetchhash’ to detect missing values.")
 (defmacro lyn-fetchhash (key table set-when-default)
   "Look up KEY in TABLE and return value or assign SET-WHEN-DEFAULT and return."
 
@@ -92,6 +92,7 @@ point reaches the beginning of end of the buffer, stop there."
       (move-beginning-of-line 1))))
 (bind-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
 
+;; ‘comment-dwim-2’ provides a slightly-smarter version of ‘comment-dwim’
 (use-package comment-dwim-2
   :bind (([remap comment-dwim] . comment-dwim-2)))
 
@@ -101,11 +102,14 @@ point reaches the beginning of end of the buffer, stop there."
   (lyn-with-hook-once 'find-file-hook
     (editorconfig-mode)))
 
+;; ‘electric-mode’ provides smart quotes used in elisp documentation
+(use-package electric :straight nil
+  :hook (emacs-lisp-mode . electric-quote-local-mode))
+
+;; ‘uniquify’ determines how buffer names are made distinct when visiting
+;; files with the same name in different directories
 (use-package uniquify :straight nil
   :defer
-  :init
-  (lyn-with-hook-once 'find-file-hook
-    (require 'uniquify))
   :custom (uniquify-buffer-name-style 'forward))
 
 ;;;; Interaction
@@ -172,7 +176,7 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (multi-term multi-term-dedicated-window-p)
   :init
   (defun lyn-multi-term-dwim (&optional dedicated)
-    "Create new terminal in the project root or fall back to `default-directory'."
+    "Create new terminal in the project root or fall back to ‘default-directory’."
     (interactive)
 
     (let ((open-command (if dedicated
@@ -208,12 +212,13 @@ point reaches the beginning of end of the buffer, stop there."
                          ("<M-left>" . term-send-backward-word)
                          ("<M-right>" . term-send-forward-word))))
 
-;; `olivetti' provides a mode which centers content in a buffer via margins.
+;; ‘olivetti’ provides a mode which centers content in a buffer via margins.
 (use-package olivetti
   :hook (org-mode . turn-on-olivetti-mode))
 
 (use-package paren :straight nil
-  :hook (prog-mode . show-paren-mode))
+  :hook (prog-mode . show-paren-mode)
+  :custom (show-paren-delay 0))
 
 (use-package paren-face
   :commands (global-paren-face-mode)
@@ -226,7 +231,8 @@ point reaches the beginning of end of the buffer, stop there."
   :init
   (lyn-with-hook-once 'pre-command-hook
     (projectile-mode))
-  :bind-keymap (("s-p" . projectile-command-map)))
+  :bind-keymap (("s-p" . projectile-command-map)
+                ("C-c p" . projectile-command-map)))
 
 (use-package tramp :straight nil
   :defer
@@ -302,14 +308,14 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Syntax Checking, Linting, and Formatting
 
-;; `apheleia' provides asynchronous autoformatting
+;; ‘apheleia’ provides asynchronous autoformatting
 (use-package apheleia :straight (:host github :repo "raxod502/apheleia")
   :commands (apheleia-global-mode)
   :init
   (lyn-with-hook-once 'find-file-hook
     (apheleia-global-mode)))
 
-;; `flycheck' provides in-buffer errors, warnings, and syntax checking
+;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
 (use-package flycheck
   :commands (global-flycheck-mode)
   :init
@@ -338,7 +344,7 @@ during discovery of the specified executable.")
                    (flycheck-default-executable-find "bundle")))
 
   (defvar lyn-flycheck--bundle-should-enable-cache (make-hash-table)
-    "Cache for results from `lyn-flycheck-bundle-should-enable'.")
+    "Cache for results from ‘lyn-flycheck-bundle-should-enable’.")
   (defun lyn-flycheck-bundle-should-enable (command)
     "True if COMMAND should be run through bundle."
 
@@ -368,13 +374,13 @@ during discovery of the specified executable.")
         (flycheck-default-executable-find executable))))
 
   (defun lyn-flycheck-command-wrapper (command)
-    "Handle specially formed COMMANDs from `lyn-flycheck-executable-find'."
+    "Handle specially formed COMMANDs from ‘lyn-flycheck-executable-find’."
 
     (let* ((url (url-generic-parse-url (car command)))
            (type (url-type url)))
       (if (not type)
           command
-        (aset url 1 nil)          ; expanded (setf (url-type url) nil), (require 'url) needed before setf expansion
+        (aset url 1 nil)                ; expanded (setf (url-type url) nil), (require 'url) needed before setf expansion
         (apply (cadr (assoc-string (file-name-nondirectory type)
                                    lyn-flycheck-handle-alist))
                (url-recreate-url url)
@@ -424,7 +430,7 @@ during discovery of the specified executable.")
   (exec-path-from-shell-check-startup-files nil))
 
 (defun lyn-local-exec-path ()
-  "Make exec-path-from-shell buffer-local, then call `exec-path-from-shell-initialize'."
+  "Make exec-path-from-shell buffer-local, then call ‘exec-path-from-shell-initialize’."
 
   (make-local-variable 'exec-path)
   (exec-path-from-shell-initialize)
@@ -453,8 +459,6 @@ during discovery of the specified executable.")
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
-         ("C-c n" . avy-goto-line-below)
-         ("C-c p" . avy-goto-line-above)
          ("C-c r" . avy-goto-char-2-above)
          ("C-c s" . avy-goto-char-2-below)))
 
@@ -508,7 +512,7 @@ during discovery of the specified executable.")
   (lyn-with-hook-once 'pre-command-hook
     (winner-mode)))
 
-;; `zygospore' provides toggling of the `delete-other-windows' command
+;; ‘zygospore’ provides toggling of the ‘delete-other-windows’ command
 (use-package zygospore
   :bind (([remap delete-other-windows] . zygospore-toggle-delete-other-windows)))
 

@@ -28,7 +28,8 @@
   "Enable garbage collection."
 
   (setf gc-cons-percentage (car (get 'gc-cons-percentage 'standard-value))
-        gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value))))
+        gc-cons-threshold (car (get 'gc-cons-threshold 'standard-value)))
+  (garbage-collect))
 (defun lyn-gc-restore-delayed ()
   "Schedule enabling garbage collection for idle time."
 
@@ -107,7 +108,7 @@
  gnutls-verify-error t
  tls-checktrust t
  tls-program '("gnutls-cli --x509cafile %t -p %p %h"
-               "openssl s_client -connect %h:%p -no_ssl2 -no_ssl2 -ign_eof")
+               "openssl s_client -connect %h:%p -no_ssl2 -ign_eof")
  ;; Broken Emacs defaults
  sentence-end-double-space nil
  ;; Broken OS behavior
@@ -127,7 +128,6 @@
 (when (fboundp 'horizontal-scroll-bar-mode)
   (horizontal-scroll-bar-mode -1))
 
-(setf show-paren-delay 0)
 (setq-default cursor-type 'bar
               echo-keystrokes 1e-6
               truncate-lines t)
@@ -141,7 +141,7 @@
 (defconst lyn-font-stack '("Triplicate T4c", "GoMono Nerd Font" "Menlo")
   "Fonts to render with, in priority order.")
 (defun lyn-font-available-p (name)
-  "Return NAME when NAME is available as a font. Nil otherwise."
+  "Return NAME if NAME is available as a font or nil if not."
 
   (car (member name (font-family-list))))
 (let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
