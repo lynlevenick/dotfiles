@@ -19,11 +19,11 @@ context-relevant thing has happened, rather than loading immediately."
        (unless (fboundp (quote ,name))
          (defun ,name ()
            (remove-hook ,hook (function ,name))
-           . ,body))
+           ,@body))
        (add-hook ,hook (function ,name)))))
 
 (defun lyn-relevant-dir (&optional dir)
-  "Return `projectile-project-root' if inside a project or DIR or `default-directory'."
+  "Return `projectile-project-root' or fall back to DIR or `default-directory'."
 
   (if (and (featurep 'projectile)
            (projectile-project-p dir))
@@ -33,7 +33,7 @@ context-relevant thing has happened, rather than loading immediately."
 (defconst lyn-fetchhash--sentinel (gensym)
   "Sentinel for `lyn-fetchhash' to detect missing values.")
 (defmacro lyn-fetchhash (key table set-when-default)
-  "Get KEY from TABLE like `gethash' or assign SET-WHEN-DEFAULT."
+  "Look up KEY in TABLE and return value or assign SET-WHEN-DEFAULT and return."
 
   `(if-let ((cached (gethash ,key ,table lyn-fetchhash--sentinel))
             ((eq cached lyn-fetchhash--sentinel)))
@@ -172,7 +172,7 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (multi-term multi-term-dedicated-window-p)
   :init
   (defun lyn-multi-term-dwim (&optional dedicated)
-    "Create new terminal in the project root if available, otherwise in `default-directory'."
+    "Create new terminal in the project root or fall back to `default-directory'."
     (interactive)
 
     (let ((open-command (if dedicated
@@ -353,7 +353,7 @@ during discovery of the specified executable.")
     "Transforms COMMAND into a command for bundle, with ARGS trailing."
 
     `(,(lyn-flycheck--bundle-executable (lyn-relevant-dir))
-      "exec" ,command . ,args))
+      "exec" ,command ,@args))
 
   (defun lyn-flycheck-executable-find (executable)
     "Wrap EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
@@ -408,8 +408,9 @@ during discovery of the specified executable.")
 ;; with Javascript or Ruby or other languages
 ;; TODO: Better solution for this ordering problem
 (use-package add-node-modules-path
-  :hook (css-mode elm-mode js-mode rjsx-mode typescript-mode))
+  :commands (add-node-modules-path))
 (use-package exec-path-from-shell
+  :commands (exec-path-from-shell-initialize)
   ;; TODO: Stop using rvm, use shim-based tools instead like rbenv
   ;; TODO: This can vary depending on projectile project, and the switch-project-hook
   ;;       isn't that great of a solution for catching issues. Can we initialize once
@@ -418,17 +419,19 @@ during discovery of the specified executable.")
   ;; TODO: This blows away the result of add-node-modules-path
   ;; HACK: Doing this on every find-file is, uh, terrible. Thanks RVM!
   :hook ((after-init . exec-path-from-shell-initialize))
-  :config
-  (defun lyn-local-exec-path ()
-    "Make exec-path-from-shell buffer-local, then call `exec-path-from-shell-initialize'."
-
-    (make-local-variable 'exec-path)
-    (exec-path-from-shell-initialize))
-
-  (add-hook 'find-file-hook #'lyn-local-exec-path)
   :custom
   (exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-check-startup-files nil))
+
+(defun lyn-local-exec-path ()
+  "Make exec-path-from-shell buffer-local, then call `exec-path-from-shell-initialize'."
+
+  (make-local-variable 'exec-path)
+  (exec-path-from-shell-initialize)
+  (when (member major-mode '(css-mode elm-mode js-mode rjsx-mode typescript-mode))
+    (add-node-modules-path)))
+(add-hook 'find-file-hook #'lyn-local-exec-path)
+(add-hook 'magit-mode-hook #'lyn-local-exec-path)
 
 ;;;; Searching
 
