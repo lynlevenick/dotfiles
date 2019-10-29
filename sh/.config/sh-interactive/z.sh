@@ -7,7 +7,7 @@ if command -v sqlite3 >/dev/null; then
 		mkdir -p "$(dirname "${__zsql_cache}")"
 
 		sqlite3 "${__zsql_cache}" <<SQL >/dev/null
-CREATE TABLE dirs (dir TEXT, frecency INTEGER);
+CREATE TABLE dirs (dir TEXT NOT NULL, frecency INTEGER NOT NULL);
 CREATE UNIQUE INDEX index_by_dir ON dirs (dir);
 CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
 SQL
@@ -32,10 +32,10 @@ SQL
 	if test "0${__zsql_sum}" -gt 5000; then
 		sqlite3 "${__zsql_cache}" <<SQL
 .timeout 100
-BEGIN TRANSACTION;
+BEGIN;
 UPDATE dirs SET frecency = CAST(frecency * 0.9 AS INTEGER);
 DELETE FROM dirs WHERE frecency <= 0;
-COMMIT TRANSACTION;
+COMMIT;
 SQL
 	fi
 }
