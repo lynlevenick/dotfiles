@@ -6,7 +6,7 @@ cli_reset_line="\015$(tput el)"
 attr_dim="$(tput dim)"
 attr_green="$(tput setaf 2)"
 attr_red="$(tput setaf 1)"
-attr_reset="$(tput sgr0)"
+attr_reset="$(tput sgr0)$(tput cnorm)"
 attr_white="$(tput setaf 7)"
 
 out_pass="${attr_green}\342\234\223${attr_reset}"

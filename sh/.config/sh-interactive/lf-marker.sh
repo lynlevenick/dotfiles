@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 __attr_reverse="$(tput rev)"
-__attr_reset="$(tput sgr0)"
+__attr_reset="$(tput sgr0)$(tput cnorm)"
 __cli_reset_line="\015$(tput el)"
 
 __lf_marker() {
@@ -10,7 +10,7 @@ __lf_marker() {
 }
 
 case "${__rc}" in
-	fish|zsh) ;;
+	zsh) ;;
 	*)
 		PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__lf_marker"
 esac

@@ -8,7 +8,7 @@ LSCOLORS='ExFxCxDxBxegedabagacad'; export LSCOLORS
 VISUAL='emacs -nw'; export VISUAL
 
 __attr_red="$(tput setaf 1)"
-__attr_reset="$(tput sgr0)"
+__attr_reset="$(tput sgr0)$(tput cnorm)"
 
 __ps1_err() {
 	# shellcheck disable=SC2181
