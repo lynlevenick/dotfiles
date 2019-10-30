@@ -40,23 +40,23 @@ SQL
 	fi
 }
 __zsql_add_async() {
-	(__zsql_add "${PWD}" &)
+	(__zsql_add "$(pwd)" &)
 }
 
 __zsql_action() {
 	if test "$1" = '$'; then
-		printf "fatal: z: Not in history\n"
+		printf 'fatal: z: Not in history\n'
 	elif test -n "${1%??}"; then
-		CDPATH= cd -- "${1%??}" 2>/dev/null || printf "fatal: cd: %s not found\n" "${1%??}"
+		CDPATH= cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
 	fi
 }
 
 z() {
-	__zsql_escaped_pwd="$(printf '%s$' "${PWD}" | sed 's/'\''/'\'\''/g')"
+	__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 	if test -n "$*"; then
 		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
 		__zsql_action "$(
-			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf --read0 --print0 --filter="$*" | rg --text --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
+			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%b\0' | fzf --read0 --print0 --filter="$*" | rg --text --multiline --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
 .mode tcl
 .timeout 100
 SELECT dir FROM dirs
