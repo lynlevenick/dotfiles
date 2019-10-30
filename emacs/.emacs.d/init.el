@@ -426,13 +426,16 @@ during discovery of the specified executable.")
   ;; HACK: Doing this on every find-file is, uh, terrible. Thanks RVM!
   :hook ((after-init . exec-path-from-shell-initialize))
   :custom
-  (exec-path-from-shell-arguments '("-l"))
+  (exec-path-from-shell-arguments '("-i"))
   (exec-path-from-shell-check-startup-files nil))
 
+(defvar lyn-original-exec-path exec-path
+  "The value of `exec-path' when Emacs was first started.")
 (defun lyn-local-exec-path ()
   "Make exec-path-from-shell buffer-local, then call ‘exec-path-from-shell-initialize’."
 
   (make-local-variable 'exec-path)
+  (setf exec-path lyn-original-exec-path) ; Avoid duplication from repeated evaluation
   (exec-path-from-shell-initialize)
   (when (member major-mode '(css-mode elm-mode js-mode rjsx-mode typescript-mode))
     (add-node-modules-path)))
