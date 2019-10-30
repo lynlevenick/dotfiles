@@ -54,7 +54,7 @@ __zsql_action() {
 z() {
 	__zsql_escaped_pwd="$(printf '%s$' "${PWD}" | sed 's/'\''/'\'\''/g')"
 	if test -n "$*"; then
-		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/./%\0/g' -e 's/'\''/'\'\''/g')"
+		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
 		__zsql_action "$(
 			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf --read0 --print0 --filter="$*" | rg --text --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
 .mode tcl
