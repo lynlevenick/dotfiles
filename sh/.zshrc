@@ -1,18 +1,14 @@
 #!/usr/bin/env false
 
-# zsh will source only zshrc for interactive, non-login
-# shells - if __rc is unset, we haven't run profile yet
-# and need to source it
-
 if test -z "${__rc}"; then
 	__rc='zsh'
-
-	if test -r "${HOME}/.profile"; then
-		. "${HOME}/.profile"
-	fi
 fi
 
-## zsh-specific configuration follows
+if test -r "${HOME}/.shrc"; then
+	. "${HOME}/.shrc"
+fi
+
+## interactive zsh specific configuration follows
 
 setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_ALL_DUPS

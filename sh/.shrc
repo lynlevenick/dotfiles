@@ -1,6 +1,10 @@
 #!/usr/bin/env false
 
-## Globally used environment variables
+if test -z "${__rc}"; then
+	__rc='unknown'
+fi
+
+## interactive specific configuration follows
 
 CLICOLOR='1'; export CLICOLOR
 EDITOR='emacs -nw'; export EDITOR
@@ -23,6 +27,16 @@ case "${TERM}" in
 	*)
 		PS1="\$(eval \"\${PROMPT_COMMAND}\")${__attr_reset}\$(__ps1_err)\$${__attr_reset} "
 esac
+
+if test -z "${__rc_common_init}"; then
+	__rc_common_init='1'
+
+	if test -d "${HOME}/.config/sh-common"; then
+		for __cmd in "${HOME}/.config/sh-common"/*; do
+			. "${__cmd}"
+		done
+	fi
+fi
 
 if test -d "${HOME}/.config/sh-interactive"; then
 	for __cmd in "${HOME}/.config/sh-interactive"/*; do

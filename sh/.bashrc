@@ -1,18 +1,14 @@
 #!/usr/bin/env false
 
-# bash will source only bashrc for interactive, non-login
-# shells - if __rc is unset, we haven't run profile yet
-# and need to source it
-
 if test -z "${__rc}"; then
 	__rc='bash'
-
-	if test -r "${HOME}/.profile"; then
-		. "${HOME}/.profile"
-	fi
 fi
 
-## bash-specific configuration follows
+if test -r "${HOME}/.shrc"; then
+	. "${HOME}/.shrc"
+fi
+
+## interactive bash specific configuration follows
 
 HISTCONTROL='ignoredups:erasedups'
 HISTFILE="${HOME}/.cache/bash_history"

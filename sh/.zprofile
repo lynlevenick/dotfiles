@@ -1,9 +1,7 @@
 #!/usr/bin/env false
 
-__rc='zsh'
-
-if test -r "${HOME}/.profile"; then
-	. "${HOME}/.profile"
+if test -z "${__rc}"; then
+	__rc='zsh'
 fi
 
-# zsh will source .zshrc on its own for interactive shells
+## zsh will source .zshrc on its own for interactive login shells
