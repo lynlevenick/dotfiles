@@ -426,7 +426,6 @@ during discovery of the specified executable.")
   ;; HACK: Doing this on every find-file is, uh, terrible. Thanks RVM!
   :hook ((after-init . exec-path-from-shell-initialize))
   :custom
-  (exec-path-from-shell-arguments '("-i"))
   (exec-path-from-shell-check-startup-files nil))
 
 (defvar lyn-original-exec-path exec-path
