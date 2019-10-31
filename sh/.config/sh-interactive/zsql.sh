@@ -43,19 +43,52 @@ __zsql_add_async() {
 	(__zsql_add "$(pwd)" &)
 }
 
-__zsql_action() {
-	if test "$1" = '$'; then
-		printf 'fatal: z: Not in history\n'
-	elif test -n "${1%??}"; then
-		CDPATH= cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
-	fi
+__zsql_cd() {
+	CDPATH= cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
+}
+
+__zsql_forget() {
+	while :; do
+		printf 'Remove '\''%s'\''? [Yn] ' "${1%??}"
+		read -r __zsql_yn
+		case "${__zsql_yn}" in
+			''|y|Y)
+				break ;;
+			n|N)
+				return ;;
+			*)
+				printf 'Please respond Y or N.\n'
+		esac
+	done
+
+	__zsql_escaped="$(printf '%s$' "${1%??}" | sed 's/'\''/'\'\''/g')"
+	sqlite3 "${__zsql_cache}" <<SQL
+.timeout 100
+DELETE FROM dirs WHERE dir = '${__zsql_escaped%?}';
+SQL
 }
 
 z() {
+	__zsql_action='__zsql_cd'
+
+	while :; do
+		case "$1" in
+			-f|--forget)
+				__zsql_action='__zsql_forget' ;;
+			--)
+				shift
+				break ;;
+			*)
+				break ;;
+		esac
+
+		shift
+	done
+
 	__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 	if test -n "$*"; then
 		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
-		__zsql_action "$(
+		__zsql_selection="$(
 			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%b\0' | fzf --read0 --print0 --filter="$*" | rg --text --multiline --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
 .mode tcl
 .timeout 100
@@ -66,12 +99,18 @@ SELECT dir FROM dirs
 SQL
 		)"
 	else
-		__zsql_action "$(
+		__zsql_selection="$(
 			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
 .mode tcl
 .timeout 100
 SELECT dir FROM dirs ORDER BY frecency DESC;
 SQL
 		)"
+	fi
+
+	if test "${__zsql_selection}" = '$'; then
+		printf 'fatal: z: Not in history\n'
+	elif test -n "${__zsql_selection%??}"; then
+		"${__zsql_action}" "${__zsql_selection}"
 	fi
 }
