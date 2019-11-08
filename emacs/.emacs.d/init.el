@@ -429,7 +429,7 @@ during discovery of the specified executable.")
   (exec-path-from-shell-check-startup-files nil))
 
 (defvar lyn-original-exec-path exec-path
-  "The value of `exec-path' when Emacs was first started.")
+  "The value of ‘exec-path’ when Emacs was first started.")
 (defun lyn-local-exec-path ()
   "Make exec-path-from-shell buffer-local, then call ‘exec-path-from-shell-initialize’."
 
