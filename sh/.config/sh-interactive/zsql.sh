@@ -100,7 +100,7 @@ SQL
 		)"
 	else
 		__zsql_selection="$(
-			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%s\0' | fzf-tmux --read0 --select-1 --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
+			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%b\0' | fzf-tmux --read0 --select-1 --bind='?:toggle-preview' --preview='env CLICOLOR_FORCE=1 ls -G -- {}' --preview-window=hidden && printf '$'
 .mode tcl
 .timeout 100
 SELECT dir FROM dirs ORDER BY frecency DESC;
