@@ -2,13 +2,12 @@
 
 __ef_action() {
 	if test -n "${1%??}"; then
-		case "${__rc}" in
-			zsh)
-				# Explicitly word-split the editor command
-				${=VISUAL:-${=EDITOR:-vi}} -- "${1%??}" ;;
-			*)
-				${VISUAL:-${EDITOR:-vi}} -- "${1%??}"
-		esac
+		if test -n "$ZSH_VERSION"; then
+			# Explicitly word-split the editor command
+			${=VISUAL:-${=EDITOR:-vi}} -- "${1%??}"
+		else
+			${VISUAL:-${EDITOR:-vi}} -- "${1%??}"
+		fi
 	fi
 }
 
@@ -19,6 +18,8 @@ else
 fi
 
 ef() {
+	# Preview is evaluated in shell context
+	# shellcheck disable=SC2016
 	__ef_action "$(
 		(
 			rg --files --hidden --null 2>/dev/null |

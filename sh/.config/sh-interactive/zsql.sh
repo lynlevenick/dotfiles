@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 if command -v sqlite3 >/dev/null; then
-	__zsql_cache="${HOME}/.cache/zsql_cache.db"
+	__zsql_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsql_cache.db"
 
 	if test ! -r "${__zsql_cache}"; then
 		mkdir -p "$(dirname "${__zsql_cache}")"
@@ -44,7 +44,7 @@ __zsql_add_async() {
 }
 
 __zsql_cd() {
-	CDPATH= cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
+	CDPATH='' cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
 }
 
 __zsql_forget() {

@@ -9,8 +9,6 @@ __lf_marker() {
 	printf "${__attr_reverse}%%${__attr_reset}%*s${__cli_reset_line}" "$((__cols - 1))" ''
 }
 
-case "${__rc}" in
-	zsh) ;;
-	*)
-		PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__lf_marker"
-esac
+if test -z "$ZSH_VERSION"; then
+	PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__lf_marker"
+fi
