@@ -70,9 +70,12 @@ SQL
 
 z() {
 	__zsql_action='__zsql_cd'
+	unset __zsql_case_sensitive
 
 	while :; do
 		case "$1" in
+			--case-sensitive)
+				__zsql_case_sensitive=1 ;;
 			-f|--forget)
 				__zsql_action='__zsql_forget' ;;
 			--)
@@ -85,6 +88,10 @@ z() {
 		shift
 	done
 
+	if test -z "$__zsql_case_sensitive" && printf '%s' "$*" | grep -q -E '[A-Z]'; then
+		__zsql_case_sensitive=1
+	fi
+
 	__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 	if test -n "$*"; then
 		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
@@ -92,6 +99,7 @@ z() {
 			sqlite3 "${__zsql_cache}" <<SQL | xargs printf '%b\0' | fzf --read0 --print0 --filter="$*" | rg --text --multiline --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
 .mode tcl
 .timeout 100
+${__zsql_case_sensitive:+PRAGMA case_sensitive_like = ON;}
 SELECT dir FROM dirs
 	WHERE dir != '${__zsql_escaped_pwd%?}'
 	AND dir LIKE '${__zsql_filtered_search%?}'
