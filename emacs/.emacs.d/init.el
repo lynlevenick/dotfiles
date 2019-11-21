@@ -447,11 +447,12 @@ during discovery of the specified executable.")
 (defun lyn-local-exec-path ()
   "Make exec-path-from-shell buffer-local, then call ‘exec-path-from-shell-initialize’."
 
-  (make-local-variable 'exec-path)
-  (setf exec-path lyn-original-exec-path) ; Avoid duplication from repeated evaluation
-  (exec-path-from-shell-initialize)
-  (when (member major-mode '(css-mode elm-mode js-mode rjsx-mode typescript-mode))
-    (add-node-modules-path)))
+  (unless (file-remote-p default-directory) ; When not running under tramp
+    (make-local-variable 'exec-path)
+    (setf exec-path lyn-original-exec-path) ; Avoid duplication from repeated evaluation
+    (exec-path-from-shell-initialize)
+    (when (member major-mode '(css-mode elm-mode js-mode rjsx-mode typescript-mode))
+      (add-node-modules-path))))
 (add-hook 'find-file-hook #'lyn-local-exec-path)
 (add-hook 'magit-mode-hook #'lyn-local-exec-path)
 
