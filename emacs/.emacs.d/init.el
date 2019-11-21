@@ -322,6 +322,20 @@ point reaches the beginning of end of the buffer, stop there."
   (lyn-with-hook-once 'find-file-hook
     (global-flycheck-mode))
   :config
+  ;; Override the sh-shellcheck checker's configuration to normalize the shell
+  ;; ‘false’ to ‘sh’.
+  (add-to-list 'flycheck-shellcheck-supported-shells 'false)
+  (defun lyn-flycheck--normalize-sh (symbol)
+    "Return 'sh if SYMBOL is 'false, otherwise return SYMBOL."
+
+    (if (eq symbol 'false)
+        'sh
+      symbol))
+  (dolist (elt (get 'sh-shellcheck 'flycheck-command))
+    (when (and (listp elt)
+               (equal (cdr elt) '((symbol-name sh-shell))))
+      (setcdr elt '((symbol-name (lyn-flycheck--normalize-sh sh-shell))))))
+
   ;; Extend flycheck to handle running an executable to determine if a command
   ;; is runnable, and to support running an executable through another.
   (defvar lyn-flycheck-handle-alist
