@@ -1,11 +1,11 @@
 #!/usr/bin/env false
 
 if test -z "$__rc"; then
-	__rc='unknown'
+	__rc=unknown
 fi
 
 if test -z "$__rc_common_init"; then
-	__rc_common_init='1'
+	__rc_common_init=1
 
 	if test -d "$HOME/.config/sh-lib"; then
 	   for __cmd in "$HOME/.config/sh-lib"/*; do
@@ -28,9 +28,9 @@ fi
 
 ## interactive specific configuration follows
 
-CLICOLOR='1'; export CLICOLOR
+CLICOLOR=1; export CLICOLOR
 EDITOR='emacs -nw'; export EDITOR
-LSCOLORS='ExFxCxDxBxegedabagacad'; export LSCOLORS
+LSCOLORS=ExFxCxDxBxegedabagacad; export LSCOLORS
 VISUAL='emacs -nw'; export VISUAL
 
 __attr_red="$(tput setaf 1)"

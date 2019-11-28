@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 if test -z "$__rc"; then
-	__rc='bash'
+	__rc=bash
 fi
 
 ## shared profile

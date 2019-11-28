@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 if test -z "$__rc"; then
-	__rc='unknown'
+	__rc=unknown
 fi
 
 # ENV determines non-login shell init file
@@ -22,7 +22,7 @@ if test -d "$HOME/.config/sh"; then
 fi
 
 if test -z "$__rc_common_init"; then
-	__rc_common_init='1'
+	__rc_common_init=1
 
 	if test -d "$HOME/.config/sh-common"; then
 		for __cmd in "$HOME/.config/sh-common"/*; do

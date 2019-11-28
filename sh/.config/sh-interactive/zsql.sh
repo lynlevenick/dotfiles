@@ -50,7 +50,7 @@ __zsql_cd() {
 __zsql_forget() {
 	while :; do
 		printf 'Remove '\''%s'\''? [Yn] ' "${1%??}"
-		IFS= read -r __zsql_yn
+		IFS='' read -r __zsql_yn
 		case "$__zsql_yn" in
 			''|y|Y)
 				break ;;
@@ -69,7 +69,7 @@ SQL
 }
 
 z() {
-	__zsql_action='__zsql_cd'
+	__zsql_action=__zsql_cd
 	unset __zsql_case_sensitive
 
 	while :; do
@@ -77,7 +77,7 @@ z() {
 			--case-sensitive)
 				__zsql_case_sensitive=1 ;;
 			-f|--forget)
-				__zsql_action='__zsql_forget' ;;
+				__zsql_action=__zsql_forget ;;
 			--)
 				shift
 				break ;;

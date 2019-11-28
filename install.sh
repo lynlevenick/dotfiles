@@ -14,20 +14,20 @@ out_fail="${attr_red}\342\234\227${attr_reset}"
 
 ## Output fundamentals
 
-last_out_overwrite=''
+unset last_out_overwrite
 
 out_step() {
-	if test "0${last_out_overwrite}" -ne 0; then
+	if test -n "$last_out_overwrite" -ne 0; then
 		printf "${cli_reset_line}"
 	fi
-	last_out_overwrite='1'
+	last_out_overwrite=1
 }
 
 out_complete() {
-	if test "0${last_out_overwrite}" -ne 0; then
+	if test -n "$last_out_overwrite" -ne 0; then
 		printf "${cli_reset_line}"
 	fi
-	last_out_overwrite=''
+	unset last_out_overwrite
 }
 
 ## Status updates

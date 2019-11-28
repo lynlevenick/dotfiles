@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 if test -z "$__rc"; then
-	__rc='zsh'
+	__rc=zsh
 fi
 
 if test -r "$HOME/.shrc"; then
@@ -13,8 +13,8 @@ fi
 setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_ALL_DUPS
 HISTFILE="$HOME/.cache/zsh_history"
-HISTSIZE='5000'
-SAVEHIST='5000'
+HISTSIZE=5000
+SAVEHIST=5000
 
 precmd() {
 	unset CDPATH

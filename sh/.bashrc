@@ -1,7 +1,7 @@
 #!/usr/bin/env false
 
 if test -z "$__rc"; then
-	__rc='bash'
+	__rc=bash
 fi
 
 if test -r "$HOME/.shrc"; then
@@ -10,10 +10,10 @@ fi
 
 ## interactive bash specific configuration follows
 
-HISTCONTROL='ignoredups:erasedups'
+HISTCONTROL=ignoredups:erasedups
 HISTFILE="$HOME/.cache/bash_history"
-HISTFILESIZE='5000'
-HISTSIZE='5000'
+HISTFILESIZE=5000
+HISTSIZE=5000
 shopt -s histappend
 
 case "$TERM" in
