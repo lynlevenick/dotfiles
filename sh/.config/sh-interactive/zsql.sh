@@ -50,7 +50,7 @@ __zsql_cd() {
 __zsql_forget() {
 	while :; do
 		printf 'Remove '\''%s'\''? [Yn] ' "${1%??}"
-		read -r __zsql_yn
+		IFS= read -r __zsql_yn
 		case "$__zsql_yn" in
 			''|y|Y)
 				break ;;
