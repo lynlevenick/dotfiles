@@ -6,7 +6,7 @@ __cli_reset_line="\015$(tput el)"
 
 __lf_marker() {
 	__cols="$(tput cols)"
-	printf "${__attr_reverse}%%${__attr_reset}%*s${__cli_reset_line}" "$((__cols - 1))" ''
+	printf "$__attr_reverse%%$__attr_reset%*s$__cli_reset_line" "$((__cols - 1))" ''
 }
 
 if test -z "$ZSH_VERSION"; then

@@ -1,11 +1,13 @@
 #!/usr/bin/env false
 
+# regexp-escape $HOME
+__dynamic_title_home_pattern="$(printf '%s' "$HOME" | sed 's/[]\/$.^|[]/\\&/g')"
+
 __dynamic_title() {
-	__dynamic_title_pwd="$(printf '%s' "${PWD}" | sed 's|^'"${HOME}"'|~|')"
-	printf '\033]0;%s\007' "${__dynamic_title_pwd}"
+	printf '\033]0;%s\007' "$(printf '%s' "$PWD" | sed "s/^$__dynamic_title_home_pattern/~/")"
 }
 
-case "${TERM}" in
+case "$TERM" in
 	xterm*|alacritty)
 		PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__dynamic_title" ;;
 	*)

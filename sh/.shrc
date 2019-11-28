@@ -1,28 +1,28 @@
 #!/usr/bin/env false
 
-if test -z "${__rc}"; then
+if test -z "$__rc"; then
 	__rc='unknown'
 fi
 
-if test -z "${__rc_common_init}"; then
+if test -z "$__rc_common_init"; then
 	__rc_common_init='1'
 
-	if test -d "${HOME}/.config/sh-lib"; then
-	   for __cmd in "${HOME}/.config/sh-lib"/*; do
-		   . "${__cmd}"
+	if test -d "$HOME/.config/sh-lib"; then
+	   for __cmd in "$HOME/.config/sh-lib"/*; do
+		   . "$__cmd"
 	   done
 	fi
 
-	if test -d "${HOME}/.config/sh-common"; then
-		for __cmd in "${HOME}/.config/sh-common"/*; do
-			. "${__cmd}"
+	if test -d "$HOME/.config/sh-common"; then
+		for __cmd in "$HOME/.config/sh-common"/*; do
+			. "$__cmd"
 		done
 	fi
 fi
 
-if test -d "${HOME}/.config/sh-interactive"; then
-	for __cmd in "${HOME}/.config/sh-interactive"/*; do
-		. "${__cmd}"
+if test -d "$HOME/.config/sh-interactive"; then
+	for __cmd in "$HOME/.config/sh-interactive"/*; do
+		. "$__cmd"
 	done
 fi
 
@@ -39,13 +39,13 @@ __attr_reset="$(tput sgr0)$(tput cnorm)"
 __ps1_err() {
 	# shellcheck disable=SC2181
 	if test "$?" -ne 0; then
-		printf '%s' "${__attr_red}"
+		printf '%s' "$__attr_red"
 	fi
 }
 
-case "${TERM}" in
+case "$TERM" in
 	eterm*)
-		PS1="\$(eval \"\${PROMPT_COMMAND}\")${__attr_reset}\w \$(__ps1_err)\$${__attr_reset} " ;;
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\w \$(__ps1_err)\$$__attr_reset " ;;
 	*)
-		PS1="\$(eval \"\${PROMPT_COMMAND}\")${__attr_reset}\$(__ps1_err)\$${__attr_reset} "
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\$(__ps1_err)\$$__attr_reset "
 esac

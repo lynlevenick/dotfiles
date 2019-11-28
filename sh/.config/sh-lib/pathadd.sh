@@ -7,9 +7,9 @@ __pathadd() {
 		*:$1:*) ;;
 		*)
 			if test "$2" = 'prepend'; then
-				PATH="$1:${PATH}"
+				PATH="$1:$PATH"
 			else
-				PATH="${PATH}:$1"
+				PATH="$PATH:$1"
 			fi
 	esac
 }

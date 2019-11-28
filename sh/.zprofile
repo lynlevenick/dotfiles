@@ -1,6 +1,6 @@
 #!/usr/bin/env false
 
-if test -z "${__rc}"; then
+if test -z "$__rc"; then
 	__rc='zsh'
 fi
 
