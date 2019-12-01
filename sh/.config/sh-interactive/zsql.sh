@@ -10,6 +10,13 @@ if command -v sqlite3 >/dev/null; then
 CREATE TABLE dirs (dir TEXT NOT NULL, frecency INTEGER NOT NULL);
 CREATE UNIQUE INDEX index_by_dir ON dirs (dir);
 CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
+CREATE TRIGGER trigger_on_update_forget
+	AFTER UPDATE OF frecency ON dirs
+	WHEN (SELECT SUM(frecency) FROM dirs) >= 5000
+	BEGIN
+	UPDATE dirs SET frecency = CAST(frecency * 0.9 AS INTEGER);
+	DELETE FROM dirs WHERE frecency = 0;
+	END;
 SQL
 	fi
 
@@ -18,38 +25,26 @@ fi
 
 __zsql_add() {
 	__zsql_escaped="$(printf '%s$' "$1" | sed 's/'\''/'\'\''/g')"
-	__zsql_sum="$(
-		sqlite3 "$__zsql_cache" <<SQL
+
+	sqlite3 "$__zsql_cache" <<SQL
 .timeout 100
 INSERT INTO dirs (dir, frecency)
 	VALUES ('${__zsql_escaped%?}', 1)
 	ON CONFLICT (dir) DO UPDATE SET
 	frecency = frecency + excluded.frecency;
-SELECT SUM(frecency) FROM dirs;
 SQL
-	)"
-
-	if test "0$__zsql_sum" -gt 5000; then
-		sqlite3 "$__zsql_cache" <<SQL
-.timeout 100
-BEGIN;
-UPDATE dirs SET frecency = CAST(frecency * 0.9 AS INTEGER);
-DELETE FROM dirs WHERE frecency <= 0;
-COMMIT;
-SQL
-	fi
 }
 __zsql_add_async() {
 	(__zsql_add "$(pwd)" &)
 }
 
 __zsql_cd() {
-	CDPATH='' cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: %s not found\n' "${1%??}"
+	CDPATH='' cd -- "${1%??}" 2>/dev/null || printf 'fatal: cd: `%s'\'' not found\n' "${1%??}"
 }
 
 __zsql_forget() {
 	while :; do
-		printf 'Remove '\''%s'\''? [Yn] ' "${1%??}"
+		printf 'Remove `%s'\''? [Yn] ' "${1%??}"
 		IFS='' read -r __zsql_yn
 		case "$__zsql_yn" in
 			''|y|Y)
@@ -92,8 +87,8 @@ z() {
 		__zsql_case_sensitive=1
 	fi
 
-	__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 	if test -n "$*"; then
+		__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
 		__zsql_selection="$(
 			sqlite3 "$__zsql_cache" <<SQL | xargs printf '%b\0' | fzf --read0 --print0 --filter="$*" | rg --text --multiline --only-matching --max-count=1 '(?-u)^([^\x00]+)' && printf '$'
@@ -116,8 +111,13 @@ SQL
 		)"
 	fi
 
-	if test "$__zsql_selection" = '$'; then
+	__zsql_exitstatus="$?"
+
+	if test "0$__zsql_exitstatus" -eq 130; then
+		: # User probably manually exited with C-C, C-D, or C-G
+	elif test -z "$__zsql_selection" || test "$__zsql_selection" = '$'; then
 		printf 'fatal: z: Not in history\n'
+		false
 	elif test -n "${__zsql_selection%??}"; then
 		"$__zsql_action" "$__zsql_selection"
 	fi
