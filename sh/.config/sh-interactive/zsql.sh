@@ -30,6 +30,7 @@ __zsql_escape() {
 
 # Consume standard input, printing until the first NUL byte
 __zsql_read_to_nul() {
+	# shellcheck disable=SC2046
 	printf '%b' $(od -v -b | sed -n ':loop
 s/^[^ ]*//
 / 000/b end
