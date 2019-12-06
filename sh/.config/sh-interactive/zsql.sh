@@ -28,11 +28,10 @@ __zsql_escape() {
 	sed 's/'\''/'\'\''/g'
 }
 
-# Consume standard input, printing until the first NUL byte
-__zsql_read_to_nul() {
-	# shellcheck disable=SC2046
-	printf '%b' $(od -v -b | sed -n ':loop
+__zsql_read_to_nul_octal() {
+	od -v -b | sed -n ':loop
 s/^[^ ]*//
+s/ *$//
 / 000/b end
 s/  */ \\/g
 p
@@ -42,8 +41,26 @@ b loop
 s/ *000.*//
 s/  */ \\/g
 p
-q')
+q'
 }
+
+# Consume standard input, printing until the first NUL byte
+if test -n "$ZSH_VERSION"; then
+	__zsql_read_to_nul() {
+		# ZSH's builtin printf doesn't support octal escapes,
+		# use the system one and explicitly word-split the output
+
+		# shellcheck disable=2034
+		__zsql_octal="$(__zsql_read_to_nul_octal)"
+		# shellcheck disable=SC2086
+		command printf '%b' ${=__zsql_octal}
+	}
+else
+	__zsql_read_to_nul() {
+		# shellcheck disable=SC2046
+		printf '%b' $(__zsql_read_to_nul_octal)
+	}
+fi
 
 __zsql_add() {
 	__zsql_escaped="$(printf '%s$' "$1" | __zsql_escape)"
