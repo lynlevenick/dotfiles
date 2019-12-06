@@ -1,5 +1,8 @@
 #!/usr/bin/env false
 
+__cache_home="${XDG_CACHE_HOME:-$HOME/.cache}"
+__config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
 if test -z "$__rc"; then
 	__rc=unknown
 fi
@@ -8,15 +11,15 @@ fi
 ENV="$HOME/.shrc"; export ENV
 
 if test -z "$__rc_common_init"; then
-	if test -d "$HOME/.config/sh-lib"; then
-		for __cmd in "$HOME/.config/sh-lib"/*; do
+	if test -d "$__config_home/sh-lib"; then
+		for __cmd in "$__config_home/sh-lib"/*; do
 			. "$__cmd"
 		done
 	fi
 fi
 
-if test -d "$HOME/.config/sh"; then
-	for __cmd in "$HOME/.config/sh"/*; do
+if test -d "$__config_home/sh"; then
+	for __cmd in "$__config_home/sh"/*; do
 		. "$__cmd"
 	done
 fi
@@ -24,8 +27,8 @@ fi
 if test -z "$__rc_common_init"; then
 	__rc_common_init=1
 
-	if test -d "$HOME/.config/sh-common"; then
-		for __cmd in "$HOME/.config/sh-common"/*; do
+	if test -d "$__config_home/sh-common"; then
+		for __cmd in "$__config_home/sh-common"/*; do
 			. "$__cmd"
 		done
 	fi

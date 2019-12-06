@@ -12,7 +12,7 @@ fi
 
 setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_ALL_DUPS
-HISTFILE="$HOME/.cache/zsh_history"
+HISTFILE="$__cache_home/zsh_history"
 HISTSIZE=5000
 SAVEHIST=5000
 
