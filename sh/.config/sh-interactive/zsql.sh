@@ -1,12 +1,20 @@
 #!/usr/bin/env false
 
-if command -v sqlite3 >/dev/null; then
-	__zsql_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsql_cache.db"
+if ! command -v sqlite3 >/dev/null; then
+	printf 'warning: zsql: sqlite3 not available, not loading\n' >&2
+	return 1
+fi
+if ! command -v fzf >/dev/null; then
+	printf 'warning: zsql: fzf not available, not loading\n' >&2
+	return 1
+fi
 
-	if test ! -r "$__zsql_cache"; then
-		mkdir -p "$(dirname "$__zsql_cache")"
+__zsql_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsql_cache.db"
 
-		sqlite3 "$__zsql_cache" <<SQL >/dev/null
+if test ! -r "$__zsql_cache"; then
+	mkdir -p "$(dirname -- "$__zsql_cache")"
+
+	sqlite3 "$__zsql_cache" <<SQL >/dev/null
 CREATE TABLE dirs (dir TEXT NOT NULL, frecency INTEGER NOT NULL DEFAULT 1);
 CREATE UNIQUE INDEX index_by_dir ON dirs (dir);
 CREATE INDEX index_by_frecency_and_dir ON dirs (frecency, dir);
@@ -18,15 +26,9 @@ CREATE TRIGGER trigger_on_update_forget
 	DELETE FROM dirs WHERE frecency = 0;
 	END;
 SQL
-	fi
-
-	PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__zsql_add_async"
 fi
 
-# Escape a string for sqlite, by turning single quotes into two single quotes
-__zsql_escape() {
-	sed 's/'\''/'\'\''/g'
-}
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__zsql_add_async"
 
 __zsql_read_to_nul_octal() {
 	od -v -b | sed -n ':loop
@@ -63,7 +65,7 @@ else
 fi
 
 __zsql_add() {
-	__zsql_escaped="$(printf '%s$' "$1" | __zsql_escape)"
+	__zsql_escaped="$(printf '%s$' "$1" | sed 's/'\''/'\'\''/g')"
 
 	sqlite3 "$__zsql_cache" <<SQL
 .timeout 100
@@ -95,7 +97,7 @@ __zsql_forget() {
 		esac
 	done
 
-	__zsql_escaped="$(printf '%s$' "${1%?}" | __zsql_escape)"
+	__zsql_escaped="$(printf '%s$' "${1%?}" | sed 's/'\''/'\'\''/g')"
 	sqlite3 "$__zsql_cache" <<SQL
 .timeout 100
 DELETE FROM dirs WHERE dir = '${__zsql_escaped%?}';
@@ -122,12 +124,15 @@ z() {
 		shift
 	done
 
-	if test -z "$__zsql_case_sensitive" && printf '%s' "$*" | grep -q -E '[A-Z]'; then
-		__zsql_case_sensitive=1
+	if test -z "$__zsql_case_sensitive"; then
+		case "$*" in
+			*[[:upper:]]*)
+				__zsql_case_sensitive=1
+		esac
 	fi
 
 	if test -n "$*"; then
-		__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | __zsql_escape)"
+		__zsql_escaped_pwd="$(printf '%s$' "$(pwd)" | sed 's/'\''/'\'\''/g')"
 		__zsql_filtered_search="$(printf '%s$' "$*" | sed -e 's/\(.\)/%\1/g' -e 's/'\''/'\'\''/g')"
 		__zsql_selection="$(
 			sqlite3 "$__zsql_cache" <<SQL | xargs printf '%b\0' 2>/dev/null | fzf --read0 --print0 --filter="$*" | __zsql_read_to_nul && printf '$'
