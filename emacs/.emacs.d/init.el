@@ -486,7 +486,8 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   (when drop-cache
     (setf lyn-local-exec-path-cache (make-hash-table :test 'equal)))
 
-  (when (and buffer-file-name                         ; Accessing a file
+  (when (and (or buffer-file-name                     ; Accessing a file
+                 (derived-mode-p 'magit-mode))        ; or running under Magit
              (not (file-remote-p default-directory))) ; File not under Tramp
     (lyn-with-relevant-dir nil
       (when (file-directory-p default-directory)
@@ -500,7 +501,7 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
                  (add-node-modules-path)
                  exec-path)))))))
 (add-hook 'find-file-hook #'lyn-local-exec-path)
-(add-hook 'magit-mode-hook #'lyn-local-exec-path)
+(add-hook 'magit-setup-buffer-hook #'lyn-local-exec-path)
 
 ;;;; Searching
 
