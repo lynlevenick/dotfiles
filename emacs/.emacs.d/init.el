@@ -22,13 +22,44 @@ context-relevant thing has happened, rather than loading immediately."
            ,@body))
        (add-hook ,hook (function ,name)))))
 
-(defun lyn-relevant-dir (&optional dir)
-  "Return ‘projectile-project-root’ or fall back to DIR or ‘default-directory’."
+(defun lyn-accessible-directory-p (filename)
+  "Like ‘file-accessible-directory-p’ for FILENAME but work around an Apple bug."
 
-  (if (and (featurep 'projectile)
-           (projectile-project-p dir))
-      (projectile-project-root dir)
-    (or dir default-directory)))
+  (and (file-directory-p filename)
+       (file-accessible-directory-p filename)))
+
+(defun lyn-safe-default-directory (&optional file)
+  "Return a safe ‘default-directory’ relative to FILE or ‘default-directory’.
+
+Like ‘magit’s ‘magit--safe-default-directory’."
+
+  (catch 'unsafe-default-dir
+    (let ((dir (file-name-as-directory (expand-file-name (or file default-directory))))
+          (previous nil))
+      (while (not (lyn-accessible-directory-p dir))
+        (setf dir (file-name-directory (directory-file-name dir)))
+        (when (equal dir previous)
+          (throw 'unsafe-default-dir nil))
+        (setf previous dir))
+      dir)))
+
+(defun lyn-relevant-dir (&optional file)
+  "Relative to FILE or ‘default-directory’, get a safe default directory.
+
+Returns from function ‘projectile-project-root’ relative to FILE if ‘projectile’ is loaded."
+
+  (lyn-safe-default-directory
+   (if (and (featurep 'projectile)
+            (projectile-project-p file))
+       (projectile-project-root file)
+     file)))
+
+(defmacro lyn-with-relevant-dir (file &rest body)
+  "Execute BODY with ‘lyn-relevant-dir’ relative to FILE as ‘default-directory’."
+  (declare (indent defun) (debug (form body)))
+
+  `(when-let ((default-directory (lyn-relevant-dir ,file)))
+     ,@body))
 
 (defconst lyn-fetchhash--sentinel (gensym)
   "Sentinel for ‘lyn-fetchhash’ to detect missing values.")
@@ -444,15 +475,30 @@ during discovery of the specified executable.")
 
 (defvar lyn-original-exec-path exec-path
   "The value of ‘exec-path’ when Emacs was first started.")
-(defun lyn-local-exec-path ()
-  "Make exec-path-from-shell buffer-local, then call ‘exec-path-from-shell-initialize’."
+(defvar lyn-local-exec-path-cache (make-hash-table :test 'equal)
+  "Cache for exec paths by project or directory.")
+(defun lyn-local-exec-path (&optional drop-cache)
+  "Set up ‘exec-path’ for the current project.
 
-  (unless (file-remote-p default-directory) ; When not running under tramp
-    (make-local-variable 'exec-path)
-    (setf exec-path lyn-original-exec-path) ; Avoid duplication from repeated evaluation
-    (exec-path-from-shell-initialize)
-    (when (member major-mode '(css-mode elm-mode js-mode rjsx-mode typescript-mode))
-      (add-node-modules-path))))
+If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
+  (interactive "p")
+
+  (when drop-cache
+    (setf lyn-local-exec-path-cache (make-hash-table :test 'equal)))
+
+  (when (and buffer-file-name                         ; Accessing a file
+             (not (file-remote-p default-directory))) ; File not under Tramp
+    (lyn-with-relevant-dir nil
+      (when (file-directory-p default-directory)
+        (make-local-variable 'exec-path)
+        (setf exec-path
+              (lyn-fetchhash
+               default-directory lyn-local-exec-path-cache
+               (progn
+                 (setf exec-path lyn-original-exec-path)
+                 (exec-path-from-shell-initialize)
+                 (add-node-modules-path)
+                 exec-path)))))))
 (add-hook 'find-file-hook #'lyn-local-exec-path)
 (add-hook 'magit-mode-hook #'lyn-local-exec-path)
 

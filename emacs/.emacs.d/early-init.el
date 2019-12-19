@@ -111,6 +111,8 @@
                "openssl s_client -connect %h:%p -no_ssl2 -ign_eof")
  ;; Broken Emacs defaults
  sentence-end-double-space nil
+ undo-limit (* 16 1024 1024)
+ undo-strong-limit (* 24 1024 1024)
  ;; Broken OS behavior
  dired-use-ls-dired nil
  use-dialog-box nil)
