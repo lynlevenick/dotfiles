@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 cli_cols="$(tput cols)"
-cli_reset_line="\015$(tput el)"
+cli_reset_line="$(tput el)"
 
 attr_dim="$(tput dim)"
 attr_green="$(tput setaf 2)"
@@ -17,15 +17,15 @@ out_fail="${attr_red}\342\234\227${attr_reset}"
 unset last_out_overwrite
 
 out_step() {
-	if test -n "$last_out_overwrite" -ne 0; then
-		printf "${cli_reset_line}"
+	if test -n "$last_out_overwrite"; then
+		printf '\015%s' "${cli_reset_line}"
 	fi
 	last_out_overwrite=1
 }
 
 out_complete() {
-	if test -n "$last_out_overwrite" -ne 0; then
-		printf "${cli_reset_line}"
+	if test -n "$last_out_overwrite"; then
+		printf '\015%s' "${cli_reset_line}"
 	fi
 	unset last_out_overwrite
 }
@@ -55,7 +55,7 @@ status_other() {
 
 ## Helpers
 
-script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+script_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)"
 
 task_async() {
 	# Parse arguments - everything before -- is the command to run,
@@ -80,7 +80,7 @@ task_async() {
 
 		{
 			if ! $task_command -- "$1" </dev/null >"${status_dir}/stdout" 2>"${status_dir}/stderr"; then
-				printf "$?" > "${status_dir}/errno"
+				printf '%s' "$?" > "${status_dir}/errno"
 			fi
 		} &
 
@@ -109,6 +109,7 @@ task_stow() {
 	status_other "$1" 'configuring...'
 	printf ' '
 
+	# shellcheck disable=SC2016
 	find "${script_dir}/$1" -type f -exec /usr/bin/env sh -c '
 		target="${HOME}/${1#$2/}"
 		if test ! -h "${target}"; then
@@ -164,20 +165,13 @@ task_brew ripgrep '/usr/local/bin/rg'
 
 task_stow sh
 
+task_brew shellcheck
+
 task_stow ssh
 
 ## Applications
 
-task_stow alacritty
-task_cask alacritty '/Applications/Alacritty.app'
-
 task_stow emacs
 task_cask emacs '/Applications/Emacs.app'
 
-task_cask firefox-nightly '/Applications/Firefox Nightly.app'
-
-## Fonts
-
-task_cask homebrew/cask-fonts/font-symbola "${HOME}/Library/Fonts/Symbola_Hinted.ttf"
-
-task_cask homebrew/cask-fonts/font-go-mono-nerd-font "${HOME}/Library/Fonts/Go Mono Nerd Font Complete.ttf"
+task_cask homebrew/cask-versions/firefox-nightly '/Applications/Firefox Nightly.app'
