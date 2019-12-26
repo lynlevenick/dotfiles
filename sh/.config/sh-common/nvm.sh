@@ -13,6 +13,7 @@ if test -r "$HOME/.nvm/nvm.sh"; then
 			alias $__command="unalias $__node_commands && . \"\$NVM_DIR/nvm.sh\" && $__command"
 		done
 	else
+		# shellcheck disable=SC1090
 		. "$NVM_DIR/nvm.sh"
 	fi
 fi

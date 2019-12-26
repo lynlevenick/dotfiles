@@ -11,6 +11,7 @@ if test -r "$HOME/.rvm/scripts/rvm"; then
 			alias $__command="unalias $__ruby_commands && . \"\$HOME/.rvm/scripts/rvm\" && $__command"
 		done
 	else
+		# shellcheck disable=SC1090
 		. "$HOME/.rvm/scripts/rvm"
 	fi
 
