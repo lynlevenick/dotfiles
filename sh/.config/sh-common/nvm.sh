@@ -4,10 +4,14 @@ if test -r "$HOME/.nvm/nvm.sh"; then
 	NVM_DIR="$HOME/.nvm"; export NVM_DIR
 
 	if test -t 1; then
-		alias node='unalias node npm nvm yarn && . "$NVM_DIR/nvm.sh" && node'
-		alias npm='unalias node npm nvm yarn && . "$NVM_DIR/nvm.sh" && npm'
-		alias nvm='unalias node npm nvm yarn && . "$NVM_DIR/nvm.sh" && nvm'
-		alias yarn='unalias node npm nvm yarn && . "$NVM_DIR/nvm.sh" && yarn'
+		__node_commands='node npm nvm yarn'
+
+		# Unnecessary printf makes this work in zsh and other shells too
+		# shellcheck disable=SC2086
+		for __command in $(printf '%s\n' $__node_commands); do
+			# shellcheck disable=SC2139
+			alias $__command="unalias $__node_commands && . \"\$NVM_DIR/nvm.sh\" && $__command"
+		done
 	else
 		. "$NVM_DIR/nvm.sh"
 	fi
