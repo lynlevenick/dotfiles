@@ -432,15 +432,18 @@ during discovery of the specified executable.")
            (type (url-type url)))
       (if (not type)
           command
-        (aset url 1 nil)                ; expanded (setf (url-type url) nil), (require 'url) needed before setf expansion
+        (aset url 1 nil) ; expanded (setf (url-type url) nil), (require 'url) needed to expand
         (apply (cadr (assoc-string (file-name-nondirectory type)
                                    lyn-flycheck-handle-alist))
                (url-recreate-url url)
                (cdr command)))))
   :custom
-  (flycheck-display-errors-delay 0.25)
+  ;; Apply flycheck extension from above
   (flycheck-executable-find #'lyn-flycheck-executable-find)
-  (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper))
+  (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper)
+  ;; Tweak syntax checking
+  (flycheck-check-syntax-automatically '(save idle-change idle-buffer-switch mode-enabled))
+  (flycheck-display-errors-delay 0))
 
 (use-package flycheck-rust
   :after (flycheck rust-mode)
