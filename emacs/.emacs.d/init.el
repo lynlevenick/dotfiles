@@ -204,13 +204,6 @@ point reaches the beginning of end of the buffer, stop there."
   (magit-completing-read-function #'magit-ido-completing-read)
   (magit-diff-adjust-tab-width t))
 
-(use-package magit-gitflow
-  :hook (magit-mode . turn-on-magit-gitflow))
-
-(use-package magit-todos
-  :hook (magit-mode . magit-todos-mode)
-  :custom (magit-todos-rg-extra-args '("--hidden")))
-
 (use-package mode-line-bell
   :commands (mode-line-bell-mode)
   :init
