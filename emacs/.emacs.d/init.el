@@ -74,7 +74,21 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 
 ;;;; Defaults
 
+;; SOMEDAY:
+;; Smooth scroll when this doesn't generate an obscene amount of garbage
+;; and/or it properly handles the macOS scrolling behaviors
+;; emacs-mac-port does scroll correctly - with stuttering for an unknown
+;; reason. There isn't a great solution here with any approach
+
+;; (when (fboundp 'pixel-scroll-mode)
+;;   (pixel-scroll-mode)
+;;   (setf pixel-resolution-fine-flag 1
+;;         pixel-dead-time 0
+;;         mouse-wheel-progressive-speed t))
+
 (bind-key "C-?" #'undo-only)
+(when (boundp 'mac-option-modifier) (setf mac-option-modifier 'meta))
+(when (boundp 'mac-command-modifier) (setf mac-command-modifier 'super))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
 (use-package imenu :straight nil
