@@ -465,20 +465,10 @@ during discovery of the specified executable.")
   :hook (prog-mode . ws-butler-mode))
 
 ;;;; Paths
-;; It is important that these hooks happen before hooks that try to integrate
-;; with Javascript or Ruby or other languages
-;; TODO: Better solution for this ordering problem
 (use-package add-node-modules-path
   :commands (add-node-modules-path))
 (use-package exec-path-from-shell
   :commands (exec-path-from-shell-initialize)
-  ;; TODO: Stop using rvm, use shim-based tools instead like rbenv
-  ;; TODO: This can vary depending on projectile project, and the switch-project-hook
-  ;;       isn't that great of a solution for catching issues. Can we initialize once
-  ;;       on startup, and once upon visiting a projectile project, then make the
-  ;;       appropriate variables local per-file per-project?
-  ;; TODO: This blows away the result of add-node-modules-path
-  ;; HACK: Doing this on every find-file is, uh, terrible. Thanks RVM!
   :hook ((after-init . exec-path-from-shell-initialize))
   :custom
   (exec-path-from-shell-check-startup-files nil))
@@ -510,6 +500,10 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
                  (exec-path-from-shell-initialize)
                  (add-node-modules-path)
                  exec-path)))))))
+;; HACK: Doing this on every find-file isn't great. Caching makes this slightly
+;;       less terrible but it's still terrible. It would be preferable if
+;;       there was a shim-based solution which ran according to the current
+;;       directory instead of needing to futz with the path constantly.
 (add-hook 'find-file-hook #'lyn-local-exec-path)
 (add-hook 'magit-setup-buffer-hook #'lyn-local-exec-path)
 
