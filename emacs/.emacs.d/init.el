@@ -85,7 +85,8 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 ;; emacs-mac-port does scroll correctly - with stuttering for an unknown
 ;; reason. There isn't a great solution here with any approach
 
-;; (when (fboundp 'pixel-scroll-mode)
+;; (when (and (display-graphic-p)
+;;            (fboundp 'pixel-scroll-mode))
 ;;   (pixel-scroll-mode)
 ;;   (setf pixel-resolution-fine-flag 1
 ;;         pixel-dead-time 0
@@ -115,6 +116,9 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
  ;; Editing
  undo-limit (* 16 1024 1024)
  undo-strong-limit (* 24 1024 1024)
+ ;; Delay font lock to speed up interaction
+ fast-but-imprecise-scrolling t
+ jit-lock-defer-time 0
  ;; OS integration
  use-dialog-box nil
  ;; Disable tabs almost everywhere
