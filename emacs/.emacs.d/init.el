@@ -3,8 +3,12 @@
 ;; There are many configurations, but this one is mine.
 ;;; Code:
 
+;;;; Load early-init file on Emacs prior to 27
+
 (unless (bound-and-true-p early-init-file)
   (require 'early-init (concat user-emacs-directory "early-init")))
+
+;;;; Convenience
 
 (defmacro lyn-with-hook-once (hook &rest body)
   "Arrange to execute BODY once, the next time HOOK is run.
