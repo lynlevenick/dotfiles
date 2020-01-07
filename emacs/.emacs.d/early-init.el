@@ -3,8 +3,10 @@
 ;; Emacs 27+ introduces early-init.el, run before package and UI initialization
 ;;; Code:
 
-;;;; Disable gc and file name handlers until startup is finished
-(setf file-name-handler-alist nil)
+;;;; Disable special file name handling and GC until startup is finished
+
+(setf (get 'file-name-handler-alist 'standard-value) (list file-name-handler-alist)
+      file-name-handler-alist nil)
 (defun lyn-file-name-handler-restore ()
   "Restore the default file name handler."
 
@@ -51,15 +53,18 @@
 (add-hook 'pre-command-hook #'lyn-gc-finalize)
 
 ;;;; Disable VC mode
+
 (remove-hook 'find-file-hook #'vc-refresh-state)
 
 ;;;; Unicode
+
 (set-charset-priority 'unicode)
 (prefer-coding-system 'utf-8-unix)
 (set-default-coding-systems 'utf-8-unix)
-(setq-default buffer-file-coding-system 'utf-8-unix)
+(setf (default-value 'buffer-file-coding-system) 'utf-8-unix)
 
 ;;;; package.el replacement
+
 (setf straight-check-for-modifications '(check-on-save find-when-checking)
       straight-recipes-gnu-elpa-use-mirror t
       straight-use-package-by-default t)
@@ -81,45 +86,19 @@
 
 (use-package no-littering)
 
-;;;; General
+;;;; Quiet init
+
 (setf
- ;; Decrease work to create autoloads
- autoload-compute-prefixes nil
- ;; Don't ping random machines
- ffap-machine-p-known 'reject
- ;; Quiet init
  inhibit-splash-screen t
  inhibit-startup-message t
  inhibit-startup-echo-area-message user-login-name
  inhibit-default-init t
  initial-major-mode #'fundamental-mode
  initial-scratch-message nil
- (symbol-function 'display-startup-echo-area-message) #'ignore
- ;; Control file creation - use version control for version control
- auto-save-default nil
- create-lockfiles nil
- make-backup-files nil
- ;; Customize is terrible (we won't load the file)
- custom-file (concat no-littering-etc-directory "custom.el")
- ;; Quiet byte compilation
- byte-compile-warnings '(not free-vars unresolved noruntime lexical)
- ;; Security
- auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")
- gnutls-verify-error t
- tls-checktrust t
- tls-program '("gnutls-cli --x509cafile %t -p %p %h"
-               "openssl s_client -connect %h:%p -no_ssl2 -ign_eof")
- ;; Broken Emacs defaults
- sentence-end-double-space nil
- undo-limit (* 16 1024 1024)
- undo-strong-limit (* 24 1024 1024)
- ;; Broken OS behavior
- dired-use-ls-dired nil
- use-dialog-box nil)
-;; Disable tabs almost everywhere
-(setq-default indent-tabs-mode nil)
+ (symbol-function 'display-startup-echo-area-message) #'ignore)
 
 ;;;; Theme
+
 (when (and (fboundp 'menu-bar-mode)
            (not (eq window-system 'ns)))
   (menu-bar-mode -1))
@@ -130,13 +109,13 @@
 (when (fboundp 'horizontal-scroll-bar-mode)
   (horizontal-scroll-bar-mode -1))
 
-(setq-default cursor-type 'bar
-              echo-keystrokes 1e-6
-              truncate-lines t)
+(setf (default-value 'cursor-type) 'bar
+      (default-value 'echo-keystrokes) 1e-6
+      (default-value 'truncate-lines) t)
 
-(setq-default mode-line-format
-              (cl-set-difference mode-line-format
-                                 '(mode-line-front-space mode-line-mule-info mode-line-client)))
+(setf (default-value 'mode-line-format)
+      (cl-set-difference mode-line-format
+                         '(mode-line-front-space mode-line-mule-info mode-line-client)))
 
 (defconst lyn-font-size 14
   "Size at which to render fonts.")
@@ -146,17 +125,18 @@
   "Return NAME if NAME is available as a font or nil if not."
 
   (car (member name (font-family-list))))
-(let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
-  (when font
-    (let ((sized-font (concat font "-" (number-to-string lyn-font-size))))
-      (set-face-font 'default sized-font)
-      (set-face-font 'fixed-pitch sized-font))))
-(set-face-font 'variable-pitch (concat "Charter-" (number-to-string lyn-font-size)))
+(when-let ((font (cl-some #'lyn-font-available-p lyn-font-stack)))
+  (let ((sized-font (concat font "-" (number-to-string lyn-font-size))))
+    (setf (face-font 'default) sized-font
+          (face-font 'fixed-pitch) sized-font)))
+(setf (face-font 'variable-pitch) (concat "Charter-" (number-to-string lyn-font-size)))
 
-(setq frame-title-format nil
-      ns-use-proxy-icon nil)
-(push '(ns . ((ns-transparent-titlebar . t)))
-      window-system-default-frame-alist)
+;; Transparent empty titlebar on NS, buffer name on others
+(when (boundp 'ns-use-proxy-icon)
+  (setf ns-use-proxy-icon (not (eq window-system 'ns))))
+(setf frame-title-format (unless (eq window-system 'ns) "%b")
+      (alist-get 'ns-transparent-titlebar
+                 (alist-get 'ns window-system-default-frame-alist)) t)
 
 (use-package srcery-theme
   :config (load-theme 'srcery t))

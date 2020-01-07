@@ -91,6 +91,35 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 ;;         pixel-dead-time 0
 ;;         mouse-wheel-progressive-speed t))
 
+(setf
+ ;; Decrease work to create autoloads
+ autoload-compute-prefixes nil
+ ;; Don't ping random machines
+ ffap-machine-p-known 'reject
+ ;; Control file creation - use version control for version control
+ auto-save-default nil
+ create-lockfiles nil
+ make-backup-files nil
+ ;; Customize is terrible (we won't load the file)
+ custom-file (concat no-littering-etc-directory "custom.el")
+ ;; Quiet byte compilation
+ byte-compile-warnings '(not free-vars unresolved noruntime lexical)
+ ;; Security
+ auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")
+ gnutls-verify-error t
+ tls-checktrust t
+ tls-program '("gnutls-cli --x509cafile %t -p %p %h"
+               "openssl s_client -connect %h:%p -no_ssl2 -ign_eof")
+ ;; Typography
+ sentence-end-double-space nil
+ ;; Editing
+ undo-limit (* 16 1024 1024)
+ undo-strong-limit (* 24 1024 1024)
+ ;; OS integration
+ use-dialog-box nil
+ ;; Disable tabs almost everywhere
+ (default-value 'indent-tabs-mode) nil)
+
 (bind-key "C-?" #'undo-only)
 (when (boundp 'mac-option-modifier) (setf mac-option-modifier 'meta))
 (when (boundp 'mac-command-modifier) (setf mac-command-modifier 'super))
@@ -361,8 +390,8 @@ point reaches the beginning of end of the buffer, stop there."
       symbol))
   (dolist (elt (get 'sh-shellcheck 'flycheck-command))
     (when (and (listp elt)
-               (equal (cdr elt) '((symbol-name sh-shell))))
-      (setcdr elt '((symbol-name (lyn-flycheck--normalize-sh sh-shell))))))
+               (equal (cddr elt) '(symbol-name sh-shell)))
+      (setf (cddr elt) '(symbol-name (lyn-flycheck--normalize-sh sh-shell)))))
 
   ;; Extend flycheck to handle running an executable to determine if a command
   ;; is runnable, and to support running an executable through another.
