@@ -74,6 +74,7 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
             ((eq cached lyn-fetchhash--sentinel)))
        (setf (gethash ,key ,table) ,set-when-default)
      cached))
+
 (use-package bind-key)
 
 ;;;; Defaults
@@ -149,7 +150,8 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (editorconfig-mode)
   :init
   (lyn-with-hook-once 'find-file-hook
-    (editorconfig-mode)))
+    (editorconfig-mode)
+    (editorconfig-apply)))
 
 ;; ‘electric-mode’ provides smart quotes used in elisp documentation
 (use-package electric :straight nil
