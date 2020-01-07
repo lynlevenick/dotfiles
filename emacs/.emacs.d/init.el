@@ -101,22 +101,6 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 
 ;;;; Editing
 
-(defun lyn-smart-isearch-delete-char ()
-  "Delete the failed portion of the search string or the last character."
-  (interactive)
-
-  (if (= 0 (length isearch-string))
-      (ding)
-    (setf isearch-string
-          (substring isearch-string 0 (or (isearch-fail-pos) (1- (length isearch-string))))
-          isearch-message
-          (mapconcat 'isearch-text-char-description isearch-string "")))
-  (if isearch-other-end (goto-char isearch-other-end))
-  (isearch-search)
-  (isearch-push-state)
-  (isearch-update))
-(bind-key [remap isearch-delete-char] #'lyn-smart-isearch-delete-char isearch-mode-map)
-
 (defun lyn-smart-move-beginning-of-line (arg)
   "Move point between beginning of indentation or beginning of line.
 
