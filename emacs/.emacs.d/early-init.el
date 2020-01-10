@@ -56,13 +56,6 @@
 
 (remove-hook 'find-file-hook #'vc-refresh-state)
 
-;;;; Unicode
-
-(set-charset-priority 'unicode)
-(prefer-coding-system 'utf-8-unix)
-(set-default-coding-systems 'utf-8-unix)
-(setf (default-value 'buffer-file-coding-system) 'utf-8-unix)
-
 ;;;; package.el replacement
 
 (setf straight-check-for-modifications '(check-on-save find-when-checking)
@@ -84,6 +77,13 @@
   (setf use-package-expand-minimally t
         use-package-verbose nil))
 
+;;;; Unicode
+
+(set-charset-priority 'unicode)
+(prefer-coding-system 'utf-8-unix)
+(set-default-coding-systems 'utf-8-unix)
+(setf (default-value 'buffer-file-coding-system) 'utf-8-unix)
+
 (use-package no-littering)
 
 ;;;; Quiet init
@@ -100,7 +100,7 @@
 ;;;; Theme
 
 (when (and (fboundp 'menu-bar-mode)
-           (not (eq window-system 'ns)))
+           (not (memq window-system '(ns mac))))
   (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
