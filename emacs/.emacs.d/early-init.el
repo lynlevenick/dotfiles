@@ -55,6 +55,7 @@
 ;;;; Disable VC mode
 
 (remove-hook 'find-file-hook #'vc-refresh-state)
+(setf vc-handled-backends nil)
 
 ;;;; package.el replacement
 
