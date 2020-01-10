@@ -490,14 +490,17 @@ during discovery of the specified executable.")
 ;;;; Paths
 (use-package add-node-modules-path
   :commands (add-node-modules-path))
-(use-package exec-path-from-shell
-  :commands (exec-path-from-shell-initialize)
-  :hook ((after-init . exec-path-from-shell-initialize))
-  :custom
-  (exec-path-from-shell-check-startup-files nil))
+(when (memq window-system '(mac ns x))
+  (use-package exec-path-from-shell
+    :commands (exec-path-from-shell-initialize)
+    :hook ((after-init . exec-path-from-shell-initialize))
+    :custom
+    (exec-path-from-shell-check-startup-files nil)))
 
 (defvar lyn-original-exec-path exec-path
   "The value of ‘exec-path’ when Emacs was first started.")
+(defvar lyn-original-process-environment (copy-tree process-environment)
+  "The value of ‘process-environment’ when Emacs was first started.")
 (defvar lyn-local-exec-path-cache (make-hash-table :test 'equal)
   "Cache for exec paths by project or directory.")
 (defun lyn-local-exec-path (&optional drop-cache)
@@ -513,16 +516,20 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
                  (derived-mode-p 'magit-mode))        ; or running under Magit
              (not (file-remote-p default-directory))) ; File not under Tramp
     (lyn-with-relevant-dir nil
-      (when (file-directory-p default-directory)
-        (make-local-variable 'exec-path)
-        (setf exec-path
-              (lyn-fetchhash
-               default-directory lyn-local-exec-path-cache
-               (progn
-                 (setf exec-path lyn-original-exec-path)
-                 (exec-path-from-shell-initialize)
-                 (add-node-modules-path)
-                 exec-path)))))))
+      (make-local-variable 'exec-path)
+      (make-local-variable 'process-environment)
+      (-let [(relevant-exec-path relevant-process-environment)
+             (let ((exec-path lyn-original-exec-path)
+                   (process-environment (copy-tree lyn-original-process-environment)))
+               (lyn-fetchhash
+                default-directory lyn-local-exec-path-cache
+                (progn
+                  (when (fboundp 'exec-path-from-shell-initialize)
+                    (exec-path-from-shell-initialize))
+                  (add-node-modules-path)
+                  (list exec-path process-environment))))]
+        (setf exec-path relevant-exec-path
+              process-environment relevant-process-environment)))))
 ;; HACK: Doing this on every find-file isn't great. Caching makes this slightly
 ;;       less terrible but it's still terrible. It would be preferable if
 ;;       there was a shim-based solution which ran according to the current
