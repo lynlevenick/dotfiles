@@ -102,7 +102,7 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
  create-lockfiles nil
  make-backup-files nil
  ;; Customize is terrible (we won't load the file)
- custom-file (concat no-littering-etc-directory "custom.el")
+ custom-file (concat temporary-file-directory "custom.el")
  ;; Quiet byte compilation
  byte-compile-warnings '(not free-vars unresolved noruntime lexical)
  ;; Security
