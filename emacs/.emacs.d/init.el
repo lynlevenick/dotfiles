@@ -349,6 +349,16 @@ point reaches the beginning of end of the buffer, stop there."
   (org-table                 ((t (:inherit fixed-pitch))))
   (org-verbatim              ((t (:inherit fixed-pitch)))))
 
+(use-package pico8-mode :straight (:host github :repo "Kaali/pico8-mode")
+  :mode "\\.p8\\'"
+  :custom
+  (pico8-documentation-file
+   (cond ((memq window-system '(mac ns))
+          (expand-file-name "~/Library/Application Support/pico-8/pico-8.txt"))
+         nil))
+  :custom-face
+  (pico8--non-lua-overlay ((t (:inherit default)))))
+
 (use-package rjsx-mode
   :mode "\\.jsx?\\'")
 

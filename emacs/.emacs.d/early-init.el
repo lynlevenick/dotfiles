@@ -101,7 +101,7 @@
 ;;;; Theme
 
 (when (and (fboundp 'menu-bar-mode)
-           (not (memq window-system '(ns mac))))
+           (not (memq window-system '(mac ns))))
   (menu-bar-mode -1))
 (when (fboundp 'tool-bar-mode)
   (tool-bar-mode -1))
