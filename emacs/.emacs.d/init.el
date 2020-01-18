@@ -545,7 +545,7 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 ;;       there was a shim-based solution which ran according to the current
 ;;       directory instead of needing to futz with the path constantly.
 (add-hook 'find-file-hook #'lyn-local-exec-path)
-(add-hook 'magit-setup-buffer-hook #'lyn-local-exec-path)
+(add-hook 'magit-pre-display-buffer-hook #'lyn-local-exec-path)
 
 ;;;; Searching
 
