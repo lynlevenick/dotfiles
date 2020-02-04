@@ -509,8 +509,6 @@ during discovery of the specified executable.")
 
 (defvar lyn-original-exec-path exec-path
   "The value of ‘exec-path’ when Emacs was first started.")
-(defvar lyn-original-process-environment (copy-tree process-environment)
-  "The value of ‘process-environment’ when Emacs was first started.")
 (defvar lyn-local-exec-path-cache (make-hash-table :test 'equal)
   "Cache for exec paths by project or directory.")
 (defun lyn-local-exec-path (&optional drop-cache)
@@ -527,19 +525,16 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
              (not (file-remote-p default-directory))) ; File not under Tramp
     (lyn-with-relevant-dir nil
       (make-local-variable 'exec-path)
-      (make-local-variable 'process-environment)
-      (-let [(relevant-exec-path relevant-process-environment)
-             (let ((exec-path lyn-original-exec-path)
-                   (process-environment (copy-tree lyn-original-process-environment)))
+      (let ((relevant-exec-path
+             (let ((exec-path lyn-original-exec-path))
                (lyn-fetchhash
                 default-directory lyn-local-exec-path-cache
                 (progn
                   (when (fboundp 'exec-path-from-shell-initialize)
                     (exec-path-from-shell-initialize))
                   (add-node-modules-path)
-                  (list exec-path process-environment))))]
-        (setf exec-path relevant-exec-path
-              process-environment relevant-process-environment)))))
+                  exec-path)))))
+        (setf exec-path relevant-exec-path)))))
 ;; HACK: Doing this on every find-file isn't great. Caching makes this slightly
 ;;       less terrible but it's still terrible. It would be preferable if
 ;;       there was a shim-based solution which ran according to the current
