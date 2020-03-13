@@ -404,8 +404,8 @@ point reaches the beginning of end of the buffer, stop there."
       symbol))
   (dolist (elt (get 'sh-shellcheck 'flycheck-command))
     (when (and (listp elt)
-               (equal (cddr elt) '(symbol-name sh-shell)))
-      (setf (cddr elt) '(symbol-name (lyn-flycheck--normalize-sh sh-shell)))))
+               (equal (cdr elt) '((symbol-name sh-shell))))
+      (setf (cdr elt) '((symbol-name (lyn-flycheck--normalize-sh sh-shell))))))
 
   ;; Extend flycheck to handle running an executable to determine if a command
   ;; is runnable, and to support running an executable through another.
