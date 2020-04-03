@@ -1,6 +1,8 @@
 ;;; init.el --- Package configuration -*- lexical-binding: t; no-byte-compile: t; -*-
+
 ;;; Commentary:
 ;; There are many configurations, but this one is mine.
+
 ;;; Code:
 
 ;;;; Load early-init file on Emacs prior to 27
@@ -18,13 +20,13 @@ A global mode, or one which maps keys, can be set to run only after some
 context-relevant thing has happened, rather than loading immediately."
   (declare (indent defun))
 
-  (let ((name (gensym)))
+  (lyn-with-gensyms (name)
     `(progn
-       (unless (fboundp (quote ,name))
+       (unless (fboundp ',name)
          (defun ,name ()
-           (remove-hook ,hook (function ,name))
+           (remove-hook ,hook #',name)
            ,@body))
-       (add-hook ,hook (function ,name)))))
+       (add-hook ,hook #',name))))
 
 (defun lyn-accessible-directory-p (filename)
   "Like ‘file-accessible-directory-p’ for FILENAME but work around an Apple bug."
@@ -70,10 +72,11 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 (defmacro lyn-fetchhash (key table set-when-default)
   "Look up KEY in TABLE and return value or assign SET-WHEN-DEFAULT and return."
 
-  `(if-let ((cached (gethash ,key ,table lyn-fetchhash--sentinel))
-            ((eq cached lyn-fetchhash--sentinel)))
-       (setf (gethash ,key ,table) ,set-when-default)
-     cached))
+  (lyn-once-only (key table)
+    `(let ((cached (gethash ,key ,table lyn-fetchhash--sentinel)))
+       (if (eq cached lyn-fetchhash--sentinel)
+           (setf (gethash ,key ,table) ,set-when-default)
+         cached))))
 
 (use-package bind-key)
 
@@ -82,8 +85,6 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 ;; SOMEDAY:
 ;; Smooth scroll when this doesn't generate an obscene amount of garbage
 ;; and/or it properly handles the macOS scrolling behaviors
-;; emacs-mac-port does scroll correctly - with stuttering for an unknown
-;; reason. There isn't a great solution here with any approach
 
 ;; (when (and (display-graphic-p)
 ;;            (fboundp 'pixel-scroll-mode))
@@ -103,8 +104,6 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
  make-backup-files nil
  ;; Customize is terrible (we won't load the file)
  custom-file (concat temporary-file-directory "custom.el")
- ;; Quiet byte compilation
- byte-compile-warnings '(not free-vars unresolved noruntime lexical)
  ;; Security
  auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")
  gnutls-verify-error t
@@ -121,6 +120,7 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
  jit-lock-defer-time 0
  ;; OS integration
  use-dialog-box nil
+ read-process-output-max (* 1 1024 1024) ; 1 MB
  ;; Disable tabs almost everywhere
  (default-value 'indent-tabs-mode) nil)
 
@@ -147,9 +147,8 @@ If ARG is not nil or 1, move forward ARG - 1 lines first. If
 point reaches the beginning of end of the buffer, stop there."
   (interactive "^p")
 
-  (setf arg (or arg 1))
-
-  (when (/= arg 1)
+  (cl-callf or arg 1)
+  (unless (= arg 1)
     (let ((line-move-visual nil))
       (forward-line (1- arg))))
 
@@ -190,7 +189,11 @@ point reaches the beginning of end of the buffer, stop there."
   (aw-scope 'frame))
 
 (use-package company
-  :hook (prog-mode . company-mode))
+  :hook (prog-mode . company-mode)
+  :custom
+  (company-capf t)
+  (company-idle-delay -1)
+  (company-minimum-prefix-length 1))
 
 (use-package company-statistics
   :commands (company-statistics-mode)
@@ -384,7 +387,10 @@ point reaches the beginning of end of the buffer, stop there."
   :commands (apheleia-global-mode)
   :init
   (lyn-with-hook-once 'find-file-hook
-    (apheleia-global-mode)))
+    (apheleia-global-mode))
+  :config
+  (setf (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
+        (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt))
 
 ;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
 (use-package flycheck
@@ -398,14 +404,15 @@ point reaches the beginning of end of the buffer, stop there."
   (add-to-list 'flycheck-shellcheck-supported-shells 'false)
   (defun lyn-flycheck--normalize-sh (symbol)
     "Return 'sh if SYMBOL is 'false, otherwise return SYMBOL."
+    (declare (pure t) (side-effect-free t))
 
     (if (eq symbol 'false)
         'sh
       symbol))
-  (dolist (elt (get 'sh-shellcheck 'flycheck-command))
-    (when (and (listp elt)
-               (equal (cdr elt) '((symbol-name sh-shell))))
-      (setf (cdr elt) '((symbol-name (lyn-flycheck--normalize-sh sh-shell))))))
+  (cl-loop for elt in (get 'sh-shellcheck 'flycheck-command)
+           when (equal (cdr-safe elt) '((symbol-name sh-shell)))
+           do (setf (cdr elt)
+                    '((symbol-name (lyn-flycheck--normalize-sh sh-shell)))))
 
   ;; Extend flycheck to handle running an executable to determine if a command
   ;; is runnable, and to support running an executable through another.
@@ -481,6 +488,10 @@ during discovery of the specified executable.")
 (use-package flycheck-rust
   :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
+
+(use-package lsp-mode
+  :hook (prog-mode . lsp)
+  :custom (lsp-enable-snippet nil))
 
 (use-package tide
   :commands (tide-setup)

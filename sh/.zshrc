@@ -4,6 +4,10 @@ if test -z "$__rc"; then
 	__rc=zsh
 fi
 
+if test -r "$HOME/.profile"; then
+	. "$HOME/.profile"
+fi
+
 if test -r "$HOME/.shrc"; then
 	. "$HOME/.shrc"
 fi

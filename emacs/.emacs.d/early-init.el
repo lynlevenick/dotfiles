@@ -7,14 +7,14 @@
 
 ;;;; Disable special file name handling and GC until startup is finished
 
-(setf (get 'file-name-handler-alist 'standard-value) (list file-name-handler-alist)
+(setf (get 'file-name-handler-alist 'standard-value)
+      (list file-name-handler-alist)
       file-name-handler-alist nil)
 (defun lyn-file-name-handler-restore ()
   "Restore the default file name handler."
 
-  (setf file-name-handler-alist
-        (append (car (get 'file-name-handler-alist 'standard-value))
-                file-name-handler-alist)))
+  (cl-callf append file-name-handler-alist
+    (car (get 'file-name-handler-alist 'standard-value))))
 (add-hook 'emacs-startup-hook #'lyn-file-name-handler-restore)
 
 (defvar lyn-gc-delayed-restore-timer nil
@@ -41,18 +41,13 @@
     (setf lyn-gc-delayed-restore-timer
           (run-with-idle-timer 2 nil #'lyn-gc-restore))))
 
-(defun lyn-gc-finalize ()
-  "Reset garbage collection and add minibuffer hooks to toggle it."
-
-  (remove-hook 'pre-command-hook #'lyn-gc-finalize)
-  (lyn-gc-restore)
-
-  ;; Additionally disable and restore gc on minibuffer,
-  ;; as amx/flx allocate a lot of memory
-  (add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
-  (add-hook 'minibuffer-exit-hook #'lyn-gc-restore-delayed))
 (lyn-gc-disable)
-(add-hook 'pre-command-hook #'lyn-gc-finalize)
+(lyn-gc-restore-delayed)
+
+;; Additionally disable and restore gc on minibuffer,
+;; as fuzzy matching tends to allocate a lot of memory
+(add-hook 'minibuffer-setup-hook #'lyn-gc-disable)
+(add-hook 'minibuffer-exit-hook #'lyn-gc-restore-delayed)
 
 ;;;; Disable VC mode
 
@@ -65,7 +60,8 @@
       straight-use-package-by-default t)
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                         user-emacs-directory))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -115,6 +111,76 @@
       (default-value 'echo-keystrokes) 1e-6
       (default-value 'truncate-lines) t)
 
+(defmacro lyn-with-gensyms (names &rest body)
+  "Bind NAMES to symbols generated with ‘gensym’ then eval BODY.
+
+Each element within NAMES is either a symbol SYMBOL or a
+pair (SYMBOL STRING-DESIGNATOR). Bare symbols are equivalent
+to the pair (SYMBOL SYMBOL).
+
+Each pair (SYMBOL STRING-DESIGNATOR) specifies that the variable
+named by SYMBOL should be bound to a symbol constructed using ‘gensym’
+with the string designated by STRING-DESIGNATOR being its
+first argument.
+
+Ported from Alexandria."
+  (declare (indent 1))
+
+  `(let ,(cl-loop for name in names
+                  collect (cl-multiple-value-bind (symbol string)
+                              (cl-etypecase name
+                                (symbol (cl-values name (symbol-name name)))
+                                (list ; Work around incomplete typecase
+                                 (cl-check-type (car name) symbol)
+                                 (cl-check-type (cdr name) list)
+                                 (cl-check-type (cddr name) null)
+                                 (cl-values (car name)
+                                            (cl-etypecase (cadr name)
+                                              (symbol (symbol-name (cadr name)))
+                                              (string (cadr name))))))
+                            `(,symbol (gensym ,string))))
+     ,@body))
+
+(defmacro lyn-once-only (specs &rest body)
+  "Bind SPECS within BODY such that they are evaluated only once.
+
+Each element within SPECS is either a symbol SYMBOL or a
+pair (SYMBOL INITFORM). Bare symbols are equivalent to the
+pair (SYMBOL SYMBOL).
+
+Each pair (SYMBOL INITFORM) specifies a single intermediate
+variable. SYMBOL will be bound in BODY to the associated
+INITFORM.
+
+INITFORMs of all pairs are evaluated before binding SYMBOLs
+and evaluating BODY.
+
+Ported from Alexandria."
+  (declare (indent 1))
+
+  ;; Create gensyms and create (symbol . initform) pairs for later consumption
+  (let ((gensyms (cl-loop for spec in specs collect (gensym "once-only")))
+        (names-and-forms
+         (cl-loop for spec in specs
+                  collect (cl-etypecase spec
+                            (list (cl-destructuring-bind (name form) spec
+                                    (cons name form)))
+                            (symbol (cons spec spec))))))
+    ;; Bind gensyms in scope
+    `(lyn-with-gensyms (,@(cl-loop for g in gensyms
+                                   for (n . _) in names-and-forms
+                                   collect `(,g ,n)))
+       ;; Bind gensyms to initial values
+       `(let ,(list ; Work around error in expanding multiple arguments to ,
+                ,@(cl-loop for g in gensyms
+                           for (_ . f) in names-and-forms
+                           collect ``(,,g ,,f)))
+          ;; Bind names to gensyms
+          ,(let ,(cl-loop for g in gensyms
+                          for (n . _) in names-and-forms
+                          collect `(,n ,g))
+             ,@body)))))
+
 (defconst memo--sentinel (gensym)
   "Sentinel value for ‘memo-memoize’ signaling an uncalled method.")
 
@@ -133,8 +199,7 @@
 (defun memo-memoize--buffer-one (func)
   "Return a memoized FUNC. Remember the most recent invocation per buffer."
 
-  (let ((prev-args-sym (gensym))
-        (prev-value-sym (gensym)))
+  (lyn-with-gensyms (prev-args-sym prev-value-sym)
     (eval
      `(progn
         (defvar-local ,prev-args-sym memo--sentinel)
@@ -148,7 +213,7 @@
 (defun memo-memoize--buffer-contents (func)
   "Return a memoized FUNC. Remember results per buffer until buffer change."
 
-  (let ((prev-value-sym (gensym)))
+  (lyn-with-gensyms (prev-value-sym)
     (eval
      `(defvar-local ,prev-value-sym memo--sentinel))
     (add-hook 'after-change-functions
@@ -162,11 +227,15 @@
   "Memoize FUNC.
 
 Optional PROPS are additional properties to apply to the
-memoized function, like, e.g. ‘:strategy STRATEGY’.
+memoized function, like, e.g. ‘:storage STORAGE’.
 
-:strategy  Strategy to be used during memoization. One of the
-           symbols ‘one’ (the default), ‘buffer-one’, or
-           ‘buffer-contents’."
+:clear-on  When storage is invalidated.
+           May be nil or the symbol ‘edit’. Default is nil.
+:local     Whether storage is buffer-local.
+           May be nil or t. Default is nil.
+:storage   Storage to be used during memoization.
+           May be one of the symbols ‘latest’ or ‘hash’.
+           Default is ‘latest’."
 
   (let ((func-name nil))
     (when (eq (type-of func) 'symbol)
@@ -180,10 +249,11 @@ memoized function, like, e.g. ‘:strategy STRATEGY’.
       (cl-callf symbol-function func))
 
     (setf func
-          (cl-typecase func
+          (cl-etypecase func
             (function
              (if-let ((strategy (or (plist-get props :strategy) 'one))
-                      (strategy-func (intern (concat "memo-memoize--" (symbol-name strategy))))
+                      (strategy-func (intern (concat "memo-memoize--"
+                                                     (symbol-name strategy))))
                       ((functionp strategy-func)))
                  (funcall strategy-func func)
                (user-error "Unknown strategy %s" strategy)))
@@ -256,7 +326,8 @@ influence of C1 on the result."
     (color-rgb-to-hex
      (+ (* c1r alpha) (* c2r inv-alpha))
      (+ (* c1g alpha) (* c2g inv-alpha))
-     (+ (* c1b alpha) (* c2b inv-alpha)))))
+     (+ (* c1b alpha) (* c2b inv-alpha))
+     2)))
 
 (defun lyn-xpm-header (width height &rest colors)
   "Return XPM header for an image of WIDTH and HEIGHT.
@@ -275,7 +346,7 @@ COLORS are mapped to numbers 0-9."
   "Return a row of XPM data of WIDTH made up of CHARACTER."
   (declare (pure t) (side-effect-free t))
 
-  (concat "\"" (make-vector width character) "\""))
+  (concat "\"" (make-string width character) "\""))
 
 (defmemo-memoize lyn-hud--xpm-row-off (width)
   "Return a row of XPM data of WIDTH made up of the character 0."
@@ -298,37 +369,45 @@ COLORS are mapped to numbers 0-9."
   (lyn-hud--xpm-row ?3 width))
 
 (defmemo-memoize lyn-hud--xpm
-    (width height fill-start-frac fill-start fill-end fill-end-frac on-color off-color)
+    (width height hl-start hl-end hl-max on-color off-color)
   "Generate WIDTH by HEIGHT xpm image.
 
-Highlight from FILL-START to FILL-END with ON-COLOR against OFF-COLOR.
-FILL-START-FRAC and FILL-END-FRAC set the fraction of coverage along
-the edges of the highlighted area."
+Highlight from HL-START to HL-END within [1 HL-MAX] with ON-COLOR
+against OFF-COLOR."
   :strategy 'buffer-one
 
+  (unless (floatp hl-max)
+    (cl-callf float hl-max))
   (let* ((height- (1- height))
-         (frac-start-color (lyn-color-blend on-color off-color fill-start-frac))
-         (frac-end-color (lyn-color-blend on-color off-color fill-end-frac))
-         (data (list (lyn-xpm-header width height off-color frac-start-color on-color frac-end-color)))
+         (start (* height- (/ (1- hl-start) hl-max)))
+         (end (* height- (/ hl-end hl-max)))
+         (start- (1- start))
+         (end+ (1+ end))
+         (start-color (lyn-color-blend on-color off-color
+                                       (- (fceiling start) start)))
+         (end-color (lyn-color-blend on-color off-color
+                                     (- end (ffloor end))))
          (line-on (lyn-hud--xpm-row-on width))
          (line-off (lyn-hud--xpm-row-off width)))
-    (dotimes (i height)
-      (push (cond
-             ((and (= i (1- fill-start))
-                   (> fill-start-frac 0))
-              (lyn-hud--xpm-row-start-frac width))
-             ((<= fill-start i fill-end) line-on)
-             ((and (= i (1+ fill-end))
-                   (> fill-end-frac 0))
-              (lyn-hud--xpm-row-end-frac width))
-             (line-off))
-            data)
-      (push (if (< i height-)
-                ","
-              "};")
-            data))
-    (create-image (apply #'concat (nreverse data))
-                  'xpm t :ascent 'center)))
+    (concat
+     (propertize "??%" 'display
+                 (create-image
+                  (apply #'concat
+                         (lyn-xpm-header width height
+                                         off-color start-color on-color end-color)
+                         (cl-loop for i below height
+                                  collect (cond
+                                           ((<= start i end) line-on)
+                                           ((< start- i end)
+                                            (lyn-hud--xpm-row-start-frac width))
+                                           ((< start i end+)
+                                            (lyn-hud--xpm-row-end-frac width))
+                                           (line-off))
+                                  collect (if (< i height-)
+                                              ","
+                                            "};")))
+                  'xpm t :ascent 'center))
+     " ")))
 
 (defmemo-memoize lyn-hud--last-line-number ()
   "Return line number at ‘point-max’.
@@ -366,31 +445,23 @@ Does not work if either ‘line-number-display-limit’ or
 (defun lyn-hud ()
   "Return an XPM of relative buffer location."
 
-  (let* ((height (frame-char-height))
-         (height- (1- height))
-         (last-line (float (lyn-hud--last-line-number)))
-         ;; Exact area coverage
-         (fill-start-exact (* height- (/ (1- (lyn-hud--line-number-at-point (window-start))) last-line)))
-         (fill-end-exact (* height- (/ (lyn-hud--line-number-at-point (window-end)) last-line)))
-         ;; Complete area coverage (no fractional part)
-         (fill-start (ceiling fill-start-exact))
-         (fill-end (floor fill-end-exact))
-         ;; Fractional area coverage (rounded to reduce redraw/allocations)
-         (fill-start-frac (/ (round (- fill-start fill-start-exact) 0.125) 8.0))
-         (fill-end-frac (/ (round (- fill-end-exact fill-end) 0.125) 8.0)))
-    (lyn-hud--xpm (* 2 (frame-char-width)) height
-                  fill-start-frac fill-start fill-end fill-end-frac
+  (when (display-graphic-p)
+    (lyn-hud--xpm (* 2 (frame-char-width)) (frame-char-height)
+                  (lyn-hud--line-number-at-point (window-start))
+                  (lyn-hud--line-number-at-point (window-end))
+                  (lyn-hud--last-line-number)
                   "#FBB829" "#444444")))
 
 (defconst lyn-mode-line-hud
-  '(:eval
-    (when (display-graphic-p)
-      (concat (propertize "hud" 'display (lyn-hud)) " ")))
+  '(:eval (lyn-hud))
   "Ending mode line segment in graphical mode.")
 
 (setf (default-value 'mode-line-format)
       (cl-set-difference mode-line-format
-                         '(mode-line-front-space mode-line-mule-info mode-line-client mode-line-end-spaces)))
+                         '(mode-line-front-space
+                           mode-line-mule-info
+                           mode-line-client
+                           mode-line-end-spaces)))
 (let* ((format (default-value 'mode-line-format))
        (idx (cl-position 'mode-line-position format)))
   (push 'lyn-mode-line-hud (nthcdr idx format)))
@@ -408,7 +479,8 @@ Does not work if either ‘line-number-display-limit’ or
   (let ((sized-font (concat font "-" (number-to-string lyn-font-size))))
     (setf (face-font 'default) sized-font
           (face-font 'fixed-pitch) sized-font)))
-(setf (face-font 'variable-pitch) (concat "Charter-" (number-to-string lyn-font-size)))
+(setf (face-font 'variable-pitch)
+      (concat "Charter-" (number-to-string lyn-font-size)))
 
 ;; Transparent empty titlebar on NS, buffer name on others
 (when (boundp 'ns-use-proxy-icon)
