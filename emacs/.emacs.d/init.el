@@ -73,10 +73,11 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
   "Look up KEY in TABLE and return value or assign SET-WHEN-DEFAULT and return."
 
   (lyn-once-only (key table)
-    `(let ((cached (gethash ,key ,table lyn-fetchhash--sentinel)))
-       (if (eq cached lyn-fetchhash--sentinel)
-           (setf (gethash ,key ,table) ,set-when-default)
-         cached))))
+    (lyn-with-gensyms (cached)
+      `(let ((,cached (gethash ,key ,table lyn-fetchhash--sentinel)))
+         (if (eq ,cached lyn-fetchhash--sentinel)
+             (setf (gethash ,key ,table) ,set-when-default)
+           ,cached)))))
 
 (use-package bind-key)
 
@@ -216,10 +217,6 @@ point reaches the beginning of end of the buffer, stop there."
   :bind (("C-x C-j" . dired-jump)
          ("C-x 4 C-j" . dired-jump-other-window)))
 
-(use-package isearch :straight nil
-  :defer
-  :custom (lazy-highlight-initial-delay 0))
-
 (use-package magit
   :defer
   :init
@@ -227,7 +224,6 @@ point reaches the beginning of end of the buffer, stop there."
     (require 'magit))
   :custom
   (magit-list-refs-sortby "-committerdate")
-  (magit-completing-read-function #'magit-ido-completing-read)
   (magit-diff-adjust-tab-width t))
 
 (use-package mode-line-bell
@@ -296,7 +292,8 @@ point reaches the beginning of end of the buffer, stop there."
   (lyn-with-hook-once 'pre-command-hook
     (projectile-mode))
   :bind-keymap (("s-p" . projectile-command-map)
-                ("C-c p" . projectile-command-map)))
+                ("C-c p" . projectile-command-map))
+  :custom (projectile-completion-system 'default))
 
 (use-package tramp :straight nil
   :defer
@@ -398,21 +395,6 @@ point reaches the beginning of end of the buffer, stop there."
   :init
   (lyn-with-hook-once 'find-file-hook
     (global-flycheck-mode))
-  :config
-  ;; Override the sh-shellcheck checker's configuration to normalize the shell
-  ;; ‘false’ to ‘sh’.
-  (add-to-list 'flycheck-shellcheck-supported-shells 'false)
-  (defun lyn-flycheck--normalize-sh (symbol)
-    "Return 'sh if SYMBOL is 'false, otherwise return SYMBOL."
-    (declare (pure t) (side-effect-free t))
-
-    (if (eq symbol 'false)
-        'sh
-      symbol))
-  (cl-loop for elt in (get 'sh-shellcheck 'flycheck-command)
-           when (equal (cdr-safe elt) '((symbol-name sh-shell)))
-           do (setf (cdr elt)
-                    '((symbol-name (lyn-flycheck--normalize-sh sh-shell)))))
 
   ;; Extend flycheck to handle running an executable to determine if a command
   ;; is runnable, and to support running an executable through another.
@@ -442,10 +424,10 @@ during discovery of the specified executable.")
 
     (let ((dir (lyn-relevant-dir)))
       (lyn-fetchhash dir lyn-flycheck--bundle-should-enable-cache
-                     (let ((bundle-executable (lyn-flycheck--bundle-executable dir)))
-                       (and bundle-executable
-                            (= 0 (call-process bundle-executable
-                                               nil nil nil "show" command)))))))
+                     (when-let ((bundle-executable
+                                 (lyn-flycheck--bundle-executable dir)))
+                       (= 0 (call-process bundle-executable
+                                          nil nil nil "show" command))))))
 
   (defun lyn-flycheck-bundle-exec (command &rest args)
     "Transforms COMMAND into a command for bundle, with ARGS trailing."
@@ -477,6 +459,22 @@ during discovery of the specified executable.")
                                    lyn-flycheck-handle-alist))
                (url-recreate-url url)
                (cdr command)))))
+  :config
+  ;; Override the sh-shellcheck checker's configuration to normalize the shell
+  ;; ‘false’ to ‘sh’.
+  (defun lyn-flycheck--normalize-sh (symbol)
+    "Return 'sh if SYMBOL is 'false, otherwise return SYMBOL."
+    (declare (pure t) (side-effect-free t))
+
+    (if (eq symbol 'false)
+        'sh
+      symbol))
+  (cl-loop for elt in (get 'sh-shellcheck 'flycheck-command)
+           when (equal (cdr-safe elt) '((symbol-name sh-shell)))
+           do (setf (cdr elt)
+                    '((symbol-name (lyn-flycheck--normalize-sh sh-shell)))))
+
+  (add-to-list 'flycheck-shellcheck-supported-shells 'false)
   :custom
   ;; Apply flycheck extension from above
   (flycheck-executable-find #'lyn-flycheck-executable-find)
@@ -492,18 +490,6 @@ during discovery of the specified executable.")
 (use-package lsp-mode
   :hook (prog-mode . lsp)
   :custom (lsp-enable-snippet nil))
-
-(use-package tide
-  :commands (tide-setup)
-  :init
-  (defun lyn-tide-setup ()
-    "Prepare for Typescript development."
-
-    (tide-setup)
-    (tide-hl-identifier-mode))
-  (lyn-with-hook-once 'typescript-mode-hook
-    (flycheck-add-next-checker 'typescript-tide '(warning . javascript-eslint) :append))
-  (add-hook 'typescript-mode-hook #'lyn-tide-setup))
 
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
@@ -555,55 +541,35 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 
 ;;;; Searching
 
-(use-package amx
-  :commands (amx-mode)
-  :init
-  (lyn-with-hook-once 'pre-command-hook
-    (amx-mode))
-  :bind (("M-X" . amx-major-mode-commands)))
-
-(use-package anzu
-  :commands (global-anzu-mode)
-  :init
-  (lyn-with-hook-once 'pre-command-hook
-    (global-anzu-mode))
-  :bind (([remap query-replace] . anzu-query-replace)
-         ([remap query-replace-regexp] . anzu-query-replace-regexp)))
-
 (use-package avy
   :bind (("C-c c" . avy-goto-char-2)
          ("C-c l" . avy-goto-line)
          ("C-c r" . avy-goto-char-2-above)
          ("C-c s" . avy-goto-char-2-below)))
 
+(use-package ctrlf :straight (:host github :repo "raxod502/ctrlf")
+  :commands (ctrlf-mode)
+  :init
+  (lyn-with-hook-once 'pre-command-hook
+    (require 'map) ; ctrlf doesn't require map like it should
+    (ctrlf-mode)))
+
 (use-package deadgrep
   :bind (("C-c g" . deadgrep)))
 
-(use-package flx-ido
-  :after ido
-  :config (flx-ido-mode)
-  :custom
-  (ido-enable-flex-matching t)
-  (ido-use-faces nil))
-
-(use-package ido :straight nil
-  :defer
-  :commands (ido-mode ido-everywhere)
+(use-package selectrum :straight (:host github :repo "raxod502/selectrum")
+  :commands (selectrum-mode)
   :init
   (lyn-with-hook-once 'pre-command-hook
-    (ido-mode)
-    (ido-everywhere))
-  :custom
-  (ido-auto-merge-work-directories-length -1)
-  (ido-enable-flex-matching t))
+    (selectrum-mode)))
 
-(use-package ido-completing-read+
-  :after ido
-  :config (ido-ubiquitous-mode))
-
-(use-package ido-vertical-mode
-  :after ido
-  :config (ido-vertical-mode))
+(use-package selectrum-prescient
+  :straight (:host github :repo "raxod502/prescient.el"
+             :files ("selectrum-prescient.el"))
+  :after selectrum
+  :config
+  (selectrum-prescient-mode)
+  (prescient-persist-mode))
 
 ;;;; Window manipulation
 
@@ -629,6 +595,11 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 ;; ‘zygospore’ provides toggling of the ‘delete-other-windows’ command
 (use-package zygospore
   :bind (([remap delete-other-windows] . zygospore-toggle-delete-other-windows)))
+
+;; ‘vterm’ binds to libvterm to provide an accurate high-speed terminal
+(use-package vterm
+  :custom
+  (vterm-kill-buffer-on-exit t))
 
 (provide 'init)
 ;;; init.el ends here
