@@ -156,7 +156,7 @@ SQL
 	fi
 
 	__zsql_exitstatus="$?"
-	if test "0$__zsql_exitstatus" -eq 130; then
+	if test "0$__zsql_exitstatus" -eq 2; then
 		return 0 # User probably manually exited with C-C, C-D, or C-G
 	elif test -z "$__zsql_selection" || test "$__zsql_selection" = '$'; then
 		printf 'fatal: z: Not in history\n'
