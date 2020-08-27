@@ -5,12 +5,91 @@
 
 ;;; Code:
 
-;;;; Load early-init file on Emacs prior to 27
+;;;; Post-initialization theming
 
-(unless (bound-and-true-p early-init-file)
-  (require 'early-init (concat user-emacs-directory "early-init")))
+(setf (face-font 'default) "Comic Code-12"
+      (face-font 'fixed-pitch) "Comic Code-12"
+      (face-font 'variable-pitch) "Valkyrie T4-14")
 
 ;;;; Convenience
+
+(defun gensym-list (length &optional prefix)
+  "Return a list of new uninterned symbols. See ‘gensym’.
+
+List is of LENGTH and symbols have PREFIX."
+
+  (cl-loop for i below length
+           collect (gensym prefix)))
+
+(defmacro lyn-with-gensyms (names &rest body)
+  "Bind NAMES to symbols generated with ‘gensym’ then eval BODY.
+
+Each element within NAMES is either a symbol SYMBOL or a
+pair (SYMBOL STRING-DESIGNATOR). Bare symbols are equivalent
+to the pair (SYMBOL SYMBOL).
+
+Each pair (SYMBOL STRING-DESIGNATOR) specifies that the variable
+named by SYMBOL should be bound to a symbol constructed using ‘gensym’
+with the string designated by STRING-DESIGNATOR being its
+first argument.
+
+Ported from Alexandria."
+  (declare (indent 1))
+
+  `(let ,(cl-loop for name in names
+                  collect (cl-multiple-value-bind (symbol string)
+                              (cl-etypecase name
+                                (symbol (cl-values name (symbol-name name)))
+                                (list ; Work around incomplete typecase
+                                 (cl-check-type (car name) symbol)
+                                 (cl-check-type (cdr name) list)
+                                 (cl-check-type (cddr name) null)
+                                 (cl-values (car name)
+                                            (cl-etypecase (cadr name)
+                                              (symbol (symbol-name (cadr name)))
+                                              (string (cadr name))))))
+                            `(,symbol (gensym ,string))))
+     ,@body))
+
+(defmacro lyn-once-only (specs &rest body)
+  "Bind SPECS within BODY such that they are evaluated only once.
+
+Each element within SPECS is either a symbol SYMBOL or a
+pair (SYMBOL INITFORM). Bare symbols are equivalent to the
+pair (SYMBOL SYMBOL).
+
+Each pair (SYMBOL INITFORM) specifies a single intermediate
+variable. SYMBOL will be bound in BODY to the associated
+INITFORM.
+
+INITFORMs of all pairs are evaluated before binding SYMBOLs
+and evaluating BODY.
+
+Ported from Alexandria."
+  (declare (indent 1))
+
+  ;; Create gensyms and create (symbol . initform) pairs for later consumption
+  (let ((gensyms (gensym-list (length specs) "once-only"))
+        (names-and-forms
+         (cl-loop for spec in specs
+                  collect (cl-etypecase spec
+                            (list (cl-destructuring-bind (name form) spec
+                                    (cons name form)))
+                            (symbol (cons spec spec))))))
+    ;; Bind gensyms in scope
+    `(lyn-with-gensyms ,(cl-loop for g in gensyms
+                                 for (n . _) in names-and-forms
+                                 collect `(,g ,n))
+       ;; Bind gensyms to initial values
+       `(let ,(list ; Work around error in expanding multiple arguments to ,
+                ,@(cl-loop for g in gensyms
+                           for (_ . f) in names-and-forms
+                           collect ``(,,g ,,f)))
+          ;; Bind names to gensyms
+          ,(let ,(cl-loop for g in gensyms
+                          for (n . _) in names-and-forms
+                          collect `(,n ,g))
+             ,@body)))))
 
 (defmacro lyn-with-hook-once (hook &rest body)
   "Arrange to execute BODY once, the next time HOOK is run.
@@ -76,7 +155,7 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
     (lyn-with-gensyms (cached)
       `(let ((,cached (gethash ,key ,table lyn-fetchhash--sentinel)))
          (if (eq ,cached lyn-fetchhash--sentinel)
-             (setf (gethash ,key ,table) ,set-when-default)
+             (puthash ,key ,set-when-default ,table)
            ,cached)))))
 
 (use-package bind-key)
@@ -207,8 +286,7 @@ point reaches the beginning of end of the buffer, stop there."
   :custom
   (dired-auto-revert-buffer t)
   (dired-dwim-target t)
-  (wdired-allow-to-change-permissions t)
-  (wdired-allow-redirect-links t))
+  (wdired-allow-to-change-permissions t))
 
 (use-package dired-x :straight nil
   :init
@@ -303,6 +381,9 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;;;; Major Modes
 
+(use-package d-mode
+  :mode "\\.di?\\'")
+
 (use-package elm-mode
   :commands (company-elm)
   :mode "\\.elm\\'"
@@ -311,6 +392,9 @@ point reaches the beginning of end of the buffer, stop there."
 
 (use-package haml-mode
   :mode "\\.haml\\'")
+
+(use-package json-mode
+  :mode "\\.json\\'")
 
 (use-package nov
   :mode ("\\.epub\\'" . nov-mode)
@@ -359,9 +443,6 @@ point reaches the beginning of end of the buffer, stop there."
   :custom-face
   (pico8--non-lua-overlay ((t (:inherit default)))))
 
-(use-package rjsx-mode
-  :mode "\\.jsx?\\'")
-
 (use-package ruby-mode :straight nil
   :defer
   :custom
@@ -371,11 +452,19 @@ point reaches the beginning of end of the buffer, stop there."
 (use-package rust-mode
   :mode "\\.rs\\'")
 
-(use-package typescript-mode
-  :mode "\\.tsx?\\'")
-
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
+
+(use-package web-mode
+  ;; (rx-to-string (cons 'or (cl-loop for (_ . test) in (append web-mode-content-types web-mode-engine-file-regexps)
+  ;;                                  unless (string= test ".")
+  ;;                                  collect `(regexp ,test)))
+  ;;               :no-group)
+  :mode "\\.[jt]sx?\\'"
+  :custom (web-mode-enable-auto-quoting nil))
+
+(use-package zig-mode
+  :mode "\\.zig\\'")
 
 ;;;; Syntax Checking, Linting, and Formatting
 
@@ -386,8 +475,26 @@ point reaches the beginning of end of the buffer, stop there."
   (lyn-with-hook-once 'find-file-hook
     (apheleia-global-mode))
   :config
-  (setf (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
+  (setf (alist-get 'clang-format apheleia-formatters) '("clang-format")
+        (alist-get 'dfmt apheleia-formatters) '("dfmt" "--brace_style" "otbs")
+        (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
+        (alist-get 'c-mode apheleia-mode-alist) 'clang-format
+        (alist-get 'd-mode apheleia-mode-alist) 'dfmt
         (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt))
+
+;; ‘ccls’ provides support for ccls in ‘lsp-mode’
+(use-package ccls
+  :after (cc-mode lsp-mode)
+  :custom
+  (ccls-initialization-options
+   '(:clang (:extraArgs ["-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1"
+                         "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+                         "-isystem/usr/local/include"
+                         "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"
+                         "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+                         "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
+                         "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"]
+                        :resourceDir "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0"))))
 
 ;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
 (use-package flycheck
@@ -489,7 +596,10 @@ during discovery of the specified executable.")
 
 (use-package lsp-mode
   :hook (prog-mode . lsp)
-  :custom (lsp-enable-snippet nil))
+  :custom
+  (lsp-enable-snippet nil)
+  (lsp-rust-server 'rust-analyzer)
+  (lsp-rust-analyzer-server-display-inlay-hints t))
 
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
@@ -505,11 +615,11 @@ during discovery of the specified executable.")
     (exec-path-from-shell-check-startup-files nil)))
 
 (defvar lyn-original-exec-path exec-path
-  "The value of ‘exec-path’ when Emacs was first started.")
+  "The value of variable ‘exec-path’ when Emacs was first started.")
 (defvar lyn-local-exec-path-cache (make-hash-table :test 'equal)
   "Cache for exec paths by project or directory.")
 (defun lyn-local-exec-path (&optional drop-cache)
-  "Set up ‘exec-path’ for the current project.
+  "Set up variable ‘exec-path’ for the current project.
 
 If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   (interactive "p")
@@ -561,7 +671,9 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   :commands (selectrum-mode)
   :init
   (lyn-with-hook-once 'pre-command-hook
-    (selectrum-mode)))
+    (selectrum-mode))
+  :config
+  (setf extended-command-suggest-shorter nil))
 
 (use-package selectrum-prescient
   :straight (:host github :repo "raxod502/prescient.el"
@@ -600,6 +712,13 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 (use-package vterm
   :custom
   (vterm-kill-buffer-on-exit t))
+
+;;;; Profiling
+
+;; ;; ‘explain-pause-mode’ does constant profiling to find out why Emacs is slow
+;; (use-package explain-pause-mode :straight (:host github :repo "lastquestion/explain-pause-mode")
+;;   :commands (explain-pause-mode)
+;;   :init (explain-pause-mode))
 
 (provide 'init)
 ;;; init.el ends here
