@@ -483,18 +483,18 @@ point reaches the beginning of end of the buffer, stop there."
         (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt))
 
 ;; ‘ccls’ provides support for ccls in ‘lsp-mode’
-(use-package ccls
-  :after (cc-mode lsp-mode)
-  :custom
-  (ccls-initialization-options
-   '(:clang (:extraArgs ["-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1"
-                         "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
-                         "-isystem/usr/local/include"
-                         "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"
-                         "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
-                         "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
-                         "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"]
-                        :resourceDir "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0"))))
+;; (use-package ccls
+;;   :after (cc-mode lsp-mode)
+;;   :custom
+;;   (ccls-initialization-options
+;;    '(:clang (:extraArgs ["-isystem/Library/Developer/CommandLineTools/usr/include/c++/v1"
+;;                          "-isystem/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+;;                          "-isystem/usr/local/include"
+;;                          "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/include"
+;;                          "-isystem/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+;;                          "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
+;;                          "-isystem/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"]
+;;                         :resourceDir "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0"))))
 
 ;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
 (use-package flycheck
@@ -610,7 +610,6 @@ during discovery of the specified executable.")
 (when (memq window-system '(mac ns x))
   (use-package exec-path-from-shell
     :commands (exec-path-from-shell-initialize)
-    :hook ((after-init . exec-path-from-shell-initialize))
     :custom
     (exec-path-from-shell-check-startup-files nil)))
 
@@ -707,6 +706,10 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 ;; ‘zygospore’ provides toggling of the ‘delete-other-windows’ command
 (use-package zygospore
   :bind (([remap delete-other-windows] . zygospore-toggle-delete-other-windows)))
+
+;;;; Things which require the path during init
+
+(exec-path-from-shell-initialize)
 
 ;; ‘vterm’ binds to libvterm to provide an accurate high-speed terminal
 (use-package vterm

@@ -74,6 +74,7 @@
 
 (eval-when-compile
   (straight-use-package 'use-package)
+  (require 'use-package)
   (setf use-package-expand-minimally t
         use-package-verbose nil))
 
