@@ -153,6 +153,8 @@ task_brew bat
 
 task_brew diff-so-fancy
 
+task_brew exa
+
 task_brew fzf
 
 task_stow git
