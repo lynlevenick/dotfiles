@@ -11,21 +11,19 @@ fi
 ENV="$HOME/.shrc"; export ENV
 
 if test -z "$__rc_common_init"; then
+	__rc_common_init=1
+
 	if test -d "$__config_home/sh-lib"; then
 		for __cmd in "$__config_home/sh-lib"/*; do
 			. "$__cmd"
 		done
 	fi
-fi
 
-if test -d "$__config_home/sh"; then
-	for __cmd in "$__config_home/sh"/*; do
-		. "$__cmd"
-	done
-fi
-
-if test -z "$__rc_common_init"; then
-	__rc_common_init=1
+	if test -d "$__config_home/sh"; then
+		for __cmd in "$__config_home/sh"/*; do
+			. "$__cmd"
+		done
+	fi
 
 	if test -d "$__config_home/sh-common"; then
 		for __cmd in "$__config_home/sh-common"/*; do

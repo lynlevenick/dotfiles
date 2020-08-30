@@ -16,6 +16,12 @@ if test -z "$__rc_common_init"; then
 	   done
 	fi
 
+	if test -d "$__config_home/sh"; then
+		for __cmd in "$__config_home/sh"/*; do
+			. "$__cmd"
+		done
+	fi
+
 	if test -d "$__config_home/sh-common"; then
 		for __cmd in "$__config_home/sh-common"/*; do
 			. "$__cmd"
