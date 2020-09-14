@@ -295,6 +295,9 @@ point reaches the beginning of end of the buffer, stop there."
   :bind (("C-x C-j" . dired-jump)
          ("C-x 4 C-j" . dired-jump-other-window)))
 
+(use-package freeze-it
+  :bind (("C-c w d" . freeze-it-mode)))
+
 (use-package magit
   :defer
   :init
@@ -352,7 +355,8 @@ point reaches the beginning of end of the buffer, stop there."
 
 ;; ‘olivetti’ provides a mode which centers content in a buffer via margins.
 (use-package olivetti
-  :hook (org-mode . turn-on-olivetti-mode))
+  :hook (org-mode . turn-on-olivetti-mode)
+  :bind (("C-c w o" . olivetti-mode)))
 
 (use-package paren :straight nil
   :hook (prog-mode . show-paren-mode)
@@ -596,7 +600,7 @@ during discovery of the specified executable.")
 (when (memq window-system '(mac ns x))
   (use-package exec-path-from-shell
     :commands (exec-path-from-shell-initialize)
-    :config (add-hook 'after-init #'exec-path-from-shell-initialize)
+    :init (add-hook 'after-init-hook #'exec-path-from-shell-initialize)
     :custom (exec-path-from-shell-check-startup-files nil)))
 
 (defvar lyn-original-exec-path exec-path

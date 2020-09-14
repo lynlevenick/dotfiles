@@ -21,6 +21,7 @@
  ("f.el" . "1814209e2ff43cf2e6d38c4cd476218915f550fb")
  ("flycheck" . "806f2a8c21231a0dddd0a48d27fa4021729ee365")
  ("flycheck-rust" . "a139cd53c5062697e9ed94ad80b803c37d999600")
+ ("freeze-it" . "b93af18633bc783c2cb8443808aeeaaca33e1146")
  ("gnu-elpa-mirror" . "0d87e08838f1aa25fb892d12f2361ee834e9cef8")
  ("haml-mode" . "bf5b6c11b1206759d2b28af48765e04882dd1fc4")
  ("ht.el" . "fff8c43f0e03d5b98deb9f988522b839ce2ca253")
