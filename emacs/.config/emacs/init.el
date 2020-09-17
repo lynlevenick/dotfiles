@@ -209,7 +209,7 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 (when (boundp 'mac-command-modifier) (setf mac-command-modifier 'super))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
 
-(use-package imenu :straight nil
+(use-package imenu :straight (:type built-in)
   :bind (("C-c i" . imenu)))
 
 ;;;; Editing
@@ -250,12 +250,12 @@ point reaches the beginning of end of the buffer, stop there."
     (editorconfig-apply)))
 
 ;; ‘electric-mode’ provides smart quotes used in elisp documentation
-(use-package electric :straight nil
+(use-package electric :straight (:type built-in)
   :hook (emacs-lisp-mode . electric-quote-local-mode))
 
 ;; ‘uniquify’ determines how buffer names are made distinct when visiting
 ;; files with the same name in different directories
-(use-package uniquify :straight nil
+(use-package uniquify :straight (:type built-in)
   :defer
   :custom (uniquify-buffer-name-style 'forward))
 
@@ -281,14 +281,14 @@ point reaches the beginning of end of the buffer, stop there."
   (lyn-with-hook-once 'company-mode-hook
     (company-statistics-mode)))
 
-(use-package dired :straight nil
+(use-package dired :straight (:type built-in)
   :defer
   :custom
   (dired-auto-revert-buffer t)
   (dired-dwim-target t)
   (wdired-allow-to-change-permissions t))
 
-(use-package dired-x :straight nil
+(use-package dired-x :straight (:type built-in)
   :init
   (with-eval-after-load 'dired
     (require 'dired-x))
@@ -358,7 +358,7 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (org-mode . turn-on-olivetti-mode)
   :bind (("C-c w o" . olivetti-mode)))
 
-(use-package paren :straight nil
+(use-package paren :straight (:type built-in)
   :hook (prog-mode . show-paren-mode)
   :custom (show-paren-delay 0))
 
@@ -377,7 +377,7 @@ point reaches the beginning of end of the buffer, stop there."
                 ("C-c p" . projectile-command-map))
   :custom (projectile-completion-system 'default))
 
-(use-package tramp :straight nil
+(use-package tramp :straight (:type built-in)
   :defer
   :init
   (lyn-with-hook-once 'post-self-insert-hook
@@ -447,7 +447,7 @@ point reaches the beginning of end of the buffer, stop there."
   :custom-face
   (pico8--non-lua-overlay ((t (:inherit default)))))
 
-(use-package ruby-mode :straight nil
+(use-package ruby-mode :straight (:type built-in)
   :defer
   :custom
   (ruby-align-chained-calls t)
@@ -651,7 +651,12 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   :init
   (lyn-with-hook-once 'pre-command-hook
     (require 'map) ; ctrlf doesn't require map like it should
-    (ctrlf-mode)))
+    (ctrlf-mode))
+  (defun lyn-disable-ctrlf-mode-in-buffer ()
+    "Disable function ‘ctrlf-mode’ for the current buffer."
+
+    (ctrlf-local-mode -1))
+  (add-hook 'term-mode-hook #'lyn-disable-ctrlf-mode-in-buffer))
 
 (use-package deadgrep
   :bind (("C-c g" . deadgrep)))
@@ -687,15 +692,11 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
          ("C-s-a" . windsize-left)
          ("C-s-d" . windsize-right)))
 
-(use-package winner :straight nil
+(use-package winner :straight (:type built-in)
   :commands (winner-mode)
   :init
-  (lyn-with-hook-once 'pre-command-hook
+  (lyn-with-hook-once 'window-configuration-change-hook
     (winner-mode)))
-
-;; ‘zygospore’ provides toggling of the ‘delete-other-windows’ command
-(use-package zygospore
-  :bind (([remap delete-other-windows] . zygospore-toggle-delete-other-windows)))
 
 ;;;; Profiling
 
