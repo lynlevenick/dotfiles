@@ -5,6 +5,11 @@
 
 ;;; Code:
 
+;;;; Dependencies
+
+(eval-when-compile
+  (require 'rx))
+
 ;;;; Post-initialization theming
 
 (setf (face-font 'default) "Comic Code-12"
@@ -108,7 +113,7 @@ context-relevant thing has happened, rather than loading immediately."
        (add-hook ,hook #',name))))
 
 (defun lyn-accessible-directory-p (filename)
-  "Like ‘file-accessible-directory-p’ for FILENAME but work around an Apple bug."
+  "As ‘file-accessible-directory-p’ for FILENAME but work around an Apple bug."
 
   (and (file-directory-p filename)
        (file-accessible-directory-p filename)))
@@ -129,18 +134,22 @@ Like ‘magit’s ‘magit--safe-default-directory’."
       dir)))
 
 (defun lyn-relevant-dir (&optional file)
-  "Relative to FILE or ‘default-directory’, get a safe default directory.
+  "Return a “most relevant” directory for FILE.
 
-Returns from function ‘projectile-project-root’ relative to FILE if ‘projectile’ is loaded."
+Relative to function ‘projectile-project-root’ if ‘projectile-project-p’,
+otherwise relative to FILE.
+
+See ‘lyn-safe-default-directory’."
 
   (lyn-safe-default-directory
-   (if (and (featurep 'projectile)
-            (projectile-project-p file))
+   (if (projectile-project-p file)
        (projectile-project-root file)
      file)))
 
 (defmacro lyn-with-relevant-dir (file &rest body)
-  "Execute BODY with ‘lyn-relevant-dir’ relative to FILE as ‘default-directory’."
+  "Execute BODY with ‘default-directory’ “most relevant” for FILE.
+
+See ‘lyn-relevant-dir’."
   (declare (indent defun) (debug (form body)))
 
   `(when-let ((default-directory (lyn-relevant-dir ,file)))
@@ -214,30 +223,6 @@ Returns from function ‘projectile-project-root’ relative to FILE if ‘proje
 
 ;;;; Editing
 
-(defun lyn-smart-move-beginning-of-line (arg)
-  "Move point between beginning of indentation or beginning of line.
-
-Move point to the first non-whitespace character on this line.
-If point is already there, move to the beginning of the line.
-
-Effectively toggles between the first non-whitespace character and
-the beginning of the line.
-
-If ARG is not nil or 1, move forward ARG - 1 lines first. If
-point reaches the beginning of end of the buffer, stop there."
-  (interactive "^p")
-
-  (cl-callf or arg 1)
-  (unless (= arg 1)
-    (let ((line-move-visual nil))
-      (forward-line (1- arg))))
-
-  (let ((orig-point (point)))
-    (back-to-indentation)
-    (when (= orig-point (point))
-      (move-beginning-of-line 1))))
-(bind-key [remap move-beginning-of-line] #'lyn-smart-move-beginning-of-line)
-
 ;; ‘comment-dwim-2’ provides a slightly-smarter version of ‘comment-dwim’
 (use-package comment-dwim-2
   :bind (([remap comment-dwim] . comment-dwim-2)))
@@ -272,14 +257,12 @@ point reaches the beginning of end of the buffer, stop there."
   :hook (prog-mode . company-mode)
   :custom
   (company-capf t)
-  (company-idle-delay -1)
+  (company-idle-delay 0.2)
   (company-minimum-prefix-length 1))
 
 (use-package company-statistics
-  :commands (company-statistics-mode)
-  :init
-  (lyn-with-hook-once 'company-mode-hook
-    (company-statistics-mode)))
+  :after company
+  :config (company-statistics-mode))
 
 (use-package dired :straight (:type built-in)
   :defer
@@ -320,13 +303,10 @@ point reaches the beginning of end of the buffer, stop there."
     "Create new terminal in the project root or fall back to ‘default-directory’."
     (interactive)
 
-    (let ((open-command (if dedicated
-                            #'multi-term-dedicated-open
-                          #'multi-term)))
-      (if (projectile-project-p)
-          (projectile-with-default-dir (projectile-project-root)
-            (funcall open-command))
-        (funcall open-command))))
+    (lyn-with-relevant-dir nil
+      (if dedicated
+          (multi-term-dedicated-open)
+        (multi-term))))
   (defun lyn-multi-term-dedicated-dwim ()
     "Close dedicated terminal if focused, or focus the dedicated terminal."
     (interactive)
@@ -386,26 +366,26 @@ point reaches the beginning of end of the buffer, stop there."
 ;;;; Major Modes
 
 (use-package d-mode
-  :mode "\\.di?\\'")
+  :mode (rx ".d" (opt "i") string-end))
 
 (use-package elm-mode
   :commands (company-elm)
-  :mode "\\.elm\\'"
+  :mode (rx ".elm" string-end)
   :config (add-to-list 'company-backends #'company-elm)
   :custom (elm-format-on-save t))
 
 (use-package haml-mode
-  :mode "\\.haml\\'")
+  :mode (rx ".haml" string-end))
 
 (use-package json-mode
-  :mode "\\.json\\'")
+  :mode (rx ".json" string-end))
 
 (use-package nov
-  :mode ("\\.epub\\'" . nov-mode)
+  :mode ((rx ".epub" string-end) . nov-mode)
   :custom (nov-text-width 60))
 
 (use-package org
-  :mode ("\\.org\\'" . org-mode)
+  :mode ((rx ".org" string-end) . org-mode)
   :hook ((org-mode . variable-pitch-mode)
          (org-mode . visual-line-mode))
   :custom
@@ -438,7 +418,7 @@ point reaches the beginning of end of the buffer, stop there."
   (org-verbatim              ((t (:inherit fixed-pitch)))))
 
 (use-package pico8-mode :straight (:host github :repo "Kaali/pico8-mode")
-  :mode "\\.p8\\'"
+  :mode (rx ".p8" string-end)
   :custom
   (pico8-documentation-file
    (cond ((memq window-system '(mac ns))
@@ -454,21 +434,21 @@ point reaches the beginning of end of the buffer, stop there."
   (ruby-insert-encoding-magic-comment nil))
 
 (use-package rust-mode
-  :mode "\\.rs\\'")
+  :mode (rx ".rs" string-end))
 
 (use-package yaml-mode
-  :mode "\\.ya?ml\\'")
+  :mode (rx ".y" (opt "a") "ml" string-end))
 
 (use-package web-mode
   ;; (rx-to-string (cons 'or (cl-loop for (_ . test) in (append web-mode-content-types web-mode-engine-file-regexps)
   ;;                                  unless (string= test ".")
   ;;                                  collect `(regexp ,test)))
   ;;               :no-group)
-  :mode "\\.[jt]sx?\\'"
+  :mode (rx "." (or "cjs" "mjs" (seq (any "jt") "s" (opt "x"))) string-end)
   :custom (web-mode-enable-auto-quoting nil))
 
 (use-package zig-mode
-  :mode "\\.zig\\'")
+  :mode (rx ".zig" string-end))
 
 ;;;; Syntax Checking, Linting, and Formatting
 
@@ -581,7 +561,6 @@ during discovery of the specified executable.")
   (flycheck-display-errors-delay 0))
 
 (use-package flycheck-rust
-  :after (flycheck rust-mode)
   :hook (flycheck-mode . flycheck-rust-setup))
 
 (use-package lsp-mode

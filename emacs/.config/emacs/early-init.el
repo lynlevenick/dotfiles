@@ -5,6 +5,10 @@
 
 ;;; Code:
 
+;;;; Set comp speed options
+
+(setf comp-speed 2)
+
 ;;;; Disable special file name handling and GC until startup is finished
 
 (setf (get 'file-name-handler-alist 'standard-value)
@@ -126,7 +130,7 @@
   (micromap-foreground "#FBB829")
   (micromap-background "#444444"))
 
-(use-package minions
+(use-package minions :straight (:host github :repo "lynlevenick/minions" :branch "remove-lambda-allocation")
   :config (minions-mode)
   :custom (minions-mode-line-lighter "\u2026")) ; Horizontal ellipsis
 
