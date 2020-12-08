@@ -27,9 +27,9 @@ precmd() {
 
 case "$TERM" in
 	eterm*)
-		PS1="%{$__attr_reset%}%~ %{%(0?..$__attr_red)%}%(!.#.$)%{$__attr_reset%} " ;;
+		PS1="%{$__attr_reset%}%~ %{%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;)%{$__attr_reset%} " ;;
 	*)
-		PS1="%{$__attr_reset%(0?..$__attr_red)%}%(!.#.$)%{$__attr_reset%} "
+		PS1="%{$__attr_reset%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;)%{$__attr_reset%} "
 esac
 
 bindkey '^n' history-search-forward

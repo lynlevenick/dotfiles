@@ -42,19 +42,33 @@ EDITOR='emacs -nw'; export EDITOR
 LSCOLORS=ExFxCxDxBxegedabagacad; export LSCOLORS
 VISUAL='emacs -nw'; export VISUAL
 
+__attr_dim="$(tput dim)"
+
 __attr_red="$(tput setaf 1)"
+__attr_white="$(tput setaf 7)"
+
 __attr_reset="$(tput sgr0)$(tput cnorm)"
 
 __ps1_err() {
 	# shellcheck disable=SC2181
 	if test "$?" -ne 0; then
 		printf '%s' "$__attr_red"
+	else
+		printf '%s' "$__attr_dim$__attr_white"
+	fi
+}
+
+__ps1_prompt_chr() {
+	if test "$(id -u)" -eq 0; then
+		printf '#'
+	else
+		printf ';'
 	fi
 }
 
 case "$TERM" in
 	eterm*)
-		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\w \$(__ps1_err)\$$__attr_reset " ;;
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\w \$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset " ;;
 	*)
-		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\$(__ps1_err)\$$__attr_reset "
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset "
 esac

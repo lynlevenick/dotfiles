@@ -18,7 +18,7 @@ shopt -s histappend
 
 case "$TERM" in
 	eterm*)
-		PS1="\[$__attr_reset\]\w \[\$(__ps1_err)\]\\$\[$__attr_reset\] " ;;
+		PS1="\[$__attr_reset\]\w \[\$(__ps1_err)\]\$(__ps1_prompt_chr)\[$__attr_reset\] " ;;
 	*)
-		PS1="\[$__attr_reset\$(__ps1_err)\]\\$\[$__attr_reset\] "
+		PS1="\[$__attr_reset\$(__ps1_err)\]\$(__ps1_prompt_chr)\[$__attr_reset\] "
 esac
