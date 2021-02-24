@@ -6,7 +6,7 @@ __pathadd() {
 	case ":${PATH:=$1}:" in
 		*:$1:*) ;;
 		*)
-			if test "$2" = 'prepend'; then
+			if test "$2" = prepend; then
 				PATH="$1:$PATH"
 			else
 				PATH="$PATH:$1"

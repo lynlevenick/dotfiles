@@ -8,6 +8,7 @@ if test -z "$__rc"; then
 fi
 
 # ENV determines non-login shell init file
+__rc_env_was_set="${ENV:+yes}"
 ENV="$HOME/.shrc"; export ENV
 
 if test -z "$__rc_common_init"; then
@@ -15,25 +16,29 @@ if test -z "$__rc_common_init"; then
 
 	if test -d "$__config_home/sh-lib"; then
 		for __cmd in "$__config_home/sh-lib"/*; do
+			# shellcheck source=/dev/null
 			. "$__cmd"
 		done
 	fi
 
 	if test -d "$__config_home/sh"; then
 		for __cmd in "$__config_home/sh"/*; do
+			# shellcheck source=/dev/null
 			. "$__cmd"
 		done
 	fi
 
 	if test -d "$__config_home/sh-common"; then
 		for __cmd in "$__config_home/sh-common"/*; do
+			# shellcheck source=/dev/null
 			. "$__cmd"
 		done
 	fi
 fi
 
-if test -t 1 && test "$__rc" = 'unknown'; then
+if test "$__rc_env_was_set" != yes && test -t 1 && test "$__rc" = unknown; then
 	if test -r "$HOME/.shrc"; then
+		# shellcheck source=./.shrc
 		. "$HOME/.shrc"
 	fi
 fi

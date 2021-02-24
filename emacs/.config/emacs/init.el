@@ -565,6 +565,7 @@ during discovery of the specified executable.")
 
 (use-package lsp-mode
   :hook (prog-mode . lsp)
+  :config (remhash 'steep-ls lsp-clients)
   :custom
   (lsp-enable-snippet nil)
   (lsp-rust-server 'rust-analyzer)

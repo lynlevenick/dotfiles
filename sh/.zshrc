@@ -4,11 +4,8 @@ if test -z "$__rc"; then
 	__rc=zsh
 fi
 
-if test -r "$HOME/.profile"; then
-	. "$HOME/.profile"
-fi
-
 if test -r "$HOME/.shrc"; then
+	# shellcheck source=./.shrc
 	. "$HOME/.shrc"
 fi
 
@@ -36,3 +33,6 @@ bindkey '^n' history-search-forward
 bindkey '^p' history-search-backward
 bindkey '\e[A' history-search-backward
 bindkey '\e[B' history-search-forward
+
+autoload -U select-word-style
+select-word-style bash

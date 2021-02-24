@@ -5,6 +5,7 @@ if test -z "$__rc"; then
 fi
 
 if test -r "$HOME/.shrc"; then
+	# shellcheck source=./.shrc
 	. "$HOME/.shrc"
 fi
 

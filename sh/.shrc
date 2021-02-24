@@ -12,18 +12,21 @@ if test -z "$__rc_common_init"; then
 
 	if test -d "$__config_home/sh-lib"; then
 	   for __cmd in "$__config_home/sh-lib"/*; do
+			# shellcheck source=/dev/null
 		   . "$__cmd"
 	   done
 	fi
 
 	if test -d "$__config_home/sh"; then
 		for __cmd in "$__config_home/sh"/*; do
+			# shellcheck source=/dev/null
 			. "$__cmd"
 		done
 	fi
 
 	if test -d "$__config_home/sh-common"; then
 		for __cmd in "$__config_home/sh-common"/*; do
+			# shellcheck source=/dev/null
 			. "$__cmd"
 		done
 	fi
@@ -31,6 +34,7 @@ fi
 
 if test -d "$__config_home/sh-interactive"; then
 	for __cmd in "$__config_home/sh-interactive"/*; do
+		# shellcheck source=/dev/null
 		. "$__cmd"
 	done
 fi
@@ -68,7 +72,7 @@ __ps1_prompt_chr() {
 
 case "$TERM" in
 	eterm*)
-		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\w \$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset " ;;
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset$PWD \$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset " ;;
 	*)
 		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset "
 esac
