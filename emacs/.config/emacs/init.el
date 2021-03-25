@@ -574,6 +574,7 @@ during discovery of the specified executable.")
   :custom
   (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
   (lsp-enable-snippet nil)
+  (lsp-headerline-breadcrumb-enable nil)
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-analyzer-server-display-inlay-hints t))
 
