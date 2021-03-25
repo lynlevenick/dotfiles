@@ -377,6 +377,9 @@ See ‘lyn-relevant-dir’."
 (use-package haml-mode
   :mode (rx ".haml" string-end))
 
+(use-package haxe-mode
+  :mode "\\.hx\\'")
+
 (use-package json-mode
   :mode (rx ".json" string-end))
 
@@ -461,9 +464,11 @@ See ‘lyn-relevant-dir’."
   :config
   (setf (alist-get 'clang-format apheleia-formatters) '("clang-format")
         (alist-get 'dfmt apheleia-formatters) '("dfmt" "--brace_style" "otbs")
+        (alist-get 'haxe-formatter apheleia-formatters) '("haxelib" "run" "formatter" "--stdin" "--source" file)
         (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
         (alist-get 'c-mode apheleia-mode-alist) 'clang-format
         (alist-get 'd-mode apheleia-mode-alist) 'dfmt
+        (alist-get 'haxe-mode apheleia-mode-alist) 'haxe-formatter
         (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt))
 
 ;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
@@ -567,6 +572,7 @@ during discovery of the specified executable.")
   :hook (prog-mode . lsp)
   :config (remhash 'steep-ls lsp-clients)
   :custom
+  (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
   (lsp-enable-snippet nil)
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-analyzer-server-display-inlay-hints t))
@@ -647,7 +653,8 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   (lyn-with-hook-once 'pre-command-hook
     (selectrum-mode))
   :config
-  (setf extended-command-suggest-shorter nil))
+  (setf enable-recursive-minibuffers t
+        extended-command-suggest-shorter nil))
 
 (use-package selectrum-prescient
   :straight (:host github :repo "raxod502/prescient.el"
