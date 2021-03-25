@@ -122,7 +122,7 @@
                            mode-line-client
                            mode-line-end-spaces)))
 
-(use-package m :straight (:host github :repo "lynlevenick/emacs-m"))
+(use-package memo :straight (:host github :repo "lynlevenick/emacs-memo"))
 
 (use-package micromap :straight (:host github :repo "lynlevenick/emacs-micromap")
   :config (micromap-mode)
