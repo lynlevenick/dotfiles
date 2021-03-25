@@ -12,9 +12,30 @@
 
 ;;;; Post-initialization theming
 
+(use-package memo :straight (:host github :repo "lynlevenick/emacs-memo"))
+
+(use-package micromap :straight (:host github :repo "lynlevenick/emacs-micromap")
+  :config (micromap-mode)
+  :custom
+  (micromap-foreground "#FBB829")
+  (micromap-background "#444444"))
+
+(use-package minions :straight (:host github :repo "lynlevenick/minions" :branch "remove-lambda-allocation")
+  :config (minions-mode)
+  :custom (minions-mode-line-lighter "\u2026")) ; Horizontal ellipsis
+
 (setf (face-font 'default) "Comic Code-12"
       (face-font 'fixed-pitch) "Comic Code-12"
       (face-font 'variable-pitch) "Valkyrie T4-14")
+
+;;;; Unicode
+
+(set-charset-priority 'unicode)
+(prefer-coding-system 'utf-8-unix)
+(set-default-coding-systems 'utf-8-unix)
+(setf (default-value 'buffer-file-coding-system) 'utf-8-unix)
+
+(use-package no-littering)
 
 ;;;; Convenience
 
@@ -150,7 +171,7 @@ See ‘lyn-safe-default-directory’."
   "Execute BODY with ‘default-directory’ “most relevant” for FILE.
 
 See ‘lyn-relevant-dir’."
-  (declare (indent defun) (debug (form body)))
+  (declare (indent 1) (debug (form body)))
 
   `(when-let ((default-directory (lyn-relevant-dir ,file)))
      ,@body))
@@ -378,7 +399,7 @@ See ‘lyn-relevant-dir’."
   :mode (rx ".haml" string-end))
 
 (use-package haxe-mode
-  :mode "\\.hx\\'")
+  :mode (rx ".hx" string-end))
 
 (use-package json-mode
   :mode (rx ".json" string-end))
@@ -491,14 +512,6 @@ See ‘lyn-relevant-dir’."
 If the test returns a non-nil value, then the schema will be prepended
 during discovery of the specified executable.")
 
-  (defvar lyn-flycheck--bundle-executable-cache (make-hash-table)
-    "Cache for bundle executables by project or directory.")
-  (defun lyn-flycheck--bundle-executable (dir)
-    "Retrieve cached bundle executable for DIR."
-
-    (lyn-fetchhash dir lyn-flycheck--bundle-executable-cache
-                   (flycheck-default-executable-find "bundle")))
-
   (defvar lyn-flycheck--bundle-should-enable-cache (make-hash-table)
     "Cache for results from ‘lyn-flycheck-bundle-should-enable’.")
   (defun lyn-flycheck-bundle-should-enable (command)
@@ -507,7 +520,7 @@ during discovery of the specified executable.")
     (let ((dir (lyn-relevant-dir)))
       (lyn-fetchhash dir lyn-flycheck--bundle-should-enable-cache
                      (when-let ((bundle-executable
-                                 (lyn-flycheck--bundle-executable dir)))
+                                 (flycheck-default-executable-find "bundle")))
                        (= 0 (call-process bundle-executable
                                           nil nil nil "show" command))))))
 

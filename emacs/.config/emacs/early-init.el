@@ -82,15 +82,6 @@
   (setf use-package-expand-minimally t
         use-package-verbose nil))
 
-;;;; Unicode
-
-(set-charset-priority 'unicode)
-(prefer-coding-system 'utf-8-unix)
-(set-default-coding-systems 'utf-8-unix)
-(setf (default-value 'buffer-file-coding-system) 'utf-8-unix)
-
-(use-package no-littering)
-
 ;;;; Quiet init
 
 (setf inhibit-startup-screen t
@@ -121,18 +112,6 @@
                            mode-line-mule-info
                            mode-line-client
                            mode-line-end-spaces)))
-
-(use-package memo :straight (:host github :repo "lynlevenick/emacs-memo"))
-
-(use-package micromap :straight (:host github :repo "lynlevenick/emacs-micromap")
-  :config (micromap-mode)
-  :custom
-  (micromap-foreground "#FBB829")
-  (micromap-background "#444444"))
-
-(use-package minions :straight (:host github :repo "lynlevenick/minions" :branch "remove-lambda-allocation")
-  :config (minions-mode)
-  :custom (minions-mode-line-lighter "\u2026")) ; Horizontal ellipsis
 
 (use-package srcery-theme
   :config (load-theme 'srcery t))
