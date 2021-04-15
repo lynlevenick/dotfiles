@@ -1,5 +1,11 @@
 #!/usr/bin/env false
 
+case "$(uname)" in
+	Darwin)
+	    XDG_CACHE_HOME="$(getconf DARWIN_USER_CACHE_DIR | sed 's/\/*$//')"; export XDG_CACHE_HOME ;;
+	*)
+esac
+
 __cache_home="${XDG_CACHE_HOME:-$HOME/.cache}"
 __config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 

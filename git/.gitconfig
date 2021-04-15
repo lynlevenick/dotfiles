@@ -2,7 +2,7 @@
   excludesfile = ~/.gitignore
   pager = diff-so-fancy | less --tabs=4 --RAW-CONTROL-CHARS --quit-if-one-screen
 [user]
-  name = Lyn Levenick
+  name = ash!!
   email = 346549+lynlevenick@users.noreply.github.com
 [github]
   user = lynlevenick

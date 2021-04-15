@@ -601,7 +601,7 @@ during discovery of the specified executable.")
   (use-package exec-path-from-shell
     :commands (exec-path-from-shell-initialize)
     :init (add-hook 'after-init-hook #'exec-path-from-shell-initialize)
-    :custom (exec-path-from-shell-check-startup-files nil)))
+    :config (add-to-list 'exec-path-from-shell-variables "XDG_CACHE_HOME")))
 
 (defvar lyn-original-exec-path exec-path
   "The value of variable ‘exec-path’ when Emacs was first started.")
