@@ -26,7 +26,7 @@
 
 (setf (face-font 'default) "Comic Code-12"
       (face-font 'fixed-pitch) "Comic Code-12"
-      (face-font 'variable-pitch) "Valkyrie T4-14")
+      (face-font 'variable-pitch) "Valkyrie OT A-14")
 
 ;;;; Unicode
 
@@ -395,6 +395,9 @@ See ‘lyn-relevant-dir’."
   :config (add-to-list 'company-backends #'company-elm)
   :custom (elm-format-on-save t))
 
+(use-package graphql-mode
+  :mode (rx (or ".graphql" ".gql") string-end))
+
 (use-package haml-mode
   :mode (rx ".haml" string-end))
 
@@ -488,8 +491,10 @@ See ‘lyn-relevant-dir’."
         (alist-get 'haxe-formatter apheleia-formatters) '("haxelib" "run" "formatter" "--stdin" "--source" file)
         (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
         (alist-get 'c-mode apheleia-mode-alist) 'clang-format
+        (alist-get 'c++-mode apheleia-mode-alist) 'clang-format
         (alist-get 'd-mode apheleia-mode-alist) 'dfmt
         (alist-get 'haxe-mode apheleia-mode-alist) 'haxe-formatter
+        (alist-get 'html-mode apheleia-mode-alist nil :remove) nil
         (alist-get 'rust-mode apheleia-mode-alist) 'rustfmt))
 
 ;; ‘flycheck’ provides in-buffer errors, warnings, and syntax checking
@@ -576,14 +581,42 @@ during discovery of the specified executable.")
   (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper)
   ;; Tweak syntax checking
   (flycheck-check-syntax-automatically '(save idle-change idle-buffer-switch mode-enabled))
-  (flycheck-display-errors-delay 0))
+  (flycheck-checker-error-threshold 2048)
+  (flycheck-display-errors-delay 0.3))
 
 (use-package flycheck-rust
   :hook (flycheck-mode . flycheck-rust-setup))
 
 (use-package lsp-mode
   :hook (prog-mode . lsp)
-  :config (remhash 'steep-ls lsp-clients)
+  :config
+  (remhash 'steep-ls lsp-clients)
+
+  (defun lyn--advice-lsp-mode-flow-project (&rest args)
+    "Never activate flow-ls based on presence of file ‘.flowconfig’."
+    nil)
+  (advice-add #'lsp-clients-flow-project-p :before-while #'lyn--advice-lsp-mode-flow-project)
+
+  (defun lyn--advice-lsp-mode-silence (format &rest args)
+    "Silence needless diagnostic messages from ‘lsp-mode’.
+This is a ‘:before-until’ advice for several ‘lsp-mode’ logging
+functions."
+    (or (string-match-p "Unable to calculate the languageId for buffer.+Take a look at `lsp-language-id-configuration'." format)
+        (member format `("No LSP server for %s(check *lsp-log*)."
+                         "Connected to %s."
+                         ,(concat
+                           "Unable to calculate the languageId for current "
+                           "buffer. Take a look at "
+                           "lsp-language-id-configuration.")
+                         ,(concat
+                           "There are no language servers supporting current "
+                           "mode %s registered with `lsp-mode'.")))
+        (and (stringp (car args))
+             (or (string-match-p "^no object for ident .+$" (car args))
+                 (string-match-p "^no identifier found$" (car args))))))
+
+  (dolist (fn '(lsp-warn lsp--warn lsp--info lsp--error))
+    (advice-add fn :before-until #'lyn--advice-lsp-mode-silence))
   :custom
   (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
   (lsp-enable-snippet nil)
@@ -661,7 +694,11 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
 (use-package deadgrep
   :bind (("C-c g" . deadgrep)))
 
-(use-package selectrum :straight (:host github :repo "raxod502/selectrum")
+(use-package marginalia
+  :after selectrum
+  :config (marginalia-mode))
+
+(use-package selectrum
   :commands (selectrum-mode)
   :init
   (lyn-with-hook-once 'pre-command-hook
@@ -671,8 +708,6 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
         extended-command-suggest-shorter nil))
 
 (use-package selectrum-prescient
-  :straight (:host github :repo "raxod502/prescient.el"
-             :files ("selectrum-prescient.el"))
   :after selectrum
   :config
   (selectrum-prescient-mode)
