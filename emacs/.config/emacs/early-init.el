@@ -31,7 +31,7 @@
     (cancel-timer lyn-gc-delayed-restore-timer)
     (setf lyn-gc-delayed-restore-timer nil))
   (setf gc-cons-percentage 1.0
-        gc-cons-threshold most-positive-fixnum))
+        gc-cons-threshold (* 16 1024 1024)))
 (defun lyn-gc-restore ()
   "Enable garbage collection."
 

@@ -74,7 +74,7 @@ task_async() {
 		shift
 	done
 
-	if test ! -e "${2:-/usr/local/bin/$1}"; then
+	if test ! -e "${2:-$(brew --prefix)/bin/$1}"; then
 		status_update "$1" 'installing...'
 		status_dir="$(mktemp -d)"
 
@@ -102,7 +102,7 @@ task_brew() {
 }
 
 task_cask() {
-	task_async brew cask install -- "$@"
+	task_async brew install --cask -- "$@"
 }
 
 task_stow() {
@@ -133,16 +133,17 @@ fi
 
 # Brew should be the one interactive element of this install process,
 # so let it do whatever with the terminal
-if ! command -v brew >/dev/null; then
+if ! test -e "/opt/homebrew/bin/brew"; then
 	status_other 'Homebrew' 'installing...'
-	# TODO: Update method when macOS removes builtin ruby
-	curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install | ruby
+	bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 	if command -v brew >/dev/null; then
 		status_pass 'Homebrew' 'installed'
 	else
 		status_fail 'Homebrew' 'failed'
 	fi
+
+	eval "$(/opt/homebrew/bin/brew shellenv)"
 else
 	status_pass 'Homebrew' 'installed'
 fi
@@ -151,23 +152,15 @@ fi
 
 task_brew bat
 
-task_brew diff-so-fancy
-
 task_brew exa
-
-task_brew fzf
 
 task_stow git
 
-task_brew python '/usr/local/bin/python3'
-
 task_stow readline
 
-task_brew ripgrep '/usr/local/bin/rg'
+task_brew ripgrep "$(brew --prefix)/bin/rg"
 
 task_stow sh
-
-task_brew shellcheck
 
 task_stow ssh
 
@@ -175,5 +168,3 @@ task_stow ssh
 
 task_stow emacs
 task_cask emacs '/Applications/Emacs.app'
-
-task_cask homebrew/cask-versions/firefox-nightly '/Applications/Firefox Nightly.app'

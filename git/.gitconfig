@@ -3,15 +3,17 @@
   pager = diff-so-fancy | less --tabs=4 --RAW-CONTROL-CHARS --quit-if-one-screen
 [init]
   defaultBranch = main
+[pull]
+  rebase = false
 
+[github]
+  user = lynlevenick
 [user]
   name = Ashlynn
   email = 346549+lynlevenick@users.noreply.github.com
-[github]
-  user = lynlevenick
+
 [color]
   ui = true
-
 [color "diff-highlight"]
   oldNormal = red bold
   oldHighlight = red bold 52

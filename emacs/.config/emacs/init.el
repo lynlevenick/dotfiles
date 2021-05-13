@@ -24,9 +24,11 @@
   :config (minions-mode)
   :custom (minions-mode-line-lighter "\u2026")) ; Horizontal ellipsis
 
-(setf (face-font 'default) "Comic Code-12"
-      (face-font 'fixed-pitch) "Comic Code-12"
-      (face-font 'variable-pitch) "Valkyrie OT A-14")
+(condition-case nil
+    (setf (face-font 'default) "Comic Code-12"
+	  (face-font 'fixed-pitch) "Comic Code-12"
+	  (face-font 'variable-pitch) "Valkyrie OT A-14")
+  (error nil))
 
 ;;;; Unicode
 
