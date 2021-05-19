@@ -592,8 +592,6 @@ during discovery of the specified executable.")
 (use-package lsp-mode
   :hook (prog-mode . lsp)
   :config
-  (remhash 'steep-ls lsp-clients)
-
   (defun lyn--advice-lsp-mode-flow-project (&rest args)
     "Never activate flow-ls based on presence of file ‘.flowconfig’."
     nil)
@@ -619,12 +617,28 @@ functions."
 
   (dolist (fn '(lsp-warn lsp--warn lsp--info lsp--error))
     (advice-add fn :before-until #'lyn--advice-lsp-mode-silence))
+
+  (let ((dirs `(,(rx (any "/\\")
+                     (or "__generated__"
+                         ".next"
+                         (seq "." (opt (or "eslint" "jest" "npm_" "prettier_" "yarn-")) "cache")
+                         "public")
+                     string-end))))
+    (cl-loop for dir in dirs
+             do (add-to-list 'lsp-file-watch-ignored-directories dir)))
+
+  (setf (alist-get (rx ".js" string-end) lsp-language-id-configuration nil nil #'equal) "javascript")
   :custom
   (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
+  (lsp-disabled-clients '(steep-ls))
+  (lsp-enable-on-type-formatting nil)
   (lsp-enable-snippet nil)
+  (lsp-eslint-format nil)
   (lsp-headerline-breadcrumb-enable nil)
+  (lsp-idle-delay 1)
   (lsp-rust-server 'rust-analyzer)
-  (lsp-rust-analyzer-server-display-inlay-hints t))
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  (lsp-typescript-format-enable nil))
 
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
