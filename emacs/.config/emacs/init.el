@@ -675,9 +675,7 @@ functions."
   :hook ((c-mode c++-mode css-mode elm-mode html-mode
           java-mode js-mode json-mode python-mode ruby-mode
           rust-mode typescript-mode) . tree-sitter-hl-mode)
-  :config
-  (setf (alist-get 'typescript-tsx-mode tree-sitter-major-mode-language-alist)
-        'tsx)
+  :config (setf (alist-get 'typescript-tsx-mode tree-sitter-major-mode-language-alist) 'tsx)
   :custom-face
   (tree-sitter-hl-face:function.call ((t (:inherit font-lock-function-name-face))))
   (tree-sitter-hl-face:operator      ((t (:inherit tree-sitter-hl-face:punctuation)))))
