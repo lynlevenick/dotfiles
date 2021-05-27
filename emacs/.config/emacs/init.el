@@ -529,7 +529,7 @@ See ‘lyn-relevant-dir’."
   :hook (flycheck-mode . flycheck-rust-setup))
 
 (use-package lsp-mode
-  :hook (prog-mode . lsp)
+  :hook (prog-mode . lsp-deferred)
   :config
   (defun lyn--advice-lsp-mode-flow-project (&rest args)
     "Never activate flow-ls based on presence of file ‘.flowconfig’."
@@ -568,16 +568,24 @@ functions."
 
   (setf (alist-get (rx ".js" string-end) lsp-language-id-configuration nil nil #'equal) "javascript")
   :custom
+  ;; stop editing my code please :)
+  (lsp-completion-enable-additional-text-edit nil)
+  (lsp-enable-on-type-formatting nil)
+  (lsp-eslint-format nil)
+  (lsp-html-format-enable nil)
+  (lsp-javascript-format-enable nil)
+  (lsp-solargraph-formatting nil)
+  (lsp-typescript-format-enable nil)
+  (lsp-yaml-format-enable nil)
+  ;; tweak features
   (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
   (lsp-disabled-clients '(bash-ls steep-ls))
-  (lsp-enable-on-type-formatting nil)
   (lsp-enable-snippet nil)
-  (lsp-eslint-format nil)
   (lsp-headerline-breadcrumb-enable nil)
+  (lsp-modeline-code-actions-segments '(name))
   (lsp-idle-delay 1)
   (lsp-rust-server 'rust-analyzer)
-  (lsp-rust-analyzer-server-display-inlay-hints t)
-  (lsp-typescript-format-enable nil))
+  (lsp-rust-analyzer-server-display-inlay-hints t))
 
 (use-package ws-butler
   :hook (prog-mode . ws-butler-mode))
@@ -670,7 +678,7 @@ functions."
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
                               ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
                               ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
-                         :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el")))
+              :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el")))
 (use-package tree-sitter
   :hook ((c-mode c++-mode css-mode elm-mode html-mode
           java-mode js-mode json-mode python-mode ruby-mode
