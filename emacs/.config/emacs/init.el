@@ -465,16 +465,11 @@ See ‘lyn-relevant-dir’."
 (use-package rust-mode
   :mode (rx ".rs" string-end))
 
+(use-package typescript-mode
+  :mode (rx ".ts" (opt "x") string-end))
+
 (use-package yaml-mode
   :mode (rx ".y" (opt "a") "ml" string-end))
-
-(use-package web-mode
-  ;; (rx-to-string (cons 'or (cl-loop for (_ . test) in (append web-mode-content-types web-mode-engine-file-regexps)
-  ;;                                  unless (string= test ".")
-  ;;                                  collect `(regexp ,test)))
-  ;;               :no-group)
-  :mode (rx "." (or "cjs" "mjs" (seq (any "jt") "s" (opt "x"))) string-end)
-  :custom (web-mode-enable-auto-quoting nil))
 
 (use-package zig-mode
   :mode (rx ".zig" string-end))
@@ -630,7 +625,7 @@ functions."
   (setf (alist-get (rx ".js" string-end) lsp-language-id-configuration nil nil #'equal) "javascript")
   :custom
   (lsp-clients--haxe-server-path (expand-file-name "~/.local/share/haxe-language-server/bin/server.js"))
-  (lsp-disabled-clients '(steep-ls))
+  (lsp-disabled-clients '(bash-ls steep-ls))
   (lsp-enable-on-type-formatting nil)
   (lsp-enable-snippet nil)
   (lsp-eslint-format nil)
@@ -649,8 +644,7 @@ functions."
 (when (memq window-system '(mac ns x))
   (use-package exec-path-from-shell
     :commands (exec-path-from-shell-initialize)
-    :init (add-hook 'after-init-hook #'exec-path-from-shell-initialize)
-    :config (add-to-list 'exec-path-from-shell-variables "XDG_CACHE_HOME")))
+    :init (exec-path-from-shell-initialize)))
 
 (defvar lyn-original-exec-path exec-path
   "The value of variable ‘exec-path’ when Emacs was first started.")
@@ -749,6 +743,36 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   :init
   (lyn-with-hook-once 'window-configuration-change-hook
     (winner-mode)))
+
+;; HACK: requires exec-path :facepalm:
+(use-package tsc
+  :straight `(:pre-build ,(when (and (memq window-system '(mac ns))
+                                     (string-match-p (rx string-start "arm-")
+                                                     system-configuration))
+                            (unless (and (executable-find "cargo")
+                                         (executable-find "cask")
+                                         (executable-find "git")
+                                         (executable-find "npm")
+                                         (executable-find "llvm-gcc"))
+                              (warn "tree-sitter build will fail"))
+                            '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter")
+                              ("sh" "-c" "cd rust-tree-sitter/cli && cargo install --path .")
+                              ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
+                              ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
+                              ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
+                         :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el")))
+(use-package tree-sitter
+  :hook (((c-mode c++-mode css-mode elm-mode html-mode
+           java-mode js-mode json-mode python-mode ruby-mode
+           rust-mode typescript-mode) . tree-sitter-hl-mode))
+  :custom-face
+  (tree-sitter-hl-face:function.call ((t (:inherit font-lock-function-name-face))))
+  (tree-sitter-hl-face:operator      ((t (:inherit tree-sitter-hl-face:punctuation)))))
+(use-package tree-sitter-langs
+  :straight (:host github :repo "ubolonton/emacs-tree-sitter"
+             :files ("langs/*.el" ("bin" "langs/bin/*.dylib") ("queries" "langs/queries/*")))
+  :after tree-sitter
+  :init (setf tree-sitter-langs--testing t))
 
 ;;;; Profiling
 
