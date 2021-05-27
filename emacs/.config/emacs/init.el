@@ -672,9 +672,9 @@ functions."
                               ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
                          :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el")))
 (use-package tree-sitter
-  :hook (((c-mode c++-mode css-mode elm-mode html-mode
-           java-mode js-mode json-mode python-mode ruby-mode
-           rust-mode typescript-mode) . tree-sitter-hl-mode))
+  :hook ((c-mode c++-mode css-mode elm-mode html-mode
+          java-mode js-mode json-mode python-mode ruby-mode
+          rust-mode typescript-mode) . tree-sitter-hl-mode)
   :config
   (setf (alist-get 'typescript-tsx-mode tree-sitter-major-mode-language-alist)
         'tsx)
