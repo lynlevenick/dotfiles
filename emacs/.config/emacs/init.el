@@ -466,7 +466,10 @@ See ‘lyn-relevant-dir’."
   :mode (rx ".rs" string-end))
 
 (use-package typescript-mode
-  :mode (rx ".ts" (opt "x") string-end))
+  :mode (rx ".ts" string-end)
+  :init
+  (define-derived-mode typescript-tsx-mode typescript-mode "typescript-tsx")
+  (add-to-list 'auto-mode-alist (cons (rx ".tsx" string-end) #'typescript-tsx-mode)))
 
 (use-package yaml-mode
   :mode (rx ".y" (opt "a") "ml" string-end))
@@ -765,6 +768,9 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
   :hook (((c-mode c++-mode css-mode elm-mode html-mode
            java-mode js-mode json-mode python-mode ruby-mode
            rust-mode typescript-mode) . tree-sitter-hl-mode))
+  :config
+  (setf (alist-get 'typescript-tsx-mode tree-sitter-major-mode-language-alist)
+        'tsx)
   :custom-face
   (tree-sitter-hl-face:function.call ((t (:inherit font-lock-function-name-face))))
   (tree-sitter-hl-face:operator      ((t (:inherit tree-sitter-hl-face:punctuation)))))
