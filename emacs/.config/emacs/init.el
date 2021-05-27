@@ -503,62 +503,6 @@ See ‘lyn-relevant-dir’."
   :init
   (lyn-with-hook-once 'find-file-hook
     (global-flycheck-mode))
-
-  ;; Extend flycheck to handle running an executable to determine if a command
-  ;; is runnable, and to support running an executable through another.
-  (defvar lyn-flycheck-handle-alist
-    '(("bundle" lyn-flycheck-bundle-exec))
-    "Map the schema a file exists under to a handler method.")
-  (defvar lyn-flycheck-wrap-alist
-    '(("rubocop" "bundle" lyn-flycheck-bundle-should-enable)
-      ("haml" "bundle" lyn-flycheck-bundle-should-enable))
-    "Schema to prepend to certain executables and optionally a test run before enabling.
-
-If the test returns a non-nil value, then the schema will be prepended
-during discovery of the specified executable.")
-
-  (defvar lyn-flycheck--bundle-should-enable-cache (make-hash-table)
-    "Cache for results from ‘lyn-flycheck-bundle-should-enable’.")
-  (defun lyn-flycheck-bundle-should-enable (command)
-    "True if COMMAND should be run through bundle."
-
-    (let ((dir (lyn-relevant-dir)))
-      (lyn-fetchhash dir lyn-flycheck--bundle-should-enable-cache
-                     (when-let ((bundle-executable
-                                 (flycheck-default-executable-find "bundle")))
-                       (= 0 (call-process bundle-executable
-                                          nil nil nil "show" command))))))
-
-  (defun lyn-flycheck-bundle-exec (command &rest args)
-    "Transforms COMMAND into a command for bundle, with ARGS trailing."
-
-    `(,(lyn-flycheck--bundle-executable (lyn-relevant-dir))
-      "exec" ,command ,@args))
-
-  (defun lyn-flycheck-executable-find (executable)
-    "Wrap EXECUTABLE for specific cases, to e.g. run rubocop through bundle exec."
-
-    (let* ((file (file-name-nondirectory executable))
-           (mapped (cdr (assoc-string file lyn-flycheck-wrap-alist)))
-           (mapped-schema (car mapped))
-           (mapped-check (cadr mapped)))
-      (if (or (and mapped-schema (not mapped-check))
-              (and mapped-check (funcall mapped-check file)))
-          (concat mapped-schema ":" file)
-        (flycheck-default-executable-find executable))))
-
-  (defun lyn-flycheck-command-wrapper (command)
-    "Handle specially formed COMMANDs from ‘lyn-flycheck-executable-find’."
-
-    (let* ((url (url-generic-parse-url (car command)))
-           (type (url-type url)))
-      (if (not type)
-          command
-        (aset url 1 nil) ; expanded (setf (url-type url) nil), (require 'url) needed to expand
-        (apply (cadr (assoc-string (file-name-nondirectory type)
-                                   lyn-flycheck-handle-alist))
-               (url-recreate-url url)
-               (cdr command)))))
   :config
   ;; Override the sh-shellcheck checker's configuration to normalize the shell
   ;; ‘false’ to ‘sh’.
@@ -576,9 +520,6 @@ during discovery of the specified executable.")
 
   (add-to-list 'flycheck-shellcheck-supported-shells 'false)
   :custom
-  ;; Apply flycheck extension from above
-  (flycheck-executable-find #'lyn-flycheck-executable-find)
-  (flycheck-command-wrapper-function #'lyn-flycheck-command-wrapper)
   ;; Tweak syntax checking
   (flycheck-check-syntax-automatically '(save idle-change idle-buffer-switch mode-enabled))
   (flycheck-checker-error-threshold 2048)
@@ -646,43 +587,9 @@ functions."
   :commands (add-node-modules-path))
 (when (memq window-system '(mac ns x))
   (use-package exec-path-from-shell
-    :commands (exec-path-from-shell-initialize)
-    :init (exec-path-from-shell-initialize)))
-
-(defvar lyn-original-exec-path exec-path
-  "The value of variable ‘exec-path’ when Emacs was first started.")
-(defvar lyn-local-exec-path-cache (make-hash-table :test 'equal)
-  "Cache for exec paths by project or directory.")
-(defun lyn-local-exec-path (&optional drop-cache)
-  "Set up variable ‘exec-path’ for the current project.
-
-If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
-  (interactive "p")
-
-  (when drop-cache
-    (setf lyn-local-exec-path-cache (make-hash-table :test 'equal)))
-
-  (when (and (or buffer-file-name                     ; Accessing a file
-                 (derived-mode-p 'magit-mode))        ; or running under Magit
-             (not (file-remote-p default-directory))) ; File not under Tramp
-    (lyn-with-relevant-dir nil
-      (make-local-variable 'exec-path)
-      (let ((relevant-exec-path
-             (let ((exec-path lyn-original-exec-path))
-               (lyn-fetchhash
-                default-directory lyn-local-exec-path-cache
-                (progn
-                  (when (fboundp 'exec-path-from-shell-initialize)
-                    (exec-path-from-shell-initialize))
-                  (add-node-modules-path)
-                  exec-path)))))
-        (setf exec-path relevant-exec-path)))))
-;; HACK: Doing this on every find-file isn't great. Caching makes this slightly
-;;       less terrible but it's still terrible. It would be preferable if
-;;       there was a shim-based solution which ran according to the current
-;;       directory instead of needing to futz with the path constantly.
-(add-hook 'find-file-hook #'lyn-local-exec-path)
-(add-hook 'magit-pre-display-buffer-hook #'lyn-local-exec-path)
+    :config
+    (add-to-list 'exec-path-from-shell-variables "XDG_CACHE_HOME")
+    (exec-path-from-shell-initialize)))
 
 ;;;; Searching
 
@@ -758,7 +665,7 @@ If DROP-CACHE is non-nil, then recreate ‘lyn-local-exec-path-cache’."
                                          (executable-find "npm")
                                          (executable-find "llvm-gcc"))
                               (warn "tree-sitter build will fail"))
-                            '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter")
+                            '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter; cd rust-tree-sitter && git pull")
                               ("sh" "-c" "cd rust-tree-sitter/cli && cargo install --path .")
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
                               ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
