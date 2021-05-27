@@ -687,12 +687,5 @@ functions."
   :after tree-sitter
   :init (setf tree-sitter-langs--testing t))
 
-;;;; Profiling
-
-;; ;; ‘explain-pause-mode’ does constant profiling to find out why Emacs is slow
-;; (use-package explain-pause-mode :straight (:host github :repo "lastquestion/explain-pause-mode")
-;;   :commands (explain-pause-mode)
-;;   :init (explain-pause-mode))
-
 (provide 'init)
 ;;; init.el ends here
