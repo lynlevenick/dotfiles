@@ -29,6 +29,8 @@
 	  (face-font 'fixed-pitch) "Comic Code-12"
 	  (face-font 'variable-pitch) "Valkyrie OT A-14")
   (error nil))
+(when (memq window-system '(mac ns))
+  (set-fontset-font t 'symbol "Apple Color Emoji" nil 'prepend))
 
 ;;;; Unicode
 
@@ -240,9 +242,6 @@ See ‘lyn-relevant-dir’."
 (when (boundp 'mac-option-modifier) (setf mac-option-modifier 'meta))
 (when (boundp 'mac-command-modifier) (setf mac-command-modifier 'super))
 (when (fboundp 'ns-next-frame) (bind-key "s-`" #'ns-next-frame))
-
-(use-package imenu :straight (:type built-in)
-  :bind (("C-c i" . imenu)))
 
 ;;;; Editing
 
@@ -594,13 +593,17 @@ functions."
 
 ;;;; Searching
 
-(use-package avy
-  :bind (("C-c c" . avy-goto-char-2)
-         ("C-c l" . avy-goto-line)
-         ("C-c r" . avy-goto-char-2-above)
-         ("C-c s" . avy-goto-char-2-below)))
+(use-package consult
+  :bind (("C-c g" . consult-ripgrep)
+         ("C-c i" . consult-imenu)
+         ("C-c I" . consult-project-imenu))
+  :config
+  (with-eval-after-load 'projectile
+    (setf consult-project-root-function #'projectile-project-root)))
+(use-package consult-flycheck
+  :bind (("C-c f" . consult-flycheck)))
 
-(use-package ctrlf :straight (:host github :repo "raxod502/ctrlf")
+(use-package ctrlf
   :commands (ctrlf-mode)
   :init
   (lyn-with-hook-once 'pre-command-hook
@@ -613,7 +616,7 @@ functions."
   (add-hook 'term-mode-hook #'lyn-disable-ctrlf-mode-in-buffer))
 
 (use-package deadgrep
-  :bind (("C-c g" . deadgrep)))
+  :bind (("C-c G" . deadgrep)))
 
 (use-package marginalia
   :after selectrum
