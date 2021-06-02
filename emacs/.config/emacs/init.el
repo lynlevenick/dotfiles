@@ -540,19 +540,12 @@ See ‘lyn-relevant-dir’."
     "Silence needless diagnostic messages from ‘lsp-mode’.
 This is a ‘:before-until’ advice for several ‘lsp-mode’ logging
 functions."
-    (or (string-match-p "Unable to calculate the languageId for buffer.+Take a look at `lsp-language-id-configuration'." format)
-        (member format `("No LSP server for %s(check *lsp-log*)."
-                         "Connected to %s."
-                         ,(concat
-                           "Unable to calculate the languageId for current "
-                           "buffer. Take a look at "
-                           "lsp-language-id-configuration.")
-                         ,(concat
-                           "There are no language servers supporting current "
-                           "mode %s registered with `lsp-mode'.")))
-        (and (stringp (car args))
-             (or (string-match-p "^no object for ident .+$" (car args))
-                 (string-match-p "^no identifier found$" (car args))))))
+    (string-match-p (rx string-start
+                        (or "Unable to calculate the languageId"
+                            "There are no language servers supporting current mode"
+                            "No LSP server for %s"
+                            "Connected to %s"))
+                    format))
 
   (dolist (fn '(lsp-warn lsp--warn lsp--info lsp--error))
     (advice-add fn :before-until #'lyn--advice-lsp-mode-silence))
