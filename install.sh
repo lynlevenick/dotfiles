@@ -79,7 +79,7 @@ task_async() {
 		status_dir="$(mktemp -d)"
 
 		{
-			if ! $task_command -- "$1" </dev/null >"${status_dir}/stdout" 2>"${status_dir}/stderr"; then
+			if ! $task_command -- "$1" <&- >"${status_dir}/stdout" 2>"${status_dir}/stderr"; then
 				printf '%s' "$?" > "${status_dir}/errno"
 			fi
 		} &
