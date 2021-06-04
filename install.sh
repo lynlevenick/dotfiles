@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 cli_cols="$(tput cols)"
-cli_reset_line="$(tput el)"
+cli_reset_line="\015$(tput el)"
 
 attr_dim="$(tput dim)"
 attr_green="$(tput setaf 2)"
@@ -18,14 +18,14 @@ unset last_out_overwrite
 
 out_step() {
 	if test -n "$last_out_overwrite"; then
-		printf '\015%s' "${cli_reset_line}"
+		printf "${cli_reset_line}"
 	fi
 	last_out_overwrite=1
 }
 
 out_complete() {
 	if test -n "$last_out_overwrite"; then
-		printf '\015%s' "${cli_reset_line}"
+		printf "${cli_reset_line}"
 	fi
 	unset last_out_overwrite
 }
@@ -110,11 +110,11 @@ task_stow() {
 	printf ' '
 
 	# shellcheck disable=SC2016
-	find "${script_dir}/$1" -type f -exec /usr/bin/env sh -c '
+	find "${script_dir}/$1" -type f -exec sh -c '
 		target="${HOME}/${1#$2/}"
 		if test ! -h "${target}"; then
 			if test -e "${target}"; then
-				printf '\''     Warning: %s exists\n'\'' "${target}"
+				printf '\''     skipped: %s exists\n'\'' "${target}"
 			else
 				mkdir -p "$(dirname -- "${target}")"
 				ln -s "$1" "$target"
@@ -151,6 +151,8 @@ fi
 ## Command line tooling
 
 task_brew bat
+
+task_brew cmake
 
 task_brew exa
 
