@@ -23,11 +23,13 @@ precmd() {
 	eval "$PROMPT_COMMAND"
 }
 
-case "$TERM" in
-	eterm*)
-		PS1="%{$__attr_reset%}%~ %{%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;)%{$__attr_reset%} " ;;
+case "$INSIDE_EMACS" in
+	'')
+		PS1="%{$__attr_unset%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;) %{$__attr_reset%}" ;;
+	*vterm*)
+		PS1="%{$__attr_unset%}%~ %{%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;) %{$(__vterm_printf '51;A')$__attr_reset%}" ;;
 	*)
-		PS1="%{$__attr_reset%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;)%{$__attr_reset%} "
+		PS1="%{$__attr_unset%}%~ %{%(0?.$__attr_dim$__attr_white.$__attr_red)%}%(!.#.;) %{$__attr_reset%}"
 esac
 
 bindkey '^n' history-search-forward

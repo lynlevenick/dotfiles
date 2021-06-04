@@ -51,7 +51,11 @@ __attr_dim="$(tput dim)"
 __attr_red="$(tput setaf 1)"
 __attr_white="$(tput setaf 7)"
 
-__attr_reset="$(tput sgr0)$(tput cnorm)"
+__attr_unset="$(tput sgr0)"
+__attr_reset="$__attr_unset$(tput cnorm)"
+
+# regexp-escape $HOME
+__ps1_home_pattern="$(printf '%s' "$HOME" | sed 's/[]\/$.^|[]/\\&/g')"
 
 __ps1_err() {
 	# shellcheck disable=SC2181
@@ -62,6 +66,10 @@ __ps1_err() {
 	fi
 }
 
+__ps1_pwd() {
+	printf '%s' "$PWD" | sed "s/^$__ps1_home_pattern/~/"
+}
+
 __ps1_prompt_chr() {
 	if test "$(id -u)" -eq 0; then
 		printf '#'
@@ -70,9 +78,11 @@ __ps1_prompt_chr() {
 	fi
 }
 
-case "$TERM" in
-	eterm*)
-		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset$PWD \$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset " ;;
+case "$INSIDE_EMACS" in
+	'')
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_unset\$(__ps1_err)\$(__ps1_prompt_chr) $__attr_reset" ;;
+	*vterm*)
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_unset\$(__ps1_pwd) \$(__ps1_err)\$(__ps1_prompt_chr) \$(__vterm_printf '51;A')$__attr_reset" ;;
 	*)
-		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_reset\$(__ps1_err)\$(__ps1_prompt_chr)$__attr_reset "
+		PS1="\$(eval \"\$PROMPT_COMMAND\")$__attr_unset\$(__ps1_pwd) \$(__ps1_err)\$(__ps1_prompt_chr) $__attr_reset"
 esac

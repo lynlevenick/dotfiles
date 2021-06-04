@@ -17,9 +17,11 @@ HISTFILESIZE=5000
 HISTSIZE=5000
 shopt -s histappend
 
-case "$TERM" in
-	eterm*)
-		PS1="\[$__attr_reset\]\w \[\$(__ps1_err)\]\$(__ps1_prompt_chr)\[$__attr_reset\] " ;;
+case "$INSIDE_EMACS" in
+	'')
+		PS1="\[$__attr_unset\$(__ps1_err)\]\$(__ps1_prompt_chr) \[$__attr_reset\]" ;;
+	*vterm*)
+		PS1="\[$__attr_unset\]\w \[\$(__ps1_err)\]\$(__ps1_prompt_chr) \[\$(__vterm_printf '51;A')$__attr_reset\]" ;;
 	*)
-		PS1="\[$__attr_reset\$(__ps1_err)\]\$(__ps1_prompt_chr)\[$__attr_reset\] "
+		PS1="\[$__attr_unset\]\w \[\$(__ps1_err)\]\$(__ps1_prompt_chr) \[$__attr_reset\]"
 esac

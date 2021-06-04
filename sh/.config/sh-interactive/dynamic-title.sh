@@ -1,10 +1,7 @@
 #!/usr/bin/env false
 
-# regexp-escape $HOME
-__dynamic_title_home_pattern="$(printf '%s' "$HOME" | sed 's/[]\/$.^|[]/\\&/g')"
-
 __dynamic_title() {
-	printf '\033]0;%s\007' "$(printf '%s' "$PWD" | sed "s/^$__dynamic_title_home_pattern/~/")"
+	printf '\033]0;%s\007' "$(__ps1_pwd)"
 }
 
 case "$TERM" in
