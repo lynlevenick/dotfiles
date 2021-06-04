@@ -159,17 +159,16 @@ Like ‘magit’s ‘magit--safe-default-directory’."
       dir)))
 
 (defun lyn-relevant-dir (&optional file)
-  "Return a “most relevant” directory for FILE.
+  "Return a “most relevant” directory for FILE or ‘default-directory’.
 
-Relative to function ‘projectile-project-root’ if ‘projectile-project-p’,
-otherwise relative to FILE.
+Relative to function ‘project-current’ if in a project, otherwise
+relative to FILE.
 
 See ‘lyn-safe-default-directory’."
 
   (lyn-safe-default-directory
-   (if (projectile-project-p file)
-       (projectile-project-root file)
-     file)))
+   (or (cdr-safe (project-current nil (file-name-directory (or file default-directory))))
+       file)))
 
 (defmacro lyn-with-relevant-dir (file &rest body)
   "Execute BODY with ‘default-directory’ “most relevant” for FILE.
@@ -318,43 +317,6 @@ See ‘lyn-relevant-dir’."
   (lyn-with-hook-once 'pre-command-hook
     (mode-line-bell-mode)))
 
-(use-package multi-term
-  :commands (multi-term multi-term-dedicated-window-p)
-  :init
-  (defun lyn-multi-term-dwim (&optional dedicated)
-    "Create new terminal in the project root or fall back to ‘default-directory’."
-    (interactive)
-
-    (lyn-with-relevant-dir nil
-      (if dedicated
-          (multi-term-dedicated-open)
-        (multi-term))))
-  (defun lyn-multi-term-dedicated-dwim ()
-    "Close dedicated terminal if focused, or focus the dedicated terminal."
-    (interactive)
-
-    (cond ((multi-term-dedicated-window-p)
-           (multi-term-dedicated-close))
-          ((multi-term-dedicated-exist-p)
-           (select-window multi-term-dedicated-window))
-          ((progn
-             (lyn-multi-term-dwim :dedicated)
-             (select-window multi-term-dedicated-window)))))
-  :bind (("C-c d" . lyn-multi-term-dedicated-dwim)
-         ("C-c t" . lyn-multi-term-dwim))
-  :custom
-  (term-bind-key-alist '(("<C-tab>" . multi-term-next)
-                         ("<C-S-tab>" . multi-term-prev)
-                         ("C-c C-c" . term-interrupt-subjob)
-                         ("C-y" . term-paste)
-                         ("<C-backspace>" . term-send-raw)
-                         ("M-b" . term-send-raw-meta)
-                         ("M-f" . term-send-raw-meta)
-                         ("M-d" . term-send-raw-meta)
-                         ("<M-backspace>" . term-send-raw-meta)
-                         ("<M-left>" . term-send-backward-word)
-                         ("<M-right>" . term-send-forward-word))))
-
 ;; ‘olivetti’ provides a mode which centers content in a buffer via margins.
 (use-package olivetti
   :hook (org-mode . turn-on-olivetti-mode)
@@ -385,35 +347,54 @@ See ‘lyn-relevant-dir’."
   (lyn-with-hook-once 'post-self-insert-hook
     (require 'tramp)))
 
+(use-package vterm
+  :commands (vterm)
+  :init
+  (defun lyn-vterm-dwim ()
+    "Create new terminal in the project root or fall back to ‘default-directory’."
+    (interactive)
+
+    (lyn-with-relevant-dir nil
+      (vterm t)))
+  (bind-key "C-c t" #'lyn-vterm-dwim)
+  (defun lyn--vterm-update-pwd (dir)
+    "Set ‘default-directory’ to DIR.
+
+Called from vterm."
+
+    (setf default-directory dir))
+  :bind (:map vterm-mode-map
+         ("<s-up>" . vterm-previous-prompt)
+         ("<s-down>" . vterm-next-prompt))
+  :custom
+  (vterm-eval-cmds '(("lyn--vterm-update-pwd" lyn--vterm-update-pwd)))
+  (vterm-always-compile-module t))
+
 ;;;; Major Modes
 
 (use-package d-mode
-  :mode (rx ".d" (opt "i") string-end))
+  :mode (rx ".d" (opt "i") eos))
 
 (use-package elm-mode
   :commands (company-elm)
-  :mode (rx ".elm" string-end)
+  :mode (rx ".elm" eos)
   :config (add-to-list 'company-backends #'company-elm)
   :custom (elm-format-on-save t))
 
 (use-package graphql-mode
-  :mode (rx (or ".graphql" ".gql") string-end))
+  :mode (rx (or ".graphql" ".gql") eos))
 
 (use-package haml-mode
-  :mode (rx ".haml" string-end))
+  :mode (rx ".haml" eos))
 
 (use-package haxe-mode
-  :mode (rx ".hx" string-end))
+  :mode (rx ".hx" eos))
 
 (use-package json-mode
-  :mode (rx ".json" string-end))
-
-(use-package nov
-  :mode ((rx ".epub" string-end) . nov-mode)
-  :custom (nov-text-width 60))
+  :mode (rx ".json" eos))
 
 (use-package org
-  :mode ((rx ".org" string-end) . org-mode)
+  :mode ((rx ".org" eos) . org-mode)
   :hook ((org-mode . variable-pitch-mode)
          (org-mode . visual-line-mode))
   :custom
@@ -425,35 +406,35 @@ See ‘lyn-relevant-dir’."
   (org-support-shift-select t)
   :custom-face
   ;; Fix heading size
-  (org-level-1               ((t (:weight semi-bold :height 1.0))))
-  (org-level-2               ((t (:weight semi-bold :height 1.0))))
-  (org-level-3               ((t (:weight semi-bold :height 1.0))))
-  (org-level-4               ((t (:weight semi-bold :height 1.0))))
-  (org-level-5               ((t (:weight semi-bold :height 1.0))))
+  (org-level-1               ((t :weight semi-bold :height 1.0)))
+  (org-level-2               ((t :weight semi-bold :height 1.0)))
+  (org-level-3               ((t :weight semi-bold :height 1.0)))
+  (org-level-4               ((t :weight semi-bold :height 1.0)))
+  (org-level-5               ((t :weight semi-bold :height 1.0)))
   ;; Fix link styling - TODO: color?
-  (org-link                  ((t (:underline nil))))
+  (org-link                  ((t :underline nil)))
   ;; These faces work better in monospace
-  (org-block                 ((t (:inherit fixed-pitch)))) ; TODO: Follow buffer text size (C-x C-+)
-  (org-block-begin-line      ((t (:inherit fixed-pitch))))
-  (org-block-end-line        ((t (:inherit fixed-pitch))))
-  (org-checkbox              ((t (:inherit fixed-pitch))))
-  (org-code                  ((t (:inherit fixed-pitch))))
-  (org-document-info-keyword ((t (:inherit fixed-pitch))))
-  (org-formula               ((t (:inherit fixed-pitch))))
-  (org-latex-and-related     ((t (:inherit fixed-pitch))))
-  (org-meta-line             ((t (:inherit fixed-pitch))))
-  (org-table                 ((t (:inherit fixed-pitch))))
-  (org-verbatim              ((t (:inherit fixed-pitch)))))
+  (org-block                 ((t :inherit fixed-pitch))) ; TODO: Follow buffer text size (C-x C-+)
+  (org-block-begin-line      ((t :inherit fixed-pitch)))
+  (org-block-end-line        ((t :inherit fixed-pitch)))
+  (org-checkbox              ((t :inherit fixed-pitch)))
+  (org-code                  ((t :inherit fixed-pitch)))
+  (org-document-info-keyword ((t :inherit fixed-pitch)))
+  (org-formula               ((t :inherit fixed-pitch)))
+  (org-latex-and-related     ((t :inherit fixed-pitch)))
+  (org-meta-line             ((t :inherit fixed-pitch)))
+  (org-table                 ((t :inherit fixed-pitch)))
+  (org-verbatim              ((t :inherit fixed-pitch))))
 
 (use-package pico8-mode :straight (:host github :repo "Kaali/pico8-mode")
-  :mode (rx ".p8" string-end)
+  :mode (rx ".p8" eos)
   :custom
   (pico8-documentation-file
    (cond ((memq window-system '(mac ns))
           (expand-file-name "~/Library/Application Support/pico-8/pico-8.txt"))
          nil))
   :custom-face
-  (pico8--non-lua-overlay ((t (:inherit default)))))
+  (pico8--non-lua-overlay ((t :inherit default))))
 
 (use-package ruby-mode :straight (:type built-in)
   :defer
@@ -462,19 +443,19 @@ See ‘lyn-relevant-dir’."
   (ruby-insert-encoding-magic-comment nil))
 
 (use-package rust-mode
-  :mode (rx ".rs" string-end))
+  :mode (rx ".rs" eos))
 
 (use-package typescript-mode
-  :mode (rx ".ts" string-end)
+  :mode (rx ".ts" eos)
   :init
   (define-derived-mode typescript-tsx-mode typescript-mode "typescript-tsx")
-  (add-to-list 'auto-mode-alist (cons (rx ".tsx" string-end) #'typescript-tsx-mode)))
+  (add-to-list 'auto-mode-alist (cons (rx ".tsx" eos) #'typescript-tsx-mode)))
 
 (use-package yaml-mode
-  :mode (rx ".y" (opt "a") "ml" string-end))
+  :mode (rx ".y" (opt "a") "ml" eos))
 
 (use-package zig-mode
-  :mode (rx ".zig" string-end))
+  :mode (rx ".zig" eos))
 
 ;;;; Syntax Checking, Linting, and Formatting
 
@@ -539,11 +520,10 @@ See ‘lyn-relevant-dir’."
     "Silence needless diagnostic messages from ‘lsp-mode’.
 This is a ‘:before-until’ advice for several ‘lsp-mode’ logging
 functions."
-    (string-match-p (rx string-start
-                        (or "Unable to calculate the languageId"
-                            "There are no language servers supporting current mode"
-                            "No LSP server for %s"
-                            "Connected to %s"))
+    (string-match-p (rx bos (or "Unable to calculate the languageId"
+                                "There are no language servers supporting current mode"
+                                "No LSP server for %s"
+                                "Connected to %s"))
                     format))
 
   (dolist (fn '(lsp-warn lsp--warn lsp--info lsp--error))
@@ -554,11 +534,11 @@ functions."
                          ".next"
                          (seq "." (opt (or "eslint" "jest" "npm_" "prettier_" "yarn-")) "cache")
                          "public")
-                     string-end))))
+                     eos))))
     (cl-loop for dir in dirs
              do (add-to-list 'lsp-file-watch-ignored-directories dir)))
 
-  (setf (alist-get (rx ".js" string-end) lsp-language-id-configuration nil nil #'equal) "javascript")
+  (setf (alist-get (rx ".js" eos) lsp-language-id-configuration nil nil #'equal) "javascript")
   :custom
   ;; stop editing my code please :)
   (lsp-completion-enable-additional-text-edit nil)
@@ -594,12 +574,19 @@ functions."
 ;;;; Searching
 
 (use-package consult
+  :commands (consult-xref)
   :bind (("C-c g" . consult-ripgrep)
          ("C-c i" . consult-imenu)
          ("C-c I" . consult-project-imenu))
   :config
-  (with-eval-after-load 'projectile
-    (setf consult-project-root-function #'projectile-project-root)))
+  (setf consult-ripgrep-command
+        (replace-regexp-in-string (rx (1+ blank) (group (1+ anychar)) eos)
+                                  " --smart-case \\1"
+                                  consult-ripgrep-command))
+  :custom
+  (consult-project-root-function #'lyn-relevant-dir)
+  (xref-show-definitions-function #'consult-xref)
+  (xref-show-xrefs-function #'consult-xref))
 (use-package consult-flycheck
   :bind (("C-c f" . consult-flycheck)))
 
@@ -616,7 +603,8 @@ functions."
   (add-hook 'term-mode-hook #'lyn-disable-ctrlf-mode-in-buffer))
 
 (use-package deadgrep
-  :bind (("C-c G" . deadgrep)))
+  :bind (("C-c G" . deadgrep))
+  :config (setf (default-value 'deadgrep--search-type) 'regexp))
 
 (use-package marginalia
   :after selectrum
@@ -674,15 +662,16 @@ functions."
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
                               ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
                               ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
-              :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el")))
+              :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el"))
+  :defer)
 (use-package tree-sitter
   :hook ((c-mode c++-mode css-mode elm-mode html-mode
           java-mode js-mode json-mode python-mode ruby-mode
           rust-mode typescript-mode) . tree-sitter-hl-mode)
   :config (setf (alist-get 'typescript-tsx-mode tree-sitter-major-mode-language-alist) 'tsx)
   :custom-face
-  (tree-sitter-hl-face:function.call ((t (:inherit font-lock-function-name-face))))
-  (tree-sitter-hl-face:operator      ((t (:inherit tree-sitter-hl-face:punctuation)))))
+  (tree-sitter-hl-face:function.call ((t :inherit font-lock-function-name-face)))
+  (tree-sitter-hl-face:operator      ((t :inherit tree-sitter-hl-face:punctuation))))
 (use-package tree-sitter-langs
   :straight (:host github :repo "ubolonton/emacs-tree-sitter"
              :files ("langs/*.el" ("bin" "langs/bin/*.dylib") ("queries" "langs/queries/*")))
