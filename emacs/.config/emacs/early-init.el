@@ -114,7 +114,10 @@
                            mode-line-end-spaces)))
 
 (use-package srcery-theme
-  :config (load-theme 'srcery t))
+  :config
+  (load-theme 'srcery t)
+  (custom-set-faces
+   `(region ((t :background ,srcery-gray-4 :inverse-video nil :extend t)))))
 
 ;; Transparent empty titlebar on NS, buffer name on others
 (setf ns-use-proxy-icon nil
