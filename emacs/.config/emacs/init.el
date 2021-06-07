@@ -568,6 +568,8 @@ functions."
 (when (memq window-system '(mac ns x))
   (use-package exec-path-from-shell
     :config
+    (cl-callf nconc exec-path-from-shell-variables
+      '("ENV" "XDG_CACHE_HOME"))
     (add-to-list 'exec-path-from-shell-variables "XDG_CACHE_HOME")
     (exec-path-from-shell-initialize)))
 
