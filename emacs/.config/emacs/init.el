@@ -649,6 +649,7 @@ functions."
     (winner-mode)))
 
 ;; HACK: requires exec-path :facepalm:
+(defvar lyn--self-compiled-tsc nil)
 (use-package tsc
   :straight `(:pre-build ,(when (and (memq window-system '(mac ns))
                                      (string-match-p (rx string-start "arm-")
@@ -659,6 +660,7 @@ functions."
                                          (executable-find "npm")
                                          (executable-find "llvm-gcc"))
                               (warn "tree-sitter build will fail"))
+                            (setf lyn--self-compiled-tsc t)
                             '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter; cd rust-tree-sitter && git pull")
                               ("sh" "-c" "cd rust-tree-sitter/cli && cargo install --path .")
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
@@ -678,7 +680,7 @@ functions."
   :straight (:host github :repo "ubolonton/emacs-tree-sitter"
              :files ("langs/*.el" ("bin" "langs/bin/*.dylib") ("queries" "langs/queries/*")))
   :after tree-sitter
-  :init (setf tree-sitter-langs--testing t))
+  :init (setf tree-sitter-langs--testing lyn--self-compiled-tsc))
 
 (provide 'init)
 ;;; init.el ends here
