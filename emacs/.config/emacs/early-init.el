@@ -5,10 +5,6 @@
 
 ;;; Code:
 
-;;;; Set comp speed options
-
-(setf comp-speed 2)
-
 ;;;; Disable special file name handling and GC until startup is finished
 
 (setf (get 'file-name-handler-alist 'standard-value)
@@ -102,7 +98,7 @@
   (horizontal-scroll-bar-mode -1))
 
 (setf (default-value 'cursor-type) 'bar
-      (default-value 'echo-keystrokes) 1e-6
+      echo-keystrokes 1e-9
       (default-value 'truncate-lines) t
       (car mouse-wheel-scroll-amount) 1)
 
@@ -121,6 +117,6 @@
 
 ;; Transparent empty titlebar on NS, buffer name on others
 (setf ns-use-proxy-icon nil
-      frame-title-format nil
+      frame-title-format (and (not (memq window-system '(ns mac))) "%b")
       (alist-get 'ns-transparent-titlebar
                  (alist-get 'ns window-system-default-frame-alist)) t)

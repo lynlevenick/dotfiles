@@ -426,16 +426,6 @@ Called from vterm."
   (org-table                 ((t :inherit fixed-pitch)))
   (org-verbatim              ((t :inherit fixed-pitch))))
 
-(use-package pico8-mode :straight (:host github :repo "Kaali/pico8-mode")
-  :mode (rx ".p8" eos)
-  :custom
-  (pico8-documentation-file
-   (cond ((memq window-system '(mac ns))
-          (expand-file-name "~/Library/Application Support/pico-8/pico-8.txt"))
-         nil))
-  :custom-face
-  (pico8--non-lua-overlay ((t :inherit default))))
-
 (use-package ruby-mode :straight (:type built-in)
   :defer
   :custom
