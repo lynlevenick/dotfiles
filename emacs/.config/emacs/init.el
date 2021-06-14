@@ -459,6 +459,7 @@ Called from vterm."
   (setf (alist-get 'clang-format apheleia-formatters) '("clang-format")
         (alist-get 'dfmt apheleia-formatters) '("dfmt" "--brace_style" "otbs")
         (alist-get 'haxe-formatter apheleia-formatters) '("haxelib" "run" "formatter" "--stdin" "--source" file)
+        (alist-get 'prettier apheleia-formatters) '("npx" "--no" "prettier" "--stdin-filepath" filepath)
         (alist-get 'rustfmt apheleia-formatters) '("rustfmt" "--emit" "stdout")
         (alist-get 'c-mode apheleia-mode-alist) 'clang-format
         (alist-get 'c++-mode apheleia-mode-alist) 'clang-format
