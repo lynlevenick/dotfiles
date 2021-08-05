@@ -658,15 +658,17 @@ functions."
                                          (executable-find "llvm-gcc"))
                               (warn "tree-sitter build will fail"))
                             (setf lyn--self-compiled-tsc t)
-                              ;; get the latest tree-sitter
-                            '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter; cd rust-tree-sitter && git pull")
+                              ;; get tree-sitter v0.19.5 - last to put files in a reasonable place
+                            '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter; cd rust-tree-sitter && git fetch && git checkout v0.19.5")
                               ("sh" "-c" "cd rust-tree-sitter/cli && cargo install --path .")
+                              ;; needed or it will download x86_64 dylibs over the arm64 ones we just built
+                              ("sh" "-c" "file core/tsc-dyn.dylib | grep -q arm64 || rm -f core/tsc-dyn.dylib")
+                              ("sh" "-c" "grep -q LOCAL core/DYN-VERSION || printf LOCAL >core/DYN-VERSION")
+                              ("sh" "-c" "grep -q DYN-VERSION bin/build && sed -e '/DYN-VERSION/d' bin/build >bin/build.tmp && mv bin/build.tmp bin/build && chmod +x bin/build || :")
                               ;; rebuild bindings
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
                               ;; ensure all language definitions
-                              ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
-                              ;; needed or it will download x86_64 dylibs over the arm64 ones we just built
-                              ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
+                              ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "*/node_modules/*" "-not" "-path" "*/ocaml/interface/*" "-exec" "sh" "-c" "targets=''; for grammar_file in \"$@\"; do grammar_dir=\"${grammar_file%/*}\"; targets=\"$targets ensure/${grammar_dir##*/}\"; done; EMACS=emacs make -j7 $targets" "sh" "{}" "+")))
               :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el"))
   :defer)
 (use-package tree-sitter
