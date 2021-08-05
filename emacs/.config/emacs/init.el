@@ -307,6 +307,8 @@ See ‘lyn-relevant-dir’."
   :init
   (lyn-with-hook-once 'find-file-hook
     (require 'magit))
+  :bind (("C-c v b" . magit-blame)
+         ("C-c v l" . magit-log-buffer-file))
   :custom
   (magit-list-refs-sortby "-committerdate")
   (magit-diff-adjust-tab-width t))

@@ -20,14 +20,15 @@
 (defvar lyn-gc-delayed-restore-timer nil
   "Timer tracking delay before restoring garbage collection.")
 
-(defun lyn-gc-disable ()
+(defun lyn-gc-disable (&optional threshold)
   "Turn off garbage collection."
 
+  (unless threshold (setf threshold (* 16 1024 1024)))
   (when lyn-gc-delayed-restore-timer
     (cancel-timer lyn-gc-delayed-restore-timer)
     (setf lyn-gc-delayed-restore-timer nil))
-  (setf gc-cons-percentage 1.0
-        gc-cons-threshold (* 16 1024 1024)))
+  (setf gc-cons-percentage 0.5
+        gc-cons-threshold threshold))
 (defun lyn-gc-restore ()
   "Enable garbage collection."
 
@@ -41,7 +42,7 @@
     (setf lyn-gc-delayed-restore-timer
           (run-with-idle-timer 2 nil #'lyn-gc-restore))))
 
-(lyn-gc-disable)
+(lyn-gc-disable (* 64 1024 1024))
 (lyn-gc-restore-delayed)
 
 ;; Additionally disable and restore gc on minibuffer,
@@ -113,7 +114,15 @@
   :config
   (load-theme 'srcery t)
   (custom-set-faces
-   `(region ((t :background ,srcery-gray-4 :inverse-video nil :extend t)))))
+   `(region ((t :background ,srcery-gray-4 :inverse-video nil :extend t)))
+   `(vterm-color-black ((t :foreground ,srcery-black :background ,srcery-bright-black)))
+   `(vterm-color-red ((t :foreground ,srcery-red :background ,srcery-bright-red)))
+   `(vterm-color-green ((t :foreground ,srcery-green :background ,srcery-bright-green)))
+   `(vterm-color-yellow ((t :foreground ,srcery-yellow :background ,srcery-bright-yellow)))
+   `(vterm-color-blue ((t :foreground ,srcery-blue :background ,srcery-bright-blue)))
+   `(vterm-color-magenta ((t :foreground ,srcery-magenta :background ,srcery-bright-magenta)))
+   `(vterm-color-cyan ((t :foreground ,srcery-cyan :background ,srcery-bright-cyan)))
+   `(vterm-color-white ((t :foreground ,srcery-white :background ,srcery-bright-white)))))
 
 ;; Transparent empty titlebar on NS, buffer name on others
 (setf ns-use-proxy-icon nil
