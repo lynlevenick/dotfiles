@@ -647,17 +647,25 @@ functions."
   :straight `(:pre-build ,(when (and (memq window-system '(mac ns))
                                      (string-match-p (rx string-start "arm-")
                                                      system-configuration))
+                                         ;; required for tree-sitter
                             (unless (and (executable-find "cargo")
+                                         ;; required for building bindings
                                          (executable-find "cask")
                                          (executable-find "git")
+                                         ;; required for tree-sitter to generate
                                          (executable-find "npm")
+                                         ;; required for bindings
                                          (executable-find "llvm-gcc"))
                               (warn "tree-sitter build will fail"))
                             (setf lyn--self-compiled-tsc t)
+                              ;; get the latest tree-sitter
                             '(("sh" "-c" "test -d rust-tree-sitter || git clone https://github.com/tree-sitter/tree-sitter rust-tree-sitter; cd rust-tree-sitter && git pull")
                               ("sh" "-c" "cd rust-tree-sitter/cli && cargo install --path .")
+                              ;; rebuild bindings
                               ("sh" "-c" "EMACS=emacs ./bin/setup && EMACS=emacs ./bin/build")
+                              ;; ensure all language definitions
                               ("find" "langs/repos" "-type" "f" "-name" "grammar.js" "-not" "-path" "\\*/node_modules/\\*" "-exec" "sh" "-c" "grammar_path=\"${1%/*}\"; EMACS=emacs make \"ensure/${grammar_path##*/}\"" "sh" "{}" ";")
+                              ;; needed or it will download x86_64 dylibs over the arm64 ones we just built
                               ("sh" "-c" "printf LOCAL >core/DYN-VERSION")))
               :files ("core/DYN-VERSION" "core/tsc-dyn.*" "core/*.el"))
   :defer)
